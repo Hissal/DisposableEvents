@@ -62,7 +62,7 @@ public class ObservableEventTests {
     [Test]
     public void ToObservableEvent_Extension_WrapsEvent() {
         var normalEvent = new Event<string>();
-        var observable = normalEvent.ToObservableEvent();
+        var observable = normalEvent.AsObservable();
 
         var observer = new TestObserver<string>();
         using (observable.Subscribe(observer)) {
@@ -109,7 +109,7 @@ public class ObservableEventTests {
         var observable = new ObservableEvent<int>(normalEvent);
 
         var observer = new TestObserver<int>();
-        observable.Subscribe(new EventReceiver<int>(_ => throw new InvalidOperationException("fail"), ex => observer.OnError(ex)));
+        observable.Subscribe(new EventObserver<int>(_ => throw new InvalidOperationException("fail"), ex => observer.OnError(ex)));
 
         observable.Publish(5);
 

@@ -1,29 +1,29 @@
 ﻿namespace DisposableEvents;
 
-public class BufferedEvent<T> : IEvent<T> {
-    readonly EventCore<T> core = new();
-    T previousValue;
+public class BufferedEvent<TMessage> : IEvent<TMessage> {
+    readonly EventCore<TMessage> core = new();
+    TMessage previousValue;
     
-    public BufferedEvent(T initialBufferedValue = default) {
+    public BufferedEvent(TMessage initialBufferedValue) {
         previousValue = initialBufferedValue;
     }
     
-    public IDisposable Subscribe(IObserver<T> observer, params IEventFilter<T>[] filters) {
-        if (filters is null || filters.Length == 0) {
+    public IDisposable Subscribe(IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) {
+        if (filters.Length == 0) {
             observer.OnNext(previousValue);
             return core.Subscribe(observer);
         }
         
-        var filteredObserver = new FilteredEventReceiver<T>(observer, new MultiEventFilter<T>(filters));
+        var filteredObserver = new FilteredEventObserver<TMessage>(observer, new MultiEventFilter<TMessage>(filters));
         filteredObserver.OnNext(previousValue);
         return core.Subscribe(filteredObserver);
     }
-    public IDisposable Subscribe(IObserver<T> observer) {
+    public IDisposable Subscribe(IObserver<TMessage> observer) {
         observer.OnNext(previousValue);
         return core.Subscribe(observer);
     }
     
-    public void Publish(T value) {
+    public void Publish(TMessage value) {
         previousValue = value;
         core.Publish(value);
     }

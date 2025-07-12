@@ -2,65 +2,73 @@
 
 public struct EmptyEvent;
 
-public interface ISubscriber<T> {
+public interface IPublisher<in TMessage> {
+    /// <summary>
+    /// Publishes a value to all subscribed observers.
+    /// </summary>
+    /// <param name="value">The value to publish.</param>
+    void Publish(TMessage value);
+}
+public interface ISubscriber<TMessage> {
     /// <summary>
     /// Subscribes to the event with an observer.
     /// </summary>
     /// <param name="observer">The observer to subscribe.</param>
     /// <param name="filters">The filters to assign to the subscription</param>
     /// <returns>A disposable subscription that can be used to unsubscribe.</returns>
-    IDisposable Subscribe(IObserver<T> observer, params IEventFilter<T>[] filters);
+    IDisposable Subscribe(IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters);
 }
-public interface IPublisher<in T> {
-    /// <summary>
-    /// Publishes a value to all subscribed observers.
-    /// </summary>
-    /// <param name="value">The value to publish.</param>
-    void Publish(T value);
-}
-public interface IEvent<T> : ISubscriber<T>, IPublisher<T>, IDisposable { }
-public interface IEvent : IEvent<EmptyEvent> {  }
 
-public class Event<T> : IEvent<T> {
-    readonly EventCore<T> core = new();
+public interface IEvent : IDisposable { };
+public interface IEvent<TMessage> : IPublisher<TMessage>, ISubscriber<TMessage>, IEvent { }
 
-    public IDisposable Subscribe(IObserver<T> observer, params IEventFilter<T>[] filters) {
-        if (filters is null || filters.Length == 0)
+public sealed class Event<TMessage> : IEvent<TMessage> {
+    readonly EventCore<TMessage> core;
+
+    public Event(EventCore<TMessage>? core = null) {
+        this.core = core ?? new EventCore<TMessage>();
+    }
+    
+    public IDisposable Subscribe(IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) {
+        if (filters.Length == 0)
             return core.Subscribe(observer);
         
-        var filteredObserver = new FilteredEventReceiver<T>(observer, new MultiEventFilter<T>(filters));
+        var filteredObserver = new FilteredEventObserver<TMessage>(observer, new MultiEventFilter<TMessage>(filters));
         return core.Subscribe(filteredObserver);
     }
     
-    public void Publish(T value) => core.Publish(value);
-    
+    public void Publish(TMessage value) => core.Publish(value);
     public void Dispose() => core.Dispose();
 }
-public class Event : IEvent {
-    readonly EventCore<EmptyEvent> core = new();
+public sealed class Event : IEvent<EmptyEvent> {
+    readonly EventCore<EmptyEvent> core;
+    
+    public Event(EventCore<EmptyEvent>? core = null) {
+        this.core = core ?? new EventCore<EmptyEvent>();
+    }
     
     public IDisposable Subscribe(IObserver<EmptyEvent> observer, params IEventFilter<EmptyEvent>[] filters) {
-        if (filters is null || filters.Length == 0)
+        if (filters.Length == 0)
             return core.Subscribe(observer);
         
-        var filteredObserver = new FilteredEventReceiver<EmptyEvent>(observer, new MultiEventFilter<EmptyEvent>(filters));
+        var filteredObserver = new FilteredEventObserver<EmptyEvent>(observer, new MultiEventFilter<EmptyEvent>(filters));
         return core.Subscribe(filteredObserver);
     }
     
-    public void Publish(EmptyEvent empty) => core.Publish(empty);
+    public void Publish(EmptyEvent value) => core.Publish(value);
     public void Dispose() => core.Dispose();
 }
 
-internal class EventCore<T> : IDisposable {
+public class EventCore<TMessage> : IDisposable {
     readonly List<Subscription> subscriptions = new();
 
-    public IDisposable Subscribe(IObserver<T> observer) {
+    public IDisposable Subscribe(IObserver<TMessage> observer) {
         var sub = new Subscription(observer, this);
         subscriptions.Add(sub);
         return sub;
     }
 
-    public void Publish(T value) {
+    public void Publish(TMessage value) {
         if (subscriptions.Count == 0)
             return;
 
@@ -73,6 +81,10 @@ internal class EventCore<T> : IDisposable {
         }
     }
     
+    ~EventCore() {
+        Dispose();
+    }
+    
     public void Dispose() {
         foreach (var subscription in subscriptions) {
             subscription.Observer.OnCompleted();
@@ -82,10 +94,10 @@ internal class EventCore<T> : IDisposable {
     }
     
     class Subscription : IDisposable {
-        public IObserver<T> Observer { get; }
-        public EventCore<T> Event { get; }
+        public IObserver<TMessage> Observer { get; }
+        public EventCore<TMessage> Event { get; }
 
-        public Subscription(IObserver<T> observer, EventCore<T> eventInstance) {
+        public Subscription(IObserver<TMessage> observer, EventCore<TMessage> eventInstance) {
             Observer = observer ?? throw new ArgumentNullException(nameof(observer));
             Event = eventInstance ?? throw new ArgumentNullException(nameof(eventInstance));
         }
