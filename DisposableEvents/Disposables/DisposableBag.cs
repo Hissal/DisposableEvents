@@ -26,3 +26,14 @@ public static class DisposableBagExtensions {
         bag.Add(disposable);
     }
 }
+
+public static class Disposable {
+    static Lazy<EmptyDisposable> LazyEmpty { get; } = new Lazy<EmptyDisposable>(() => new EmptyDisposable());
+    public static IDisposable Empty => LazyEmpty.Value;
+}
+
+public class EmptyDisposable : IDisposable {
+    public void Dispose() {
+        // No op
+    }
+}

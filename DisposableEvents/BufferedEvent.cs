@@ -2,30 +2,38 @@
 
 public class BufferedEvent<TMessage> : IEvent<TMessage> {
     readonly EventCore<TMessage> core = new();
-    TMessage previousValue;
+    TMessage? previousMessage;
     
-    public BufferedEvent(TMessage initialBufferedValue) {
-        previousValue = initialBufferedValue;
+    static readonly bool IsValueType = typeof(TMessage).IsValueType;
+    
+    public BufferedEvent(int expectedSubscriberCount = 2) : this(new EventCore<TMessage>(expectedSubscriberCount)) { }
+    public BufferedEvent(EventCore<TMessage> core) {
+        this.core = core;
+        previousMessage = default;
     }
     
+    public void Publish(TMessage message) {
+        previousMessage = message;
+        core.Publish(message);
+    }
     public IDisposable Subscribe(IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) {
         if (filters.Length == 0) {
-            observer.OnNext(previousValue);
-            return core.Subscribe(observer);
+            return BufferedSubscribe(observer);
         }
         
         var filteredObserver = new FilteredEventObserver<TMessage>(observer, new MultiEventFilter<TMessage>(filters));
-        filteredObserver.OnNext(previousValue);
-        return core.Subscribe(filteredObserver);
+        return BufferedSubscribe(filteredObserver);
     }
-    public IDisposable Subscribe(IObserver<TMessage> observer) {
-        observer.OnNext(previousValue);
+    
+    IDisposable BufferedSubscribe(IObserver<TMessage> observer) {
+        if (IsValueType || previousMessage != null) {
+            observer.OnNext(previousMessage!);
+        }
         return core.Subscribe(observer);
     }
     
-    public void Publish(TMessage value) {
-        previousValue = value;
-        core.Publish(value);
+    ~BufferedEvent() {
+        Dispose();
     }
 
     public void Dispose() {

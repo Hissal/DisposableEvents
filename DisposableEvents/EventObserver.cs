@@ -1,6 +1,6 @@
 ﻿namespace DisposableEvents;
 
-public class EventObserver<T> : IObserver<T> {
+public sealed class EventObserver<T> : IObserver<T> {
     readonly Action<T> onNext;
     readonly Action<Exception>? onError;
     readonly Action? onCompleted;
@@ -12,11 +12,16 @@ public class EventObserver<T> : IObserver<T> {
     }
 
     public void OnNext(T value) => onNext?.Invoke(value);
-    public void OnError(Exception error) => onError?.Invoke(error);
+    public void OnError(Exception error) {
+        if (onError == null)
+            throw error;
+        
+        onError.Invoke(error);
+    }
     public void OnCompleted() => onCompleted?.Invoke();
 }
 
-public class EventObserver : IObserver<EmptyEvent> {
+public sealed class EventObserver : IObserver<EmptyEvent> {
     readonly Action onNext;
     readonly Action<Exception>? onError;
     readonly Action? onCompleted;
@@ -28,11 +33,17 @@ public class EventObserver : IObserver<EmptyEvent> {
     }
 
     public void OnNext(EmptyEvent value) => onNext?.Invoke();
-    public void OnError(Exception error) => onError?.Invoke(error);
+    public void OnError(Exception error) {
+        if (onError == null)
+            throw error;
+        
+        onError.Invoke(error);
+    }
+
     public void OnCompleted() => onCompleted?.Invoke();
 }
 
-public class FilteredEventObserver<T> : IObserver<T> {
+public sealed class FilteredEventObserver<T> : IObserver<T> {
     readonly IObserver<T> observer;
     readonly IEventFilter<T> filter;
 
@@ -58,4 +69,31 @@ public class FilteredEventObserver<T> : IObserver<T> {
             observer.OnCompleted();
         }
     }
+}
+
+public sealed class ClosureEventObserver<TClosure, TMessage> : IObserver<TMessage> {
+    readonly Action<TClosure, TMessage> onNext;
+    readonly Action<TClosure, Exception>? onError;
+    readonly Action<TClosure>? onCompleted;
+    
+    readonly TClosure closure;
+
+    public ClosureEventObserver(TClosure closure, Action<TClosure, TMessage> onNext, Action<TClosure, Exception>? onError = null, Action<TClosure>? onCompleted = null) {
+        this.onNext = onNext ?? throw new ArgumentNullException(nameof(onNext));
+        this.onError = onError;
+        this.onCompleted = onCompleted;
+        
+        this.closure = closure;
+    }
+
+    public void OnNext(TMessage value) => onNext(closure, value);
+    
+    public void OnError(Exception error) {
+        if (onError == null)
+            throw error;
+        
+        onError.Invoke(closure, error);
+    }
+    
+    public void OnCompleted() => onCompleted?.Invoke(closure);
 }

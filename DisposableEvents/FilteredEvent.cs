@@ -4,9 +4,10 @@ public sealed class FilteredEvent<T> : IEvent<T> {
     readonly EventCore<T> core;
     readonly IEventFilter<T>[] defaultFilters;
 
-    public FilteredEvent(params IEventFilter<T>[] defaultFilters) : this(null, defaultFilters) { }
-    public FilteredEvent(EventCore<T>? core, params IEventFilter<T>[] defaultFilters) {
-        this.core = core ?? new EventCore<T>();
+    public FilteredEvent(params IEventFilter<T>[] defaultFilters) : this(2, defaultFilters) { }
+    public FilteredEvent(int expectedSubscriberCount = 2, params IEventFilter<T>[] defaultFilters) : this(new EventCore<T>(expectedSubscriberCount), defaultFilters) { }
+    public FilteredEvent(EventCore<T> core, params IEventFilter<T>[] defaultFilters) {
+        this.core = core;
         this.defaultFilters = defaultFilters;
     }
     
@@ -18,6 +19,6 @@ public sealed class FilteredEvent<T> : IEvent<T> {
         return core.Subscribe(new FilteredEventObserver<T>(observer, new MultiEventFilter<T>(resolvedFilters)));
     }
     
-    public void Publish(T value) => core.Publish(value);
+    public void Publish(T message) => core.Publish(message);
     public void Dispose() => core.Dispose();
 }

@@ -30,9 +30,9 @@ public class EventObserverTests {
     }
 
     [Test]
-    public void EventReceiverT_OnError_WithoutHandler_DoesNotThrow() {
+    public void EventReceiverT_OnError_WithoutHandler_Throws() {
         var receiver = new EventObserver<int>(_ => { });
-        Assert.DoesNotThrow(() => receiver.OnError(new Exception()));
+        Assert.Throws<Exception>(() => receiver.OnError(new Exception()));
     }
 
     [Test]
@@ -72,9 +72,9 @@ public class EventObserverTests {
     }
 
     [Test]
-    public void EventReceiver_OnError_WithoutHandler_DoesNotThrow() {
-        var receiver = new EventObserver(() => { });
-        Assert.DoesNotThrow(() => receiver.OnError(new Exception()));
+    public void EventReceiver_OnError_WithoutHandler_Throws() {
+        var observer = new EventObserver(() => { });
+        Assert.Throws<Exception>(() => observer.OnError(new Exception()));
     }
 
     [Test]

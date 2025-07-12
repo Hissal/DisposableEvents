@@ -18,13 +18,16 @@ public static class EventExtensions {
     /// <summary>
     /// Subscribes to the event with an action to handle published values, and optional handlers for exceptions and event disposal.
     /// </summary>
-    /// <param name="e">The event to subscribe to.</param>
+    /// <param name="subscriber">The event to subscribe to.</param>
     /// <param name="action">The action to invoke when a value is published.</param>
     /// <param name="filters">The filters to attach to this subscription.</param>
     /// <typeparam name="TMessage">The type of the event data.</typeparam>
     /// <returns>A disposable subscription that can be used to unsubscribe from the event.</returns>
-    public static IDisposable Subscribe<TMessage>(this ISubscriber<TMessage> e, Action<TMessage> action, params IEventFilter<TMessage>[] filters) => 
-        e.Subscribe(new EventObserver<TMessage>(action), filters);
+    public static IDisposable Subscribe<TMessage>(this ISubscriber<TMessage> subscriber, Action<TMessage> action, params IEventFilter<TMessage>[] filters) => 
+        subscriber.Subscribe(new EventObserver<TMessage>(action), filters);
+    
+    public static IDisposable Subscribe<TClosure, TMessage>(this ISubscriber<TMessage> subscriber, TClosure closure, Action<TClosure, TMessage> action, params IEventFilter<TMessage>[] filters) =>
+        subscriber.Subscribe(new ClosureEventObserver<TClosure,TMessage>(closure, action), filters);
 
     /// <summary>
     /// Subscribes to the event with an action to handle published values, and optional handlers for exceptions and event disposal.

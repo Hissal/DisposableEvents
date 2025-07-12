@@ -10,7 +10,7 @@ public sealed class ObservableEvent<TMessage> : IEvent<TMessage>, IObservable<TM
     public IDisposable Subscribe(IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) => wrappedEvent.Subscribe(observer, filters);
     public IDisposable Subscribe(IObserver<TMessage> observer) => wrappedEvent.Subscribe(observer);
 
-    public void Publish(TMessage value) => wrappedEvent.Publish(value);
+    public void Publish(TMessage message) => wrappedEvent.Publish(message);
 
     public void Dispose() {
         wrappedEvent.Dispose();

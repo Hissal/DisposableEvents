@@ -5,15 +5,6 @@ namespace DisposableEventTests;
 [TestFixture]
 public class BufferedEventTests {
     [Test]
-    public void BufferedEvent_SendsInitialValueOnSubscribe() {
-        var evt = new BufferedEvent<string>("init");
-        string received = null;
-        evt.Subscribe(x => received = x);
-
-        Assert.That(received, Is.EqualTo("init"));
-    }
-
-    [Test]
     public void BufferedEvent_Publish_UpdatesReceivedValue() {
         var evt = new BufferedEvent<int>(5);
         int received = 0;
@@ -26,7 +17,7 @@ public class BufferedEventTests {
 
     [Test]
     public void BufferedEvent_Publish_UpdatesBufferedValue() {
-        var evt = new BufferedEvent<int>(5);
+        var evt = new BufferedEvent<int>();
         int received = 0;
         int received2 = 0;
 
@@ -42,7 +33,7 @@ public class BufferedEventTests {
 
     [Test]
     public void BufferedEvent_MultipleSubscribers_ReceiveLatestValue() {
-        var evt = new BufferedEvent<int>(7);
+        var evt = new BufferedEvent<int>();
         int received1 = 0, received2 = 0;
 
         evt.Publish(42);
@@ -56,7 +47,7 @@ public class BufferedEventTests {
 
     [Test]
     public void BufferedEvent_SubscriberReceivesUpdatesAfterSubscribe() {
-        var evt = new BufferedEvent<string>("first");
+        var evt = new BufferedEvent<string>();
         string received = null;
         evt.Subscribe(x => received = x);
 
@@ -83,8 +74,9 @@ public class BufferedEventTests {
 
     [Test]
     public void BufferedEvent_Dispose_PreventsFurtherNotifications() {
-        var evt = new BufferedEvent<int>(10);
+        var evt = new BufferedEvent<int>();
         int received = 0;
+        evt.Publish(10);
         evt.Subscribe(x => received = x);
 
         evt.Dispose();
@@ -94,18 +86,22 @@ public class BufferedEventTests {
     }
 
     [Test]
-    public void BufferedEvent_AllowsNullOrDefaultValues() {
-        var evt = new BufferedEvent<string>(null);
+    public void BufferedEvent_DoesntBufferNull() {
+        var evt = new BufferedEvent<string>();
         string received = "not null";
-        evt.Subscribe(x => received = x);
+        var d = evt.Subscribe(x => received = x);
 
-        Assert.That(received, Is.Null);
+        Assert.That(received, Is.EqualTo("not null"));
 
         evt.Publish("abc");
         Assert.That(received, Is.EqualTo("abc"));
 
         evt.Publish(null);
         Assert.That(received, Is.Null);
+        
+        received = "not null";
+        evt.Subscribe(x => received = x);
+        Assert.That(received, Is.EqualTo("not null")); // Should not receive null again
     }
 
     [Test]
