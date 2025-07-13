@@ -24,4 +24,10 @@
       <ProjectReference Include="..\DisposableEvents\DisposableEvents.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="EventContainers\" />
+      <Folder Include="Events\AsyncEvents\" />
+      <Folder Include="OtherSystems\" />
+    </ItemGroup>
+
 </Project>

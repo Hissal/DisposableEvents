@@ -20,3 +20,7 @@ public class KeyedEventFactory : IKeyedEventFactory {
     
     public IKeyedEvent<TKey, TMessage> Create<TKey, TMessage>() where TKey : notnull => new KeyedEvent<TKey, TMessage>();
 }
+
+public class BufferedEventFactory : IEventFactory {
+    public IEvent<TMessage> Create<TMessage>() => new BufferedEvent<TMessage>();
+}

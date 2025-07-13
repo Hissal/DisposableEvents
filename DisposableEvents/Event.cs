@@ -2,14 +2,14 @@
 
 public struct EmptyEvent;
 
-public interface IPublisher<in TMessage> {
+public interface IEventPublisher<in TMessage> {
     /// <summary>
     /// Publishes a value to all subscribed observers.
     /// </summary>
     /// <param name="message">The value to publish.</param>
     void Publish(TMessage message);
 }
-public interface ISubscriber<TMessage> {
+public interface IEventSubscriber<TMessage> {
     /// <summary>
     /// Subscribes to the event with an observer.
     /// </summary>
@@ -20,7 +20,7 @@ public interface ISubscriber<TMessage> {
 }
 
 public interface IEvent : IDisposable { };
-public interface IEvent<TMessage> : IPublisher<TMessage>, ISubscriber<TMessage>, IEvent { }
+public interface IEvent<TMessage> : IEventPublisher<TMessage>, IEventSubscriber<TMessage>, IEvent { }
 
 public sealed class Event<TMessage> : IEvent<TMessage> {
     readonly EventCore<TMessage> core;
@@ -34,7 +34,7 @@ public sealed class Event<TMessage> : IEvent<TMessage> {
         if (filters.Length == 0)
             return core.Subscribe(observer);
         
-        var filteredObserver = new FilteredEventObserver<TMessage>(observer, new MultiEventFilter<TMessage>(filters));
+        var filteredObserver = new FilteredEventObserver<TMessage>(observer, new CompositeEventFilter<TMessage>(filters));
         return core.Subscribe(filteredObserver);
     }
     
@@ -53,7 +53,7 @@ public sealed class Event : IEvent<EmptyEvent> {
         if (filters.Length == 0)
             return core.Subscribe(observer);
         
-        var filteredObserver = new FilteredEventObserver<EmptyEvent>(observer, new MultiEventFilter<EmptyEvent>(filters));
+        var filteredObserver = new FilteredEventObserver<EmptyEvent>(observer, new CompositeEventFilter<EmptyEvent>(filters));
         return core.Subscribe(filteredObserver);
     }
     

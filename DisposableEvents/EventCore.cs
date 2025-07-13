@@ -4,16 +4,18 @@ using DisposableEvents.Internal;
 namespace DisposableEvents;
 
 public class EventCore<TMessage> : IDisposable {
-    readonly List<IObserver<TMessage>> observers;
-
-    bool isDisposed;
+    public List<IObserver<TMessage>> Observers { get; }
+    public bool IsDisposed { get; private set; }
+    public IObserver<TMessage>[] GetObservers() => Observers.ToArray();
+    
 
     public EventCore(int expectedSubscriptionCount = 2) {
-        observers = new List<IObserver<TMessage>>(expectedSubscriptionCount);
+        Observers = new List<IObserver<TMessage>>(expectedSubscriptionCount);
     }
     
+    
     public void Publish(TMessage value) {
-        foreach (var observer in observers) {
+        foreach (var observer in Observers) {
             try { 
                 observer.OnNext(value);
             }
@@ -24,12 +26,15 @@ public class EventCore<TMessage> : IDisposable {
     }
     
     public IDisposable Subscribe(IObserver<TMessage> observer) {
-        if (isDisposed) {
+        if (observer == null)
+            throw new ArgumentNullException(nameof(observer));
+        
+        if (IsDisposed) {
             observer.OnCompleted();
             return Disposable.Empty;
         }
         
-        observers.Add(observer);
+        Observers.Add(observer);
         var subscription = new Subscription(this, observer);
         return subscription;
     }
@@ -39,15 +44,15 @@ public class EventCore<TMessage> : IDisposable {
     }
     
     public void Dispose() {
-        if (isDisposed) return;
+        if (IsDisposed) return;
         
-        foreach (var observer in observers) {
+        foreach (var observer in Observers) {
             observer.OnCompleted();
         }
         
-        observers.Clear();
+        Observers.Clear();
 
-        isDisposed = true;
+        IsDisposed = true;
         GC.SuppressFinalize(this);
     }
     
@@ -65,8 +70,8 @@ public class EventCore<TMessage> : IDisposable {
             if (isDisposed) return;
             isDisposed = true;
             
-            if (core.isDisposed) return;
-            core.observers.Remove(observer);
+            if (core.IsDisposed) return;
+            core.Observers.Remove(observer);
         }
     }
 }

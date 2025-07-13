@@ -1,6 +1,6 @@
 ﻿namespace DisposableEvents.Disposables;
 
-public class DisposableBag : IDisposable {
+public sealed class DisposableBag : IDisposable {
     readonly List<IDisposable> disposables;
     public DisposableBag() {
         disposables = new List<IDisposable>();
@@ -30,10 +30,11 @@ public static class DisposableBagExtensions {
 public static class Disposable {
     static Lazy<EmptyDisposable> LazyEmpty { get; } = new Lazy<EmptyDisposable>(() => new EmptyDisposable());
     public static IDisposable Empty => LazyEmpty.Value;
-}
-
-public class EmptyDisposable : IDisposable {
-    public void Dispose() {
-        // No op
+    
+    sealed class EmptyDisposable : IDisposable {
+        public void Dispose() {
+            // No op
+        }
     }
 }
+

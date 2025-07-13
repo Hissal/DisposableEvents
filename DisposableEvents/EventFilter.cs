@@ -37,48 +37,47 @@ public interface IEventFilter<T> {
 /// <typeparam name="T">The type of the event data.</typeparam>
 public class PredicateEventFilter<T> : IEventFilter<T> {
     readonly Func<T, bool>? eventFilter;
-    readonly Func<Exception, bool>? onErrorFilter;
-    readonly Func<bool>? onCompletedFilter;
+    readonly Func<Exception, bool>? errorFilter;
+    readonly Func<bool>? completedFilter;
     
     public int FilterOrder { get; }
 
-    public PredicateEventFilter(Func<T, bool> filter, Func<Exception, bool>? onErrorFilter = null, Func<bool>? onCompletedFilter = null) {
+    public PredicateEventFilter(Func<T, bool>? eventFilter = null, Func<Exception, bool>? errorFilter = null, Func<bool>? completedFilter = null) {
         FilterOrder = 0;
         
-        eventFilter = filter;
-        this.onErrorFilter = onErrorFilter;
-        this.onCompletedFilter = onCompletedFilter;
+        this.eventFilter = eventFilter;
+        this.errorFilter = errorFilter;
+        this.completedFilter = completedFilter;
     }
-    public PredicateEventFilter(int filterOrder, Func<T, bool> filter, Func<Exception, bool>? onErrorFilter = null, Func<bool>? onCompletedFilter = null) {
+    public PredicateEventFilter(int filterOrder, Func<T, bool>? eventFilter = null, Func<Exception, bool>? errorFilter = null, Func<bool>? completedFilter = null) {
         FilterOrder = filterOrder;
         
-        eventFilter = filter;
-        this.onErrorFilter = onErrorFilter;
-        this.onCompletedFilter = onCompletedFilter;
+        this.eventFilter = eventFilter;
+        this.errorFilter = errorFilter;
+        this.completedFilter = completedFilter;
     }
 
     public bool FilterEvent(ref T value) => eventFilter?.Invoke(value) ?? true;
+    public bool FilterOnError(Exception ex) => errorFilter?.Invoke(ex) ?? true;
+    public bool FilterOnCompleted() => completedFilter?.Invoke() ?? true;
     
-    public bool FilterOnCompleted() => onCompletedFilter?.Invoke() ?? true;
-    
-    public bool FilterOnError(Exception ex) => onErrorFilter?.Invoke(ex) ?? true;
 }
 
 /// <summary>
 /// Defines a composite event filter that applies multiple filters in order.
 /// </summary>
 /// <typeparam name="T">The type of the event data.</typeparam>
-public class MultiEventFilter<T> : IEventFilter<T> {
+public class CompositeEventFilter<T> : IEventFilter<T> {
     readonly IEventFilter<T>[] orderedFilters;
     
     public int FilterOrder { get; }
     
-    public MultiEventFilter(params IEventFilter<T>[] filters) {
+    public CompositeEventFilter(params IEventFilter<T>[] filters) {
         FilterOrder = 0;
         orderedFilters = filters?.OrderBy(f => f.FilterOrder).ToArray()
                          ?? Array.Empty<IEventFilter<T>>();
     }
-    public MultiEventFilter(int filterOrder, params IEventFilter<T>[] filters) {
+    public CompositeEventFilter(int filterOrder, params IEventFilter<T>[] filters) {
         FilterOrder = filterOrder;
         orderedFilters = filters?.OrderBy(f => f.FilterOrder).ToArray()
                          ?? Array.Empty<IEventFilter<T>>();
@@ -107,4 +106,30 @@ public class MultiEventFilter<T> : IEventFilter<T> {
         }
         return true;
     }
+}
+
+public class MutatingEventFilter<T> : IEventFilter<T> {
+    readonly Func<T, T>? eventFilter;
+    
+    public int FilterOrder { get; }
+
+    public MutatingEventFilter(Func<T, T> filter) {
+        FilterOrder = 0;
+        eventFilter = filter;
+    }
+    public MutatingEventFilter(int filterOrder, Func<T, T> filter) {
+        FilterOrder = filterOrder;
+        eventFilter = filter;
+    }
+
+    public bool FilterEvent(ref T value) {
+        if (eventFilter == null) 
+            return true;
+        
+        value = eventFilter(value);
+        return true;
+    }
+
+    public bool FilterOnCompleted() => true;
+    public bool FilterOnError(Exception ex) => true;
 }

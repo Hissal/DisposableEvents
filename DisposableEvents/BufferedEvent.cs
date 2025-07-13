@@ -1,10 +1,10 @@
 ﻿namespace DisposableEvents;
 
 public class BufferedEvent<TMessage> : IEvent<TMessage> {
-    readonly EventCore<TMessage> core = new();
+    readonly EventCore<TMessage> core;
     TMessage? previousMessage;
     
-    static readonly bool IsValueType = typeof(TMessage).IsValueType;
+    static readonly bool s_isValueType = typeof(TMessage).IsValueType;
     
     public BufferedEvent(int expectedSubscriberCount = 2) : this(new EventCore<TMessage>(expectedSubscriberCount)) { }
     public BufferedEvent(EventCore<TMessage> core) {
@@ -17,18 +17,27 @@ public class BufferedEvent<TMessage> : IEvent<TMessage> {
         core.Publish(message);
     }
     public IDisposable Subscribe(IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) {
+        if (observer == null)
+            throw new ArgumentNullException(nameof(observer));
+        
         if (filters.Length == 0) {
             return BufferedSubscribe(observer);
         }
         
-        var filteredObserver = new FilteredEventObserver<TMessage>(observer, new MultiEventFilter<TMessage>(filters));
+        var filteredObserver = new FilteredEventObserver<TMessage>(observer, new CompositeEventFilter<TMessage>(filters));
         return BufferedSubscribe(filteredObserver);
     }
     
     IDisposable BufferedSubscribe(IObserver<TMessage> observer) {
-        if (IsValueType || previousMessage != null) {
-            observer.OnNext(previousMessage!);
+        if (!core.IsDisposed && (s_isValueType || previousMessage != null)) {
+            try {
+                observer.OnNext(previousMessage!);
+            }
+            catch (Exception e) {
+                observer.OnError(e);
+            }
         }
+        
         return core.Subscribe(observer);
     }
     

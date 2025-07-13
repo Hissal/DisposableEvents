@@ -1,7 +1,7 @@
 ﻿namespace DisposableEvents;
 
 public sealed class EventObserver<T> : IObserver<T> {
-    readonly Action<T> onNext;
+    readonly Action<T>? onNext;
     readonly Action<Exception>? onError;
     readonly Action? onCompleted;
 
@@ -22,7 +22,7 @@ public sealed class EventObserver<T> : IObserver<T> {
 }
 
 public sealed class EventObserver : IObserver<EmptyEvent> {
-    readonly Action onNext;
+    readonly Action? onNext;
     readonly Action<Exception>? onError;
     readonly Action? onCompleted;
 

@@ -1,4 +1,6 @@
-﻿namespace DisposableEvents;
+﻿using DisposableEvents.Disposables;
+
+namespace DisposableEvents;
 
 public interface IKeyedPublisher<in TKey, in TMessage> where TKey : notnull {
     /// <summary>
@@ -22,18 +24,26 @@ public interface IKeyedSubscriber<in TKey, TMessage> where TKey : notnull {
 
 public interface IKeyedEvent : IDisposable { }
 
-public interface IKeyedEvent<in TKey, TMessage> : IKeyedPublisher<TKey, TMessage>, IKeyedSubscriber<TKey, TMessage>, IKeyedEvent
-    where TKey : notnull { }
+public interface IKeyedEvent<in TKey, TMessage> : IKeyedPublisher<TKey, TMessage>, IKeyedSubscriber<TKey, TMessage>,
+    IKeyedEvent
+    where TKey : notnull {
+    void Dispose(TKey key);
+}
 
 public sealed class KeyedEvent<TKey, TMessage> : IKeyedEvent<TKey, TMessage> where TKey : notnull {
     readonly Dictionary<TKey, IEvent<TMessage>> _events = new();
+    bool isDisposed;
 
     public IDisposable Subscribe(TKey key, IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) {
+        if (isDisposed) {
+            observer?.OnCompleted();
+            return Disposable.Empty;
+        }
+        
         if (_events.TryGetValue(key, out var @event)) 
             return @event.Subscribe(observer, filters);
         
-        @event = new Event<TMessage>();
-        _events[key] = @event;
+        @event = CreateEvent(key);
         return @event.Subscribe(observer, filters);
     }
 
@@ -43,16 +53,35 @@ public sealed class KeyedEvent<TKey, TMessage> : IKeyedEvent<TKey, TMessage> whe
         }
     }
 
+    IEvent<TMessage> CreateEvent(TKey key) {
+        var @event = new Event<TMessage>();
+        _events[key] = @event;
+        return @event;
+    }
+
     ~KeyedEvent() {
         Dispose();
     }
     
     public void Dispose() {
+        if (isDisposed)
+            return;
+        
+        isDisposed = true;
+        
         foreach (var @event in _events.Values) {
             @event.Dispose();
         }
 
         _events.Clear();
         GC.SuppressFinalize(this);
+    }
+    
+    public void Dispose(TKey key) {
+        if (!_events.TryGetValue(key, out var @event))
+            return;
+        
+        @event.Dispose();
+        _events.Remove(key);
     }
 }

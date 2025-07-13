@@ -16,7 +16,7 @@ public sealed class FilteredEvent<T> : IEvent<T> {
             ? defaultFilters
             : defaultFilters.Concat(filters).ToArray();
         
-        return core.Subscribe(new FilteredEventObserver<T>(observer, new MultiEventFilter<T>(resolvedFilters)));
+        return core.Subscribe(new FilteredEventObserver<T>(observer, new CompositeEventFilter<T>(resolvedFilters)));
     }
     
     public void Publish(T message) => core.Publish(message);

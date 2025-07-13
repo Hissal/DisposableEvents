@@ -9,10 +9,10 @@ public static class EventExtensions {
     /// <param name="onError">Optional action to invoke if an exception occurs during event publishing.</param>
     /// <param name="onComplete">Optional action to invoke when the event is disposed or completed.</param>
     /// <returns>A disposable subscription that can be used to unsubscribe from the event.</returns>
-    public static IDisposable Subscribe(this ISubscriber<EmptyEvent> e, Action action, Action<Exception>? onError = null, Action? onComplete = null) =>
+    public static IDisposable Subscribe(this IEventSubscriber<EmptyEvent> e, Action action, Action<Exception>? onError = null, Action? onComplete = null) =>
         e.Subscribe(new EventObserver(action, onError, onComplete));
 
-    public static void Publish(this IPublisher<EmptyEvent> e) => 
+    public static void Publish(this IEventPublisher<EmptyEvent> e) => 
         e.Publish(default);
 
     /// <summary>
@@ -23,10 +23,10 @@ public static class EventExtensions {
     /// <param name="filters">The filters to attach to this subscription.</param>
     /// <typeparam name="TMessage">The type of the event data.</typeparam>
     /// <returns>A disposable subscription that can be used to unsubscribe from the event.</returns>
-    public static IDisposable Subscribe<TMessage>(this ISubscriber<TMessage> subscriber, Action<TMessage> action, params IEventFilter<TMessage>[] filters) => 
+    public static IDisposable Subscribe<TMessage>(this IEventSubscriber<TMessage> subscriber, Action<TMessage> action, params IEventFilter<TMessage>[] filters) => 
         subscriber.Subscribe(new EventObserver<TMessage>(action), filters);
     
-    public static IDisposable Subscribe<TClosure, TMessage>(this ISubscriber<TMessage> subscriber, TClosure closure, Action<TClosure, TMessage> action, params IEventFilter<TMessage>[] filters) =>
+    public static IDisposable Subscribe<TClosure, TMessage>(this IEventSubscriber<TMessage> subscriber, TClosure closure, Action<TClosure, TMessage> action, params IEventFilter<TMessage>[] filters) =>
         subscriber.Subscribe(new ClosureEventObserver<TClosure,TMessage>(closure, action), filters);
 
     /// <summary>
@@ -39,7 +39,7 @@ public static class EventExtensions {
     /// <param name="filters">The filters to attach to this subscription.</param>
     /// <typeparam name="TMessage">The type of the event data.</typeparam>
     /// <returns>A disposable subscription that can be used to unsubscribe from the event.</returns>
-    public static IDisposable Subscribe<TMessage>(this ISubscriber<TMessage> e, Action<TMessage> action, Action<Exception>? onError = null, Action? onComplete = null, params IEventFilter<TMessage>[] filters) => 
+    public static IDisposable Subscribe<TMessage>(this IEventSubscriber<TMessage> e, Action<TMessage> action, Action<Exception>? onError = null, Action? onComplete = null, params IEventFilter<TMessage>[] filters) => 
         e.Subscribe(new EventObserver<TMessage>(action, onError, onComplete), filters);
     
     
@@ -51,7 +51,7 @@ public static class EventExtensions {
     /// <param name="filter">A predicate that returns true to allow the value through, or false to filter it out.</param>
     /// <typeparam name="TMessage">The type of the event data.</typeparam>
     /// <returns>A disposable subscription that can be used to unsubscribe from the event.</returns>
-    public static IDisposable Subscribe<TMessage>(this ISubscriber<TMessage> e, Action<TMessage> action, Func<TMessage, bool> filter) => 
+    public static IDisposable Subscribe<TMessage>(this IEventSubscriber<TMessage> e, Action<TMessage> action, Func<TMessage, bool> filter) => 
         e.Subscribe(new EventObserver<TMessage>(action), new PredicateEventFilter<TMessage>(filter));
 
     /// <summary>
@@ -64,6 +64,6 @@ public static class EventExtensions {
     /// <param name="completedFilter">Predicate to filter completion. Returns true to allow, false to filter out.</param>
     /// <typeparam name="TMessage">The type of the event data.</typeparam>
     /// <returns>A disposable subscription that can be used to unsubscribe from the event.</returns>
-    public static IDisposable Subscribe<TMessage>(this ISubscriber<TMessage> e, Action<TMessage> action, Func<TMessage, bool> eventFilter, Func<Exception, bool> errorFilter, Func<bool> completedFilter) => 
+    public static IDisposable Subscribe<TMessage>(this IEventSubscriber<TMessage> e, Action<TMessage> action, Func<TMessage, bool> eventFilter, Func<Exception, bool> errorFilter, Func<bool> completedFilter) => 
         e.Subscribe(new EventObserver<TMessage>(action), new PredicateEventFilter<TMessage>(eventFilter, errorFilter, completedFilter));
 }
