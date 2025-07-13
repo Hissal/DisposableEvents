@@ -56,7 +56,7 @@ public class EventObserverTests {
     [Test]
     public void Empty_OnNext_CallsAction() {
         int received = 0;
-        var obs = new EventObserver(() => received = 42);
+        var obs = new EmptyEventObserver(() => received = 42);
         obs.OnNext(new EmptyEvent());
         Assert.That(received, Is.EqualTo(42));
     }
@@ -64,7 +64,7 @@ public class EventObserverTests {
     [Test]
     public void Empty_OnError_CallsOnError() {
         Exception captured = null;
-        var obs = new EventObserver(() => { }, ex => captured = ex);
+        var obs = new EmptyEventObserver(() => { }, ex => captured = ex);
         var ex = new InvalidOperationException("fail");
         obs.OnError(ex);
         Assert.That(captured, Is.EqualTo(ex));
@@ -73,27 +73,27 @@ public class EventObserverTests {
     [Test]
     public void Empty_OnCompleted_CallsOnCompleted() {
         bool completed = false;
-        var obs = new EventObserver(() => { }, null, () => completed = true);
+        var obs = new EmptyEventObserver(() => { }, null, () => completed = true);
         obs.OnCompleted();
         Assert.That(completed, Is.True);
     }
 
     [Test]
     public void Empty_OnError_WithoutHandler_Throws() {
-        var obs = new EventObserver(() => { });
+        var obs = new EmptyEventObserver(() => { });
         Assert.Throws<Exception>(() => obs.OnError(new Exception()));
     }
 
     [Test]
     public void Empty_OnCompleted_WithoutHandler_DoesNotThrow() {
-        var obs = new EventObserver(() => { });
+        var obs = new EmptyEventObserver(() => { });
         Assert.DoesNotThrow(() => obs.OnCompleted());
     }
 
     [Test]
     public void Empty_NullOnNext_DoesNotThrow() {
         Assert.DoesNotThrow(() => {
-            var obs = new EventObserver(null!);
+            var obs = new EmptyEventObserver(null!);
             obs.OnNext(new EmptyEvent());
         });
     }

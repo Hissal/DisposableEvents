@@ -1,7 +1,5 @@
 ﻿namespace DisposableEvents;
 
-public struct EmptyEvent;
-
 public interface IEventPublisher<in TMessage> {
     /// <summary>
     /// Publishes a value to all subscribed observers.
@@ -39,24 +37,5 @@ public sealed class Event<TMessage> : IEvent<TMessage> {
     }
     
     public void Publish(TMessage message) => core.Publish(message);
-    public void Dispose() => core.Dispose();
-}
-public sealed class Event : IEvent<EmptyEvent> {
-    readonly EventCore<EmptyEvent> core;
-    
-    public Event(int expectedSubscriberCount = 2) : this(new EventCore<EmptyEvent>(expectedSubscriberCount)) { }
-    public Event(EventCore<EmptyEvent> core) {
-        this.core = core;
-    }
-    
-    public IDisposable Subscribe(IObserver<EmptyEvent> observer, params IEventFilter<EmptyEvent>[] filters) {
-        if (filters.Length == 0)
-            return core.Subscribe(observer);
-        
-        var filteredObserver = new FilteredEventObserver<EmptyEvent>(observer, new CompositeEventFilter<EmptyEvent>(filters));
-        return core.Subscribe(filteredObserver);
-    }
-    
-    public void Publish(EmptyEvent message) => core.Publish(message);
     public void Dispose() => core.Dispose();
 }

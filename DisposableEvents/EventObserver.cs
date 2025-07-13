@@ -21,28 +21,6 @@ public sealed class EventObserver<T> : IObserver<T> {
     public void OnCompleted() => onCompleted?.Invoke();
 }
 
-public sealed class EventObserver : IObserver<EmptyEvent> {
-    readonly Action? onNext;
-    readonly Action<Exception>? onError;
-    readonly Action? onCompleted;
-
-    public EventObserver(Action onNext, Action<Exception>? onError = null, Action? onCompleted = null) {
-        this.onNext = onNext;
-        this.onError = onError;
-        this.onCompleted = onCompleted;
-    }
-
-    public void OnNext(EmptyEvent value) => onNext?.Invoke();
-    public void OnError(Exception error) {
-        if (onError == null)
-            throw error;
-        
-        onError.Invoke(error);
-    }
-
-    public void OnCompleted() => onCompleted?.Invoke();
-}
-
 public sealed class FilteredEventObserver<T> : IObserver<T> {
     readonly IObserver<T> observer;
     readonly IEventFilter<T> filter;

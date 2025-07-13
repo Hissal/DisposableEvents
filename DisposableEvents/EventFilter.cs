@@ -60,7 +60,6 @@ public class PredicateEventFilter<T> : IEventFilter<T> {
     public bool FilterEvent(ref T value) => eventFilter?.Invoke(value) ?? true;
     public bool FilterOnError(Exception ex) => errorFilter?.Invoke(ex) ?? true;
     public bool FilterOnCompleted() => completedFilter?.Invoke() ?? true;
-    
 }
 
 /// <summary>
