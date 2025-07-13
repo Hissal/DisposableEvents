@@ -26,8 +26,9 @@
 
     <ItemGroup>
       <Folder Include="EventContainers\" />
-      <Folder Include="Events\AsyncEvents\" />
-      <Folder Include="OtherSystems\" />
+      <Folder Include="EventTypes\AsyncEvents\" />
+      <Folder Include="EventParts\" />
+      <Folder Include="UnrelatedToEvents\Disposables\" />
     </ItemGroup>
 
 </Project>

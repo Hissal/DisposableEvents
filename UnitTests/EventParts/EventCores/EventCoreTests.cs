@@ -1,7 +1,7 @@
 ﻿using DisposableEvents;
 using DisposableEvents.Disposables;
 
-namespace DisposableEventTests.EventFunctionalityTests.EventCores;
+namespace UnitTests.EventParts.EventCores;
 
 [TestFixture]
 public class EventCoreTests {

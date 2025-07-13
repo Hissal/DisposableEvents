@@ -1,6 +1,6 @@
 ﻿using DisposableEvents;
 
-namespace DisposableEventTests.EventFilters;
+namespace UnitTests.EventParts.EventFilters;
 
 [TestFixture]
 public class MutatingFilterTests {

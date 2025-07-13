@@ -1,6 +1,6 @@
 ﻿using DisposableEvents;
 
-namespace DisposableEventTests.Events.KeyedEvents;
+namespace UnitTests.EventTypes.KeyedEvents;
 
 [TestFixture]
 public class NormalKeyedEventTests {

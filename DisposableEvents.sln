@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisposableEvents", "DisposableEvents\DisposableEvents.csproj", "{07D671FB-6834-45E9-B46E-E30A1D47C0E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisposableEventTests", "DisposableEventTests\DisposableEventTests.csproj", "{DCDFE64D-15E5-4362-BA6F-BCC625434CD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{DCDFE64D-15E5-4362-BA6F-BCC625434CD4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{E126B00F-0D3C-47B6-BFE4-EA1F4E1B05CF}"
 EndProject

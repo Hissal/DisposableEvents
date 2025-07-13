@@ -1,4 +1,4 @@
-﻿namespace DisposableEventTests;
+﻿namespace UnitTests;
 
 internal class TestObserver<T> : IObserver<T>
 {

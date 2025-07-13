@@ -1,6 +1,6 @@
 ﻿using DisposableEvents;
 
-namespace DisposableEventTests.Events;
+namespace UnitTests.EventTypes;
 
 [TestFixture]
 public class EventExtensionTests {

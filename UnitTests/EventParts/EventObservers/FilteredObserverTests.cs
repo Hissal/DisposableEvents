@@ -1,6 +1,6 @@
 ﻿using DisposableEvents;
 
-namespace DisposableEventTests.EventObservers;
+namespace UnitTests.EventParts.EventObservers;
 
 [TestFixture]
 public class FilteredObserverTests {
