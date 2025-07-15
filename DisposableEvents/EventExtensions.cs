@@ -1,4 +1,7 @@
-﻿namespace DisposableEvents;
+﻿using System.Buffers;
+using DisposableEvents.Factories;
+
+namespace DisposableEvents;
 
 /// <summary>
 /// Provides extension methods for subscribing to and publishing events with various observer and filter configurations.

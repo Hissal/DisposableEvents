@@ -1,4 +1,6 @@
-﻿namespace DisposableEvents;
+﻿using DisposableEvents.Factories;
+
+namespace DisposableEvents;
 
 public interface IEventPublisher<in TMessage> {
     /// <summary>
@@ -22,18 +24,16 @@ public interface IEvent<TMessage> : IEventPublisher<TMessage>, IEventSubscriber<
 
 public sealed class Event<TMessage> : IEvent<TMessage> {
     readonly EventCore<TMessage> core;
+    readonly IEventObserverFactory observerFactory;
 
-    public Event(int expectedSubscriberCount = 2) : this(new EventCore<TMessage>(expectedSubscriberCount)) { }
-    public Event(EventCore<TMessage> core) {
+    public Event(int expectedSubscriberCount = 2, IEventObserverFactory? observerFactory = null) : this(new EventCore<TMessage>(expectedSubscriberCount), observerFactory) { }
+    public Event(EventCore<TMessage> core, IEventObserverFactory? observerFactory = null) {
         this.core = core;
+        this.observerFactory = observerFactory ?? EventObserverFactory.Default;
     }
     
     public IDisposable Subscribe(IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) {
-        if (filters.Length == 0)
-            return core.Subscribe(observer);
-        
-        var filteredObserver = new FilteredEventObserver<TMessage>(observer, new CompositeEventFilter<TMessage>(filters));
-        return core.Subscribe(filteredObserver);
+        return core.Subscribe(observerFactory.Create(observer, filters));
     }
     
     public void Publish(TMessage message) => core.Publish(message);

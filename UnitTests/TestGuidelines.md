@@ -20,3 +20,4 @@ This document outlines the guidelines for writing unit tests for the DisposableE
 - **MultipleSubscribers_AllReceivePublishedValue**: Ensure that multiple subscribers receive the published value.
 - **SubscribeAfterDispose_ReceivesOnCompleted**: Ensure that subscribing after the event has been disposed receives an OnCompleted notification.
 - **PublishWithNoSubscribers_DoesNotThrow**: Ensure that publishing an event with no subscribers does not throw an exception.
+- **Subscribe_AppliesFilters**: Ensure that filters are applied to subscriptions.

@@ -1,4 +1,5 @@
 ﻿using DisposableEvents.Disposables;
+using DisposableEvents.Factories;
 
 namespace DisposableEvents;
 
@@ -31,16 +32,26 @@ public interface IKeyedEvent<in TKey, TMessage> : IKeyedPublisher<TKey, TMessage
 }
 
 public sealed class KeyedEvent<TKey, TMessage> : IKeyedEvent<TKey, TMessage> where TKey : notnull {
-    readonly Dictionary<TKey, IEvent<TMessage>> _events = new();
+    readonly Dictionary<TKey, IEvent<TMessage>> events = new();
+    readonly IEventObserverFactory observerFactory;
+    readonly int expectedSubscriberCount;
+    
     bool isDisposed;
 
+    public KeyedEvent(int expectedSubscriberCountPerKey = 2) 
+        : this(expectedSubscriberCountPerKey, EventObserverFactory.Default) { }
+    public KeyedEvent(int expectedSubscriberCountPerKey, IEventObserverFactory observerFactory) {
+        expectedSubscriberCount = expectedSubscriberCountPerKey;
+        this.observerFactory = observerFactory;
+    }
+    
     public IDisposable Subscribe(TKey key, IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) {
         if (isDisposed) {
             observer?.OnCompleted();
             return Disposable.Empty;
         }
         
-        if (_events.TryGetValue(key, out var @event)) 
+        if (events.TryGetValue(key, out var @event)) 
             return @event.Subscribe(observer, filters);
         
         @event = CreateEvent(key);
@@ -48,14 +59,14 @@ public sealed class KeyedEvent<TKey, TMessage> : IKeyedEvent<TKey, TMessage> whe
     }
 
     public void Publish(TKey key, TMessage message) {
-        if (_events.TryGetValue(key, out var @event)) {
+        if (events.TryGetValue(key, out var @event)) {
             @event.Publish(message);
         }
     }
 
-    IEvent<TMessage> CreateEvent(TKey key) {
-        var @event = new Event<TMessage>();
-        _events[key] = @event;
+    Event<TMessage> CreateEvent(TKey key) {
+        var @event = new Event<TMessage>(expectedSubscriberCount, observerFactory);
+        events[key] = @event;
         return @event;
     }
 
@@ -69,19 +80,19 @@ public sealed class KeyedEvent<TKey, TMessage> : IKeyedEvent<TKey, TMessage> whe
         
         isDisposed = true;
         
-        foreach (var @event in _events.Values) {
+        foreach (var @event in events.Values) {
             @event.Dispose();
         }
 
-        _events.Clear();
+        events.Clear();
         GC.SuppressFinalize(this);
     }
     
     public void Dispose(TKey key) {
-        if (!_events.TryGetValue(key, out var @event))
+        if (!events.TryGetValue(key, out var @event))
             return;
         
         @event.Dispose();
-        _events.Remove(key);
+        events.Remove(key);
     }
 }

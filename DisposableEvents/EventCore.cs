@@ -1,4 +1,5 @@
 ﻿using DisposableEvents.Disposables;
+using DisposableEvents.Internal;
 
 namespace DisposableEvents;
 
@@ -25,8 +26,7 @@ public class EventCore<TMessage> : IDisposable {
     }
     
     public IDisposable Subscribe(IObserver<TMessage> observer) {
-        if (observer == null)
-            throw new ArgumentNullException(nameof(observer));
+        ThrowHelper.ThrowIfNull(observer);
         
         if (IsDisposed) {
             observer.OnCompleted();

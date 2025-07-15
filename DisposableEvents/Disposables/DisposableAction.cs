@@ -21,10 +21,19 @@ public interface IDisposableAction<T> : IDisposable {
 }
 
 public sealed class DisposableAction : IDisposableAction {
-    Action action;
-    Action onDispose;
+    public static IDisposableAction Create(Action action, Action onDispose) => new DisposableAction(action, onDispose);
+    public static IDisposableAction<T> Create<T>(Action<T> action, Action onDispose) => new DisposableAction<T>(action, onDispose);
+
+    public static IDisposableAction Create<TClosure>(TClosure closure, Action<TClosure> action, Action<TClosure> onDispose) => 
+        new DisposableActionClosure<TClosure>(closure, action, onDispose);
+    public static IDisposableAction<T> Create<TClosure, T>(TClosure closure, Action<TClosure, T> action, Action<TClosure> onDispose) => 
+        new DisposableActionClosure<TClosure, T>(closure, action, onDispose);
+    
+    Action? action;
+    Action? onDispose;
     
     bool isDisposed;
+    bool IsDisposed => Volatile.Read(ref isDisposed);
     
     public DisposableAction(Action action, Action onDispose) {
         this.action = action;
@@ -32,34 +41,36 @@ public sealed class DisposableAction : IDisposableAction {
     }
     
     public void Invoke() {
-        if (isDisposed)
+        if (IsDisposed)
             return;
         
-        action.Invoke();
+        action?.Invoke();
     }
 
     public void Add(IDisposableAction action) {
+        if (IsDisposed)
+            return;
+        
         this.action += action.Invoke;
         onDispose += action.Dispose;
     }
 
     public void Dispose() {
-        if (isDisposed)
+        if (IsDisposed)
             return;
         
-        onDispose.Invoke();
-        
-        isDisposed = true;
-        action = null!;
-        onDispose = null!;
+        Volatile.Write(ref isDisposed, true);
+        Volatile.Write(ref action, null);
+        Interlocked.Exchange(ref onDispose, null)?.Invoke();
     }
 }
 
 public sealed class DisposableAction<T> : IDisposableAction<T> {
-    Action<T> action;
-    Action onDispose;
+    Action<T>? action;
+    Action? onDispose;
     
     bool isDisposed;
+    bool IsDisposed => Volatile.Read(ref isDisposed);
     
     public DisposableAction(Action<T> action, Action onDispose) {
         this.action = action;
@@ -67,38 +78,40 @@ public sealed class DisposableAction<T> : IDisposableAction<T> {
     }
     
     public void Invoke(T arg) {
-        if (isDisposed)
+        if (IsDisposed)
             return;
         
-        action.Invoke(arg);
+        action?.Invoke(arg);
     }
 
     public void Add(IDisposableAction<T> action) {
+        if (IsDisposed)
+            return;
+        
         this.action += action.Invoke;
         onDispose += action.Dispose;
     }
 
     public void Dispose() {
-        if (isDisposed)
+        if (IsDisposed)
             return;
         
-        onDispose.Invoke();
-        
-        isDisposed = true;
-        action = null!;
-        onDispose = null!;
+        Volatile.Write(ref isDisposed, true);
+        Volatile.Write(ref action, null);
+        Interlocked.Exchange(ref onDispose, null)?.Invoke();
     }
 }
 
 public sealed class DisposableActionClosure<TClosure> : IDisposableAction {
-    Action<TClosure> action;
-    Action<TClosure> onDispose;
+    Action<TClosure>? action;
+    Action<TClosure>? onDispose;
     
     bool isDisposed;
+    bool IsDisposed => Volatile.Read(ref isDisposed);
 
     readonly TClosure closure;
     
-    List<IDisposableAction>? additionalActions;
+    List<IDisposableAction?>? additionalActions;
     
     public DisposableActionClosure(TClosure closure, Action<TClosure> action, Action<TClosure> onDispose) {
         this.closure = closure;
@@ -107,39 +120,40 @@ public sealed class DisposableActionClosure<TClosure> : IDisposableAction {
     }
     
     public void Invoke() {
-        if (isDisposed)
+        if (IsDisposed)
             return;
         
-        action.Invoke(closure);
+        action?.Invoke(closure);
         
         if (additionalActions == null)
             return;
         
         foreach (var additionalAction in additionalActions) {
-            additionalAction.Invoke();
+            additionalAction?.Invoke();
         }
     }
 
     public void Add(IDisposableAction action) {
-        additionalActions ??= new List<IDisposableAction>();
+        if (IsDisposed)
+            return;
+        
+        additionalActions ??= new List<IDisposableAction?>();
         additionalActions.Add(action);
     }
 
     public void Dispose() {
-        if (isDisposed)
+        if (IsDisposed)
             return;
         
-        onDispose.Invoke(closure);
-        
-        isDisposed = true;
-        action = null!;
-        onDispose = null!;
+        Volatile.Write(ref isDisposed, true);
+        Volatile.Write(ref action, null);
+        Interlocked.Exchange(ref onDispose, null)?.Invoke(closure);
 
         if (additionalActions == null)
             return;
         
         foreach (var additionalAction in additionalActions) {
-            additionalAction.Dispose();
+            additionalAction?.Dispose();
         }
         
         additionalActions.Clear();
@@ -148,14 +162,15 @@ public sealed class DisposableActionClosure<TClosure> : IDisposableAction {
 }
 
 public sealed class DisposableActionClosure<TClosure, T> : IDisposableAction<T> {
-    Action<TClosure, T> action;
-    Action<TClosure> onDispose;
+    Action<TClosure, T>? action;
+    Action<TClosure>? onDispose;
     
     bool isDisposed;
+    bool IsDisposed => Volatile.Read(ref isDisposed);
 
     readonly TClosure closure;
     
-    List<IDisposableAction<T>>? additionalActions;
+    List<IDisposableAction<T>?>? additionalActions;
     
     public DisposableActionClosure(TClosure closure, Action<TClosure, T> action, Action<TClosure> onDispose) {
         this.closure = closure;
@@ -164,39 +179,43 @@ public sealed class DisposableActionClosure<TClosure, T> : IDisposableAction<T> 
     }
     
     public void Invoke(T arg) {
-        if (isDisposed)
+        if (IsDisposed)
             return;
         
-        action.Invoke(closure, arg);
+        action?.Invoke(closure, arg);
         
         if (additionalActions == null)
             return;
         
         foreach (var additionalAction in additionalActions) {
-            additionalAction.Invoke(arg);
+            additionalAction?.Invoke(arg);
         }
     }
 
     public void Add(IDisposableAction<T> action) {
-        additionalActions ??= new List<IDisposableAction<T>>();
+        if (IsDisposed)
+            return;
+        
+        additionalActions ??= new List<IDisposableAction<T>?>();
         additionalActions.Add(action);
     }
 
     public void Dispose() {
-        if (isDisposed)
+        if (IsDisposed)
             return;
         
-        onDispose.Invoke(closure);
-        
-        isDisposed = true;
-        action = null!;
-        onDispose = null!;
+        Volatile.Write(ref isDisposed, true);
+        Volatile.Write(ref action, null);
+        Interlocked.Exchange(ref onDispose, null)?.Invoke(closure);
         
         if (additionalActions == null)
             return;
         
         foreach (var additionalAction in additionalActions) {
-            additionalAction.Dispose();
+            additionalAction?.Dispose();
         }
+        
+        additionalActions.Clear();
+        additionalActions = null;
     }
 }

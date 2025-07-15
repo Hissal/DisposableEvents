@@ -38,6 +38,9 @@ public struct DisposableBag : IDisposable {
     }
 
     public void Dispose() {
+        if (isDisposed)
+            return;
+        
         Clear();
         isDisposed = true;
     }

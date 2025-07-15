@@ -2,7 +2,7 @@
 
 namespace DisposableEvents.Disposables;
 
-public ref struct DisposableBuilder {
+public ref struct DisposableBuilder : IDisposable {
     IDisposable? disposable1;
     IDisposable? disposable2;
     IDisposable? disposable3;
@@ -68,8 +68,16 @@ public ref struct DisposableBuilder {
         disposables[count] = disposable;
     }
 
+    /// <summary>
+    /// Builds the disposable collection and returns a single <see cref="IDisposable"/> that will dispose all added disposables.
+    /// </summary>
+    /// <exception cref="ObjectDisposedException">Thrown if the builder has already been disposed.</exception>
+    /// <remarks>
+    /// After calling this method, the builder is disposed and cannot be used again.
+    /// </remarks>
     public IDisposable Build() {
         var result = count switch {
+            -1 => Disposable.Empty,
             0 => Disposable.Empty,
             1 => disposable1!,
             2 => Disposable.Combine(disposable1!, disposable2!),

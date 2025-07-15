@@ -87,6 +87,18 @@ public class BufferedEventTests {
         var evt = new BufferedEvent<int>();
         Assert.DoesNotThrow(() => evt.Publish(42));
     }
+
+    [Test]
+    public void Subscribe_AppliesFilters() {
+        var evt = new BufferedEvent<int>();
+        var obs = new TestObserver<int>();
+        var filter = new TestFilter<int>();
+
+        evt.Subscribe(obs, filter);
+        evt.Publish(10);
+        
+        Assert.That(filter.LastValue, Is.EqualTo(10));
+    }
     
     // Buffered behavior tests
     

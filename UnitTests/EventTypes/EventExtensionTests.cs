@@ -4,6 +4,8 @@ namespace UnitTests.EventTypes;
 
 [TestFixture]
 public class EventExtensionTests {
+    // TODO: Make them make sense
+    
     [Test]
     public void Subscribe_Action_ReceivesPublishedValue() {
         var evt = new Event<int>();
@@ -21,7 +23,7 @@ public class EventExtensionTests {
         evt.Publish(20);
         evt.Publish(5);
         Assert.That(received, Is.EqualTo(20));
-        
+
         evt.Subscribe(x => received = x);
     }
 
@@ -37,8 +39,10 @@ public class EventExtensionTests {
         );
         evt.Publish(1);
         evt.Dispose();
-        Assert.That(captured, Is.InstanceOf<InvalidOperationException>());
-        Assert.That(completed, Is.True);
+        Assert.Multiple(() => {
+            Assert.That(captured, Is.InstanceOf<InvalidOperationException>());
+            Assert.That(completed, Is.True);
+        });
     }
 
     [Test]

@@ -1,21 +1,23 @@
-﻿namespace DisposableEvents;
+﻿using DisposableEvents.Factories;
+
+namespace DisposableEvents;
 
 public struct EmptyEvent { }
 
 public sealed class Event : IEvent<EmptyEvent> {
     readonly EventCore<EmptyEvent> core;
+    readonly IEventObserverFactory observerFactory;
     
-    public Event(int expectedSubscriberCount = 2) : this(new EventCore<EmptyEvent>(expectedSubscriberCount)) { }
-    public Event(EventCore<EmptyEvent> core) {
+    public Event(int expectedSubscriberCount = 2, IEventObserverFactory? observerFactory = null) 
+        : this(new EventCore<EmptyEvent>(expectedSubscriberCount), observerFactory) { }
+    
+    public Event(EventCore<EmptyEvent> core, IEventObserverFactory? observerFactory = null) {
         this.core = core;
+        this.observerFactory = observerFactory ?? EventObserverFactory.Default;
     }
     
     public IDisposable Subscribe(IObserver<EmptyEvent> observer, params IEventFilter<EmptyEvent>[] filters) {
-        if (filters.Length == 0)
-            return core.Subscribe(observer);
-        
-        var filteredObserver = new FilteredEventObserver<EmptyEvent>(observer, new CompositeEventFilter<EmptyEvent>(filters));
-        return core.Subscribe(filteredObserver);
+        return core.Subscribe(observerFactory.Create(observer, filters));
     }
     
     public void Publish(EmptyEvent message) => core.Publish(message);

@@ -26,8 +26,8 @@ public sealed class EventContainer : IEventContainer {
     public EventContainer(IEventFactory? eventFactory = null, IKeyedEventFactory? keyedEventFactory = null) :
         this(new UnkeyedEventContainer(eventFactory), new KeyedEventContainer(keyedEventFactory)) { }
     public EventContainer(IUnkeyedEventContainer? eventContainer = null, IKeyedEventContainer? keyedEventContainer = null) {
-        if (eventContainer == this) throw new ArgumentNullException(nameof(eventContainer));
-        if (keyedEventContainer == this) throw new ArgumentNullException(nameof(keyedEventContainer));
+        if (eventContainer == this) throw new InvalidOperationException($"Cannot use self as {nameof(IUnkeyedEventContainer)}");
+        if (keyedEventContainer == this) throw new InvalidOperationException($"Cannot use self as {nameof(IKeyedEventContainer)}");
         
         unkeyedEventContainer = eventContainer ?? new UnkeyedEventContainer();
         keyedEventContainerImplementation = keyedEventContainer ?? new KeyedEventContainer();
@@ -77,7 +77,7 @@ public sealed class UnkeyedEventContainer : IUnkeyedEventContainer {
     readonly Dictionary<Type, IEvent> events;
     readonly IEventFactory factory;
 
-    internal UnkeyedEventContainer(IEventFactory? factory = null) {
+    public UnkeyedEventContainer(IEventFactory? factory = null) {
         events = new Dictionary<Type, IEvent>();
         this.factory = factory ?? EventFactory.Default;
     }
@@ -135,7 +135,7 @@ public sealed class KeyedEventContainer : IKeyedEventContainer {
     readonly Dictionary<Type, IKeyedEvent> events;
     readonly IKeyedEventFactory factory;
 
-    internal KeyedEventContainer(IKeyedEventFactory? factory = null) {
+    public KeyedEventContainer(IKeyedEventFactory? factory = null) {
         events = new Dictionary<Type, IKeyedEvent>();
         this.factory = factory ?? KeyedEventFactory.Default;
     }

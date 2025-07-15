@@ -30,14 +30,6 @@ public static class Disposable {
 
     public static IDisposable Action(Action onDispose) => new ActionDisposable(onDispose);
     public static IDisposable Action<TClosure>(TClosure closure, Action<TClosure> onDispose) => new ActionDisposable<TClosure>(closure, onDispose);
-
-    public static IDisposableAction Action(Action action, Action onDispose) => new DisposableAction(action, onDispose);
-    public static IDisposableAction<T> Action<T>(Action<T> action, Action onDispose) => new DisposableAction<T>(action, onDispose);
-
-    public static IDisposableAction Action<TClosure>(TClosure closure, Action<TClosure> action, Action<TClosure> onDispose) => 
-        new DisposableActionClosure<TClosure>(closure, action, onDispose);
-    public static IDisposableAction<T> Action<TClosure, T>(TClosure closure, Action<TClosure, T> action, Action<TClosure> onDispose) => 
-        new DisposableActionClosure<TClosure, T>(closure, action, onDispose);
     
     public static BooleanDisposable Boolean() => new BooleanDisposable();
 

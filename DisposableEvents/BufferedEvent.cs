@@ -1,14 +1,20 @@
-﻿namespace DisposableEvents;
+﻿using DisposableEvents.Factories;
+using DisposableEvents.Internal;
+
+namespace DisposableEvents;
 
 public class BufferedEvent<TMessage> : IEvent<TMessage> {
     readonly EventCore<TMessage> core;
+    readonly IEventObserverFactory observerFactory;
+    
     TMessage? previousMessage;
     
     static readonly bool s_isValueType = typeof(TMessage).IsValueType;
     
-    public BufferedEvent(int expectedSubscriberCount = 2) : this(new EventCore<TMessage>(expectedSubscriberCount)) { }
-    public BufferedEvent(EventCore<TMessage> core) {
+    public BufferedEvent(int expectedSubscriberCount = 2, IEventObserverFactory? observerFactory = null) : this(new EventCore<TMessage>(expectedSubscriberCount), observerFactory) { }
+    public BufferedEvent(EventCore<TMessage> core, IEventObserverFactory? observerFactory = null) {
         this.core = core;
+        this.observerFactory = observerFactory ?? EventObserverFactory.Default;
         previousMessage = default;
     }
     
@@ -17,15 +23,8 @@ public class BufferedEvent<TMessage> : IEvent<TMessage> {
         core.Publish(message);
     }
     public IDisposable Subscribe(IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) {
-        if (observer == null)
-            throw new ArgumentNullException(nameof(observer));
-        
-        if (filters.Length == 0) {
-            return BufferedSubscribe(observer);
-        }
-        
-        var filteredObserver = new FilteredEventObserver<TMessage>(observer, new CompositeEventFilter<TMessage>(filters));
-        return BufferedSubscribe(filteredObserver);
+        ThrowHelper.ThrowIfNull(observer);
+        return BufferedSubscribe(observerFactory.Create(observer, filters));
     }
     
     IDisposable BufferedSubscribe(IObserver<TMessage> observer) {
