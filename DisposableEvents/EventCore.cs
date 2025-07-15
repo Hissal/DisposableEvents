@@ -3,7 +3,7 @@ using DisposableEvents.Internal;
 
 namespace DisposableEvents;
 
-public class EventCore<TMessage> : IDisposable {
+public sealed class EventCore<TMessage> : IDisposable {
     public List<IObserver<TMessage>> Observers { get; }
     public bool IsDisposed { get; private set; }
     public IObserver<TMessage>[] CopyObservers() => Observers.ToArray();

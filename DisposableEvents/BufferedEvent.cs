@@ -3,7 +3,7 @@ using DisposableEvents.Internal;
 
 namespace DisposableEvents;
 
-public class BufferedEvent<TMessage> : IEvent<TMessage> {
+public sealed class BufferedEvent<TMessage> : IEvent<TMessage> {
     readonly EventCore<TMessage> core;
     readonly IEventObserverFactory observerFactory;
     

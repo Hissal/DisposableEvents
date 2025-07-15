@@ -3,7 +3,7 @@ using DisposableEvents.Internal;
 
 namespace DisposableEvents;
 
-public class EventFuncCore<TMessage, TReturn> : IDisposable {
+public sealed class EventFuncCore<TMessage, TReturn> : IDisposable {
     public List<IEventFuncObserver<TMessage, TReturn>> Observers { get; }
     public bool IsDisposed { get; private set; }
     
@@ -67,12 +67,19 @@ public class EventFuncCore<TMessage, TReturn> : IDisposable {
         if (Observers.Count == 0)
             yield break;
         
-        // Note: This does not handle exceptions in the same way as Publish.
         foreach (var observer in Observers) {
-            var result = observer.OnNext(message);
+            FuncResult<TReturn> resultFromObserver;
             
-            if (behavior is FuncResultEnumerationBehavior.ReturnAll || result.IsSuccess) {
-                yield return result;
+            try {
+                resultFromObserver = observer.OnNext(message);
+            }
+            catch (Exception e) {
+                observer.OnError(e);
+                continue;
+            }
+            
+            if (behavior is FuncResultEnumerationBehavior.ReturnAll || resultFromObserver.IsSuccess) {
+                yield return resultFromObserver;
             }
         }
     }

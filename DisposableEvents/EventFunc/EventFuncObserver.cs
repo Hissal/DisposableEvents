@@ -12,8 +12,6 @@ public sealed class EventFuncObserver<TMessage, TReturn> : IEventFuncObserver<TM
     }
 
     public FuncResult<TReturn> OnNext(TMessage value) => onNext.Invoke(value);
-    void IObserver<TMessage>.OnNext(TMessage value) => OnNext(value);
-    
     public void OnError(Exception error) {
         if (onError == null)
             throw error;
@@ -71,8 +69,6 @@ public sealed class ClosureEventFuncObserver<TClosure, TMessage, TReturn> : IEve
     }
 
     public FuncResult<TReturn> OnNext(TMessage value) => onNext.Invoke(closure, value);
-    void IObserver<TMessage>.OnNext(TMessage value) => OnNext(value);
-    
     public void OnError(Exception error) {
         if (onError == null)
             throw error;
