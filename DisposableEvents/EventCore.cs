@@ -6,7 +6,7 @@ namespace DisposableEvents;
 public class EventCore<TMessage> : IDisposable {
     public List<IObserver<TMessage>> Observers { get; }
     public bool IsDisposed { get; private set; }
-    public IObserver<TMessage>[] GetObservers() => Observers.ToArray();
+    public IObserver<TMessage>[] CopyObservers() => Observers.ToArray();
     
 
     public EventCore(int expectedSubscriptionCount = 2) {
@@ -34,8 +34,7 @@ public class EventCore<TMessage> : IDisposable {
         }
         
         Observers.Add(observer);
-        var subscription = new Subscription(this, observer);
-        return subscription;
+        return new Subscription(this, observer);
     }
     
     ~EventCore() {

@@ -1,17 +1,17 @@
 ﻿namespace DisposableEvents;
 
-public sealed class EventObserver<T> : IObserver<T> {
-    readonly Action<T>? onNext;
+public sealed class EventObserver<TMessage> : IObserver<TMessage> {
+    readonly Action<TMessage>? onNext;
     readonly Action<Exception>? onError;
     readonly Action? onCompleted;
 
-    public EventObserver(Action<T> onNext, Action<Exception>? onError = null, Action? onCompleted = null) {
+    public EventObserver(Action<TMessage> onNext, Action<Exception>? onError = null, Action? onCompleted = null) {
         this.onNext = onNext;
         this.onError = onError;
         this.onCompleted = onCompleted;
     }
 
-    public void OnNext(T value) => onNext?.Invoke(value);
+    public void OnNext(TMessage value) => onNext?.Invoke(value);
     public void OnError(Exception error) {
         if (onError == null)
             throw error;
@@ -21,16 +21,16 @@ public sealed class EventObserver<T> : IObserver<T> {
     public void OnCompleted() => onCompleted?.Invoke();
 }
 
-public sealed class FilteredEventObserver<T> : IObserver<T> {
-    readonly IObserver<T> observer;
-    readonly IEventFilter<T> filter;
+public sealed class FilteredEventObserver<TMessage> : IObserver<TMessage> {
+    readonly IObserver<TMessage> observer;
+    readonly IEventFilter<TMessage> filter;
 
-    public FilteredEventObserver(IObserver<T> observer, IEventFilter<T> filter) {
+    public FilteredEventObserver(IObserver<TMessage> observer, IEventFilter<TMessage> filter) {
         this.observer = observer ?? throw new ArgumentNullException(nameof(observer));
         this.filter = filter ?? throw new ArgumentNullException(nameof(filter));
     }
     
-    public void OnNext(T value) {
+    public void OnNext(TMessage value) {
         if (filter.FilterEvent(ref value)) {
             observer.OnNext(value);
         }
