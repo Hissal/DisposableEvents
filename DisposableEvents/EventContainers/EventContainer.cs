@@ -2,25 +2,33 @@
 
 namespace DisposableEvents.EventContainers;
 
-public interface IUnkeyedEventContainer : IDisposable {
-    IEvent<TMessage> RegisterEvent<TMessage>(IEvent<TMessage>? @event = null);
-    bool TryGetEvent<TMessage>(out IEvent<TMessage> @event);
-
-    public IDisposable Subscribe<TMessage>(IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters);
+public interface IAnyEventPublisher {
     public void Publish<TMessage>(TMessage message);
 }
-public interface IKeyedEventContainer : IDisposable {
+public interface IAnyEventSubscriber {
+    public IDisposable Subscribe<TMessage>(IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters);
+}
+
+public interface IAnyKeyedEventPublisher {
+    public void Publish<TKey, TMessage>(TKey key, TMessage message) where TKey : notnull;
+}
+public interface IAnyKeyedEventSubscriber {
+    public IDisposable Subscribe<TKey, TMessage>(TKey key, IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) where TKey : notnull;
+}
+
+public interface IUnkeyedEventContainer : IAnyEventPublisher, IAnyEventSubscriber, IDisposable {
+    IEvent<TMessage> RegisterEvent<TMessage>(IEvent<TMessage>? @event = null);
+    bool TryGetEvent<TMessage>(out IEvent<TMessage> @event);
+}
+public interface IKeyedEventContainer : IAnyKeyedEventPublisher, IAnyKeyedEventSubscriber, IDisposable {
     IKeyedEvent<TKey, TMessage> RegisterEvent<TKey, TMessage>(IKeyedEvent<TKey, TMessage>? @event = null) where TKey : notnull;
     bool TryGetEvent<TKey, TMessage>(out IKeyedEvent<TKey, TMessage> @event) where TKey : notnull;
-
-    public IDisposable Subscribe<TKey, TMessage>(TKey key, IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) where TKey : notnull;
-    public void Publish<TKey, TMessage>(TKey key, TMessage message) where TKey : notnull;
 }
 public interface IEventContainer : IUnkeyedEventContainer, IKeyedEventContainer { }
 
 public sealed class EventContainer : IEventContainer {
     readonly IUnkeyedEventContainer unkeyedEventContainer;
-    readonly IKeyedEventContainer keyedEventContainerImplementation;
+    readonly IKeyedEventContainer keyedEventContainer;
 
     public EventContainer() : this(eventContainer: null) {}
     public EventContainer(IEventFactory? eventFactory = null, IKeyedEventFactory? keyedEventFactory = null) :
@@ -30,7 +38,7 @@ public sealed class EventContainer : IEventContainer {
         if (keyedEventContainer == this) throw new InvalidOperationException($"Cannot use self as {nameof(IKeyedEventContainer)}");
         
         unkeyedEventContainer = eventContainer ?? new UnkeyedEventContainer();
-        keyedEventContainerImplementation = keyedEventContainer ?? new KeyedEventContainer();
+        this.keyedEventContainer = keyedEventContainer ?? new KeyedEventContainer();
     }
     
     // Unkeyed
@@ -40,7 +48,7 @@ public sealed class EventContainer : IEventContainer {
     public bool TryGetEvent<TMessage>(out IEvent<TMessage> @event) {
         return unkeyedEventContainer.TryGetEvent(out @event);
     }
-    public IDisposable Subscribe<TMessage>(IObserver<TMessage> observer, IEventFilter<TMessage>[] filters) {
+    public IDisposable Subscribe<TMessage>(IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) {
         return unkeyedEventContainer.Subscribe(observer, filters);
     }
     public void Publish<TMessage>(TMessage message) {
@@ -49,16 +57,16 @@ public sealed class EventContainer : IEventContainer {
 
     // Keyed
     public IKeyedEvent<TKey, TMessage> RegisterEvent<TKey, TMessage>(IKeyedEvent<TKey, TMessage>? @event = null) where TKey : notnull {
-        return keyedEventContainerImplementation.RegisterEvent(@event);
+        return keyedEventContainer.RegisterEvent(@event);
     }
     public bool TryGetEvent<TKey, TMessage>(out IKeyedEvent<TKey, TMessage> @event) where TKey : notnull {
-        return keyedEventContainerImplementation.TryGetEvent(out @event);
+        return keyedEventContainer.TryGetEvent(out @event);
     }
-    public IDisposable Subscribe<TKey, TMessage>(TKey key, IObserver<TMessage> observer, IEventFilter<TMessage>[] filters) where TKey : notnull {
-        return keyedEventContainerImplementation.Subscribe(key, observer, filters);
+    public IDisposable Subscribe<TKey, TMessage>(TKey key, IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) where TKey : notnull {
+        return keyedEventContainer.Subscribe(key, observer, filters);
     }
     public void Publish<TKey, TMessage>(TKey key, TMessage message) where TKey : notnull {
-        keyedEventContainerImplementation.Publish(key, message);
+        keyedEventContainer.Publish(key, message);
     }
 
     ~EventContainer() {
@@ -67,7 +75,7 @@ public sealed class EventContainer : IEventContainer {
     
     public void Dispose() {
         unkeyedEventContainer.Dispose();
-        keyedEventContainerImplementation.Dispose();
+        keyedEventContainer.Dispose();
         
         GC.SuppressFinalize(this);
     }

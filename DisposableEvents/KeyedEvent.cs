@@ -3,7 +3,7 @@ using DisposableEvents.Factories;
 
 namespace DisposableEvents;
 
-public interface IKeyedPublisher<in TKey, in TMessage> where TKey : notnull {
+public interface IKeyedEventPublisher<in TKey, in TMessage> where TKey : notnull {
     /// <summary>
     /// Publishes a message to the event with the specified key.
     /// </summary>
@@ -12,7 +12,7 @@ public interface IKeyedPublisher<in TKey, in TMessage> where TKey : notnull {
     void Publish(TKey key, TMessage message);
 }
 
-public interface IKeyedSubscriber<in TKey, TMessage> where TKey : notnull {
+public interface IKeyedEventSubscriber<in TKey, TMessage> where TKey : notnull {
     /// <summary>
     /// Subscribes to the event with the specified key.
     /// </summary>
@@ -25,7 +25,7 @@ public interface IKeyedSubscriber<in TKey, TMessage> where TKey : notnull {
 
 public interface IKeyedEvent : IDisposable { }
 
-public interface IKeyedEvent<in TKey, TMessage> : IKeyedPublisher<TKey, TMessage>, IKeyedSubscriber<TKey, TMessage>,
+public interface IKeyedEvent<in TKey, TMessage> : IKeyedEventPublisher<TKey, TMessage>, IKeyedEventSubscriber<TKey, TMessage>,
     IKeyedEvent
     where TKey : notnull {
     void Dispose(TKey key);

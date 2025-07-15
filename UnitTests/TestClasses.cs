@@ -1,5 +1,6 @@
 ﻿using DisposableEvents;
-using DisposableEvents.Disposables;
+using DisposableEvents.EventContainers;
+using DisposableEvents.Factories;
 
 namespace UnitTests;
 
@@ -41,6 +42,10 @@ internal class TestKeyedEvent<TKey, T> : IKeyedEvent<TKey, T> where TKey : notnu
     
     public bool IsDisposed;
     
+    public object? LastPublishedValueForKey(TKey key) {
+        return PublishedDict.GetValueOrDefault(key);
+    }
+    
     public void Publish(TKey key, T message) {
         PublishedDict[key] = message;
         Published.Add(message);
@@ -57,6 +62,105 @@ internal class TestKeyedEvent<TKey, T> : IKeyedEvent<TKey, T> where TKey : notnu
         DisposedKeys.Add(key);
     }
 
+    public void Dispose() {
+        IsDisposed = true;
+    }
+    
+    class TestSubscription : IDisposable {
+        public void Dispose() {
+            // No-op for this test event
+        }
+    }
+}
+
+internal class TestUnkeyedEventContainer : IUnkeyedEventContainer {
+    public readonly Dictionary<Type, IEvent> RegisteredEventsDict = new();
+    public readonly List<IEvent> RegisteredEvents = new();
+    public readonly List<object> PublishedMessages = new();
+    public readonly List<object> SubscribedObservers = new();
+    
+    public object? LastPublishedValue => PublishedMessages.Count > 0 ? PublishedMessages[^1] : null;
+    public bool IsDisposed;
+
+
+    public IEvent<TMessage> RegisterEvent<TMessage>(IEvent<TMessage>? @event = null) {
+        RegisteredEventsDict[typeof(TMessage)] = @event!;
+        RegisteredEvents.Add(@event!);
+        return @event!;
+    }
+    
+    public bool TryGetEvent<TMessage>(out IEvent<TMessage> @event) {
+        if (RegisteredEventsDict.TryGetValue(typeof(TMessage), out var e)) {
+            @event = (IEvent<TMessage>)e;
+            return true;
+        }
+        
+        @event = null!;
+        return false;
+    }
+    
+    public void Publish<TMessage>(TMessage message) {
+        PublishedMessages.Add(message!);
+    }
+    
+    public IDisposable Subscribe<TMessage>(IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) {
+        SubscribedObservers.Add(observer);
+        return new TestSubscription();
+    }
+    
+    public void Dispose() {
+        IsDisposed = true;
+    }
+    
+    class TestSubscription : IDisposable {
+        public void Dispose() {
+            // No-op for this test event
+        }
+    }
+}
+
+internal class TestKeyedEventContainer : IKeyedEventContainer {
+    public readonly Dictionary<Type, IKeyedEvent> RegisteredEventsDict = new();
+    public readonly List<IKeyedEvent> RegisteredEvents = new();
+    public readonly Dictionary<object, object> PublishedMessagesDict = new();
+    public readonly List<object> PublishedMessages = new();
+    public readonly List<object> PublishedKeys = new();
+    public readonly List<object> SubscribedObservers = new();
+    public bool IsDisposed;
+    
+    public object? LastPublishedValue => PublishedMessages.Count > 0 ? PublishedMessages[^1] : null;
+    public object? LastPublishedKey => PublishedKeys.Count > 0 ? PublishedKeys[^1] : null;
+    public object? LastPublishedValueForKey(object key) {
+        return PublishedMessagesDict.GetValueOrDefault(key);
+    }
+
+    public IKeyedEvent<TKey, TMessage> RegisterEvent<TKey, TMessage>(IKeyedEvent<TKey, TMessage>? @event = null) where TKey : notnull {
+        RegisteredEventsDict[typeof(TMessage)] = @event!;
+        RegisteredEvents.Add(@event!);
+        return @event!;
+    }
+    
+    public bool TryGetEvent<TKey, TMessage>(out IKeyedEvent<TKey, TMessage> @event) where TKey : notnull  {
+        if (RegisteredEventsDict.TryGetValue(typeof(TMessage), out var e)) {
+            @event = (IKeyedEvent<TKey, TMessage>)e;
+            return true;
+        }
+        
+        @event = null!;
+        return false;
+    }
+    
+    public void Publish<TKey, TMessage>(TKey key, TMessage message) where TKey : notnull  {
+        PublishedMessagesDict[key] = message!;
+        PublishedKeys.Add(key);
+        PublishedMessages.Add(message!);
+    }
+    
+    public IDisposable Subscribe<TKey, TMessage>(TKey key, IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) where TKey : notnull  {
+        SubscribedObservers.Add(observer);
+        return new TestSubscription();
+    }
+    
     public void Dispose() {
         IsDisposed = true;
     }
