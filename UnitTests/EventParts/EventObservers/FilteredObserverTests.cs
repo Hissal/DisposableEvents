@@ -11,7 +11,7 @@ public class FilteredObserverTests {
     public void OnNext_Passes_WhenFilterAllows() {
         var observer = new TestObserver<int>();
         var filter = new PredicateEventFilter<int>(x => true);
-        var filtered = new FilteredEventObserver<int>(observer, filter);
+        var filtered = new FilteredEventHandler<int>(observer, filter);
 
         filtered.OnNext(5);
   
@@ -22,7 +22,7 @@ public class FilteredObserverTests {
     public void OnNext_DoesNotPass_WhenFilterBlocks() {
         var observer = new TestObserver<int>();
         var filter = new PredicateEventFilter<int>(x => false);
-        var filtered = new FilteredEventObserver<int>(observer, filter);
+        var filtered = new FilteredEventHandler<int>(observer, filter);
 
         filtered.OnNext(42);
 
@@ -33,7 +33,7 @@ public class FilteredObserverTests {
     public void OnError_Passes_WhenFilterAllows() {
         var observer = new TestObserver<int>();
         var filter = new PredicateEventFilter<int>(errorFilter: ex => true);
-        var filtered = new FilteredEventObserver<int>(observer, filter);
+        var filtered = new FilteredEventHandler<int>(observer, filter);
 
         var ex = new Exception("fail");
         filtered.OnError(ex);
@@ -45,7 +45,7 @@ public class FilteredObserverTests {
     public void OnError_DoesNotPass_WhenFilterBlocks() {
         var observer = new TestObserver<int>();
         var filter = new PredicateEventFilter<int>(errorFilter: ex => false);
-        var filtered = new FilteredEventObserver<int>(observer, filter);
+        var filtered = new FilteredEventHandler<int>(observer, filter);
 
         filtered.OnError(new Exception("fail"));
 
@@ -56,7 +56,7 @@ public class FilteredObserverTests {
     public void OnCompleted_Passes_WhenFilterAllows() {
         var observer = new TestObserver<int>();
         var filter = new PredicateEventFilter<int>(completedFilter: () => true);
-        var filtered = new FilteredEventObserver<int>(observer, filter);
+        var filtered = new FilteredEventHandler<int>(observer, filter);
 
         filtered.OnCompleted();
 
@@ -67,7 +67,7 @@ public class FilteredObserverTests {
     public void OnCompleted_DoesNotPass_WhenFilterBlocks() {
         var observer = new TestObserver<int>();
         var filter = new PredicateEventFilter<int>(completedFilter: () => false);
-        var filtered = new FilteredEventObserver<int>(observer, filter);
+        var filtered = new FilteredEventHandler<int>(observer, filter);
 
         filtered.OnCompleted();
 
@@ -80,7 +80,7 @@ public class FilteredObserverTests {
     public void FilterEvent_CanMutateValue() {
         var observer = new TestObserver<int>();
         var filter = new MutatingEventFilter<int>(x => x * 2);
-        var filtered = new FilteredEventObserver<int>(observer, filter);
+        var filtered = new FilteredEventHandler<int>(observer, filter);
 
         filtered.OnNext(3);
 
@@ -92,12 +92,12 @@ public class FilteredObserverTests {
     [Test]
     public void ThrowsOnNullObserver() {
         var filter = new PredicateEventFilter<int>(x => true);
-        Assert.Throws<ArgumentNullException>(() => new FilteredEventObserver<int>(null!, filter));
+        Assert.Throws<ArgumentNullException>(() => new FilteredEventHandler<int>(null!, filter));
     }
 
     [Test]
     public void ThrowsOnNullFilter() {
         var observer = new TestObserver<int>();
-        Assert.Throws<ArgumentNullException>(() => new FilteredEventObserver<int>(observer, null!));
+        Assert.Throws<ArgumentNullException>(() => new FilteredEventHandler<int>(observer, null!));
     }
 }

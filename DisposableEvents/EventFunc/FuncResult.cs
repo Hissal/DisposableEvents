@@ -3,10 +3,10 @@
 public readonly struct FuncResult<T> {
     public T Value { get; }
     public bool IsSuccess { get; }
-
+    
     public FuncResult(T value, bool isSuccess = true) {
         Value = value;
-        IsSuccess = true;
+        IsSuccess = isSuccess;
     }
 
     public FuncResult() {
@@ -15,8 +15,9 @@ public readonly struct FuncResult<T> {
     }
     
     public static implicit operator FuncResult<T>(T value) => Success(value);
+    public static implicit operator T(FuncResult<T> result) => result.Value;
     
-    public static FuncResult<T> Success(T value) => new FuncResult<T>(value);
+    public static FuncResult<T> Success(T value) => new FuncResult<T>(value, true);
     public static FuncResult<T> Failure(T value = default!) => new FuncResult<T>(value, false);
     
     public void Deconstruct(out T value, out bool isSuccess) {

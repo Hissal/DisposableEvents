@@ -4,25 +4,25 @@ namespace DisposableEvents;
 
 public struct EmptyEvent { }
 
-public sealed class Event : IEvent<EmptyEvent> {
-    readonly EventCore<EmptyEvent> core;
-    readonly IEventObserverFactory observerFactory;
-    
-    public Event(int expectedSubscriberCount = 2, IEventObserverFactory? observerFactory = null) 
-        : this(new EventCore<EmptyEvent>(expectedSubscriberCount), observerFactory) { }
-    
-    public Event(EventCore<EmptyEvent> core, IEventObserverFactory? observerFactory = null) {
-        this.core = core;
-        this.observerFactory = observerFactory ?? EventObserverFactory.Default;
-    }
-    
-    public IDisposable Subscribe(IObserver<EmptyEvent> observer, params IEventFilter<EmptyEvent>[] filters) {
-        return core.Subscribe(observerFactory.Create(observer, filters));
-    }
-    
-    public void Publish(EmptyEvent message) => core.Publish(message);
-    public void Dispose() => core.Dispose();
-}
+// public sealed class Event : IEvent<EmptyEvent> {
+//     readonly EventCore<EmptyEvent> core;
+//     readonly IEventHandlerFactory handlerFactory;
+//     
+//     public Event(int expectedSubscriberCount = 2, IEventHandlerFactory? observerFactory = null) 
+//         : this(new EventCore<EmptyEvent>(expectedSubscriberCount), observerFactory) { }
+//     
+//     public Event(EventCore<EmptyEvent> core, IEventHandlerFactory? observerFactory = null) {
+//         this.core = core;
+//         this.handlerFactory = observerFactory ?? EventHandlerFactory.Default;
+//     }
+//     
+//     public IDisposable Subscribe(IObserver<EmptyEvent> observer, params IEventFilter<EmptyEvent>[] filters) {
+//         return core.Subscribe(handlerFactory.Create(observer, filters));
+//     }
+//     
+//     public void Publish(EmptyEvent message) => core.Publish(message);
+//     public void Dispose() => core.Dispose();
+// }
 
 public sealed class EmptyEventObserver : IObserver<EmptyEvent> {
     readonly Action? onNext;
@@ -93,7 +93,7 @@ public class EmptyPredicateEventFilter : IEventFilter<EmptyEvent> {
         this.completedFilter = completedFilter;
     }
 
-    public bool FilterEvent(ref EmptyEvent value) => eventFilter?.Invoke() ?? true;
+    public bool Filter(ref EmptyEvent value) => eventFilter?.Invoke() ?? true;
     public bool FilterOnError(Exception ex) => errorFilter?.Invoke(ex) ?? true;
     public bool FilterOnCompleted() => completedFilter?.Invoke() ?? true;
 }

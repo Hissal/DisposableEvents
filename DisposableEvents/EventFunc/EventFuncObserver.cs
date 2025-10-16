@@ -5,17 +5,19 @@ public sealed class EventFuncObserver<TMessage, TReturn> : IEventFuncObserver<TM
     readonly Action<Exception>? onError;
     readonly Action? onCompleted;
 
-    public EventFuncObserver(Func<TMessage, FuncResult<TReturn>> onNext, Action<Exception>? onError = null, Action? onCompleted = null) {
+    public EventFuncObserver(Func<TMessage, FuncResult<TReturn>> onNext, Action<Exception>? onError = null,
+        Action? onCompleted = null) {
         this.onNext = onNext;
         this.onError = onError;
         this.onCompleted = onCompleted;
     }
 
     public FuncResult<TReturn> OnNext(TMessage value) => onNext.Invoke(value);
+
     public void OnError(Exception error) {
         if (onError == null)
             throw error;
-        
+
         onError.Invoke(error);
     }
 
@@ -30,26 +32,24 @@ public sealed class FilteredEventFuncObserver<TMessage, TReturn> : IEventFuncObs
         this.observer = observer ?? throw new ArgumentNullException(nameof(observer));
         this.filter = filter ?? throw new ArgumentNullException(nameof(filter));
     }
-    
+
     public FuncResult<TReturn> OnNext(TMessage value) {
-        return filter.FilterEvent(ref value) 
-            ? observer.OnNext(value) 
+        return filter.Filter(ref value)
+            ? observer.OnNext(value)
             : FuncResult<TReturn>.Failure();
     }
+
     void IObserver<TMessage>.OnNext(TMessage value) {
         OnNext(value);
     }
-    
+
     public void OnError(Exception error) {
-        if (filter.FilterOnError(error)) {
-            observer.OnError(error);
-        }
+        observer.OnError(error);
     }
-    
+
+
     public void OnCompleted() {
-        if (filter.FilterOnCompleted()) {
-            observer.OnCompleted();
-        }
+        observer.OnCompleted();
     }
 }
 
@@ -57,24 +57,26 @@ public sealed class ClosureEventFuncObserver<TClosure, TMessage, TReturn> : IEve
     readonly Func<TClosure, TMessage, FuncResult<TReturn>> onNext;
     readonly Action<TClosure, Exception>? onError;
     readonly Action<TClosure>? onCompleted;
-    
+
     readonly TClosure closure;
 
-    public ClosureEventFuncObserver(TClosure closure, Func<TClosure, TMessage, FuncResult<TReturn>> onNext, Action<TClosure, Exception>? onError = null, Action<TClosure>? onCompleted = null) {
+    public ClosureEventFuncObserver(TClosure closure, Func<TClosure, TMessage, FuncResult<TReturn>> onNext,
+        Action<TClosure, Exception>? onError = null, Action<TClosure>? onCompleted = null) {
         this.onNext = onNext;
         this.onError = onError;
         this.onCompleted = onCompleted;
-        
+
         this.closure = closure;
     }
 
     public FuncResult<TReturn> OnNext(TMessage value) => onNext.Invoke(closure, value);
+
     public void OnError(Exception error) {
         if (onError == null)
             throw error;
-        
+
         onError.Invoke(closure, error);
     }
-    
+
     public void OnCompleted() => onCompleted?.Invoke(closure);
 }

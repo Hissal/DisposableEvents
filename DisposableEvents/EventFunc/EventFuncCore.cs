@@ -15,9 +15,9 @@ public sealed class EventFuncCore<TMessage, TReturn> : IDisposable {
     
     public FuncResult<TReturn> Publish(TMessage message, FuncResultBehavior behavior) {
         if (Observers.Count == 0)
-            return default;
+            return FuncResult<TReturn>.Failure();
         
-        FuncResult<TReturn> result = default;
+        var result = FuncResult<TReturn>.Failure();
         
         foreach (var observer in Observers) {
             FuncResult<TReturn> resultFromObserver;
@@ -63,23 +63,32 @@ public sealed class EventFuncCore<TMessage, TReturn> : IDisposable {
         return result;
     }
 
-    public IEnumerable<FuncResult<TReturn>> PublishEnumerator(TMessage message, FuncResultEnumerationBehavior behavior) {
+    public IEnumerable<FuncResult<TReturn>> PublishEnumerator(TMessage message, FuncResultEnumerationBehaviorFlags behaviorFlags) {
         if (Observers.Count == 0)
             yield break;
         
         foreach (var observer in Observers) {
-            FuncResult<TReturn> resultFromObserver;
+            var resultFromObserver = FuncResult<TReturn>.Failure();
+            var errorOccurred = false;
             
             try {
                 resultFromObserver = observer.OnNext(message);
             }
             catch (Exception e) {
                 observer.OnError(e);
-                continue;
+                errorOccurred = true;
             }
             
-            if (behavior is FuncResultEnumerationBehavior.ReturnAll || resultFromObserver.IsSuccess) {
-                yield return resultFromObserver;
+            if (errorOccurred && behaviorFlags.HasFlag(FuncResultEnumerationBehaviorFlags.SkipErrors))
+                continue;
+            
+            switch (resultFromObserver.IsSuccess) {
+                case true when behaviorFlags.HasFlag(FuncResultEnumerationBehaviorFlags.SkipSuccesses):
+                case false when behaviorFlags.HasFlag(FuncResultEnumerationBehaviorFlags.SkipFailures):
+                    continue;
+                default:
+                    yield return resultFromObserver;
+                    break;
             }
         }
     }

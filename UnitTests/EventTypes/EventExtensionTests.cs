@@ -8,7 +8,7 @@ public class EventExtensionTests {
     
     [Test]
     public void Subscribe_Action_ReceivesPublishedValue() {
-        var evt = new Event<int>();
+        var evt = new DisposableEvent<int>();
         int received = 0;
         evt.Subscribe(x => received = x);
         evt.Publish(123);
@@ -17,7 +17,7 @@ public class EventExtensionTests {
 
     [Test]
     public void Subscribe_ActionWithPredicate_OnlyReceivesPassingValues() {
-        var evt = new Event<int>();
+        var evt = new DisposableEvent<int>();
         int received = 0;
         evt.Subscribe(x => received = x, v => v > 10);
         evt.Publish(20);
@@ -29,7 +29,7 @@ public class EventExtensionTests {
 
     [Test]
     public void Subscribe_ActionWithOnErrorAndOnComplete_HandlesErrorAndCompletion() {
-        var evt = new Event<int>();
+        var evt = new DisposableEvent<int>();
         Exception? captured = null;
         bool completed = false;
         evt.Subscribe(
@@ -47,7 +47,7 @@ public class EventExtensionTests {
 
     [Test]
     public void Subscribe_ClosureEventObserver_ReceivesValueWithClosure() {
-        var evt = new Event<int>();
+        var evt = new DisposableEvent<int>();
         int sum = 0;
         evt.Subscribe(10, (closure, value) => sum = closure + value);
         evt.Publish(5);

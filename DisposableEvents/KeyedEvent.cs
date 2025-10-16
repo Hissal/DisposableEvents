@@ -17,10 +17,10 @@ public interface IKeyedEventSubscriber<in TKey, TMessage> where TKey : notnull {
     /// Subscribes to the event with the specified key.
     /// </summary>
     /// <param name="key">The key to subscribe to.</param>
-    /// <param name="observer">The observer to notify when the event is published.</param>
+    /// <param name="handler">The observer to notify when the event is published.</param>
     /// <param name="filters"></param>
     /// <returns>A disposable that can be used to unsubscribe from the event.</returns>
-    IDisposable Subscribe(TKey key, IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters);
+    IDisposable Subscribe(TKey key, IEventHandler<TMessage> handler, params IEventFilter<TMessage>[] filters);
 }
 
 public interface IKeyedEvent : IDisposable { }
@@ -32,30 +32,30 @@ public interface IKeyedEvent<in TKey, TMessage> : IKeyedEventPublisher<TKey, TMe
 }
 
 public sealed class KeyedEvent<TKey, TMessage> : IKeyedEvent<TKey, TMessage> where TKey : notnull {
-    readonly Dictionary<TKey, IEvent<TMessage>> events = new();
-    readonly IEventObserverFactory observerFactory;
+    readonly Dictionary<TKey, IDisposableEvent<TMessage>> events = new();
+    readonly IFilteredEventHandlerFactory handlerFactory;
     readonly int expectedSubscriberCount;
     
     bool isDisposed;
 
     public KeyedEvent(int expectedSubscriberCountPerKey = 2) 
-        : this(expectedSubscriberCountPerKey, EventObserverFactory.Default) { }
-    public KeyedEvent(int expectedSubscriberCountPerKey, IEventObserverFactory observerFactory) {
+        : this(expectedSubscriberCountPerKey, FilteredEventHandlerFactory.Default) { }
+    public KeyedEvent(int expectedSubscriberCountPerKey, IFilteredEventHandlerFactory handlerFactory) {
         expectedSubscriberCount = expectedSubscriberCountPerKey;
-        this.observerFactory = observerFactory;
+        this.handlerFactory = handlerFactory;
     }
     
-    public IDisposable Subscribe(TKey key, IObserver<TMessage> observer, params IEventFilter<TMessage>[] filters) {
+    public IDisposable Subscribe(TKey key, IEventHandler<TMessage> handler, params IEventFilter<TMessage>[] filters) {
         if (isDisposed) {
-            observer?.OnCompleted();
+            handler?.OnUnsubscribe();
             return Disposable.Empty;
         }
         
         if (events.TryGetValue(key, out var @event)) 
-            return @event.Subscribe(observer, filters);
+            return @event.Subscribe(handler, filters);
         
         @event = CreateEvent(key);
-        return @event.Subscribe(observer, filters);
+        return @event.Subscribe(handler, filters);
     }
 
     public void Publish(TKey key, TMessage message) {
@@ -64,8 +64,8 @@ public sealed class KeyedEvent<TKey, TMessage> : IKeyedEvent<TKey, TMessage> whe
         }
     }
 
-    Event<TMessage> CreateEvent(TKey key) {
-        var @event = new Event<TMessage>(expectedSubscriberCount, observerFactory);
+    DisposableEvent<TMessage> CreateEvent(TKey key) {
+        var @event = new DisposableEvent<TMessage>(expectedSubscriberCount);
         events[key] = @event;
         return @event;
     }

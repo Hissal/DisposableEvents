@@ -1,10 +1,11 @@
 ﻿using DisposableEvents;
 using DisposableEvents.EventContainers;
 using DisposableEvents.Factories;
+using NUnit.Framework.Interfaces;
 
 namespace UnitTests;
 
-internal class TestEvent<T> : IEvent<T> {
+internal class TestEvent<T> : IDisposableEvent<T> {
     public readonly List<T> Published = new();
     public T LastPublishedValue => Published.Count > 0 ? Published[^1] : default!;
     public bool IsDisposed;
@@ -74,8 +75,8 @@ internal class TestKeyedEvent<TKey, T> : IKeyedEvent<TKey, T> where TKey : notnu
 }
 
 internal class TestUnkeyedEventContainer : IUnkeyedEventContainer {
-    public readonly Dictionary<Type, IEvent> RegisteredEventsDict = new();
-    public readonly List<IEvent> RegisteredEvents = new();
+    public readonly Dictionary<Type, IEventMarker> RegisteredEventsDict = new();
+    public readonly List<IEventMarker> RegisteredEvents = new();
     public readonly List<object> PublishedMessages = new();
     public readonly List<object> SubscribedObservers = new();
     
@@ -83,15 +84,15 @@ internal class TestUnkeyedEventContainer : IUnkeyedEventContainer {
     public bool IsDisposed;
 
 
-    public IEvent<TMessage> RegisterEvent<TMessage>(IEvent<TMessage>? @event = null) {
+    public IDisposableEvent<TMessage> RegisterEvent<TMessage>(IDisposableEvent<TMessage>? @event = null) {
         RegisteredEventsDict[typeof(TMessage)] = @event!;
         RegisteredEvents.Add(@event!);
         return @event!;
     }
     
-    public bool TryGetEvent<TMessage>(out IEvent<TMessage> @event) {
+    public bool TryGetEvent<TMessage>(out IDisposableEvent<TMessage> @event) {
         if (RegisteredEventsDict.TryGetValue(typeof(TMessage), out var e)) {
-            @event = (IEvent<TMessage>)e;
+            @event = (IDisposableEvent<TMessage>)e;
             return true;
         }
         
@@ -204,7 +205,7 @@ internal class TestFilter<T> : IEventFilter<T> {
 
     public int FilterOrder { get; set; } = 0;
 
-    public bool FilterEvent(ref T value) {
+    public bool Filter(ref T value) {
         Filtered.Add(value);
         return true;
     }
@@ -222,4 +223,44 @@ internal class TestFilter<T> : IEventFilter<T> {
 
 internal class TestException : Exception {
     public TestException(string message) : base(message) { }
+}
+
+
+internal class TestFuncObserver<TMessage, TReturn> : IEventFuncObserver<TMessage, TReturn> {
+    public readonly List<TMessage> Received = new();
+    public TMessage LastValue => Received.Count > 0 ? Received[^1] : default!;
+    public Exception? Error;
+    public bool Completed;
+    
+    public TReturn ReturnValue { get; }
+    public bool Success { get; } = true;
+    
+    public TestFuncObserver(TReturn returnValue = default!, bool success = true) {
+        ReturnValue = returnValue;
+        Success = success;
+    }
+
+    public FuncResult<TReturn> OnNext(TMessage value) { 
+        Received.Add(value);
+        
+        return Success
+            ? FuncResult<TReturn>.Success(ReturnValue)
+            : FuncResult<TReturn>.Failure(ReturnValue);
+    }
+
+    public void OnError(Exception error) => Error = error;
+    public void OnCompleted() => Completed = true;
+}
+
+internal class ThrowingFuncObserver<TMessage, TReturn> : IEventFuncObserver<TMessage, TReturn> {
+    public Exception? Error;
+    readonly Exception toThrow;
+
+    public ThrowingFuncObserver(Exception ex) {
+        toThrow = ex;
+    }
+    
+    public FuncResult<TReturn> OnNext(TMessage value) => throw toThrow;
+    public void OnError(Exception error) => Error = error;
+    public void OnCompleted() { }
 }

@@ -13,7 +13,7 @@ public class EventFactoryTests {
         var evt = factory.Create<int>();
 
         Assert.That(evt, Is.Not.Null);
-        Assert.That(evt, Is.InstanceOf<Event<int>>());
+        Assert.That(evt, Is.InstanceOf<DisposableEvent<int>>());
     }
 
     [Test]
@@ -25,8 +25,8 @@ public class EventFactoryTests {
 
         Assert.That(evt1, Is.Not.SameAs(evt2));
         Assert.Multiple(() => {
-            Assert.That(evt1, Is.InstanceOf<Event<int>>());
-            Assert.That(evt2, Is.InstanceOf<Event<string>>());
+            Assert.That(evt1, Is.InstanceOf<DisposableEvent<int>>());
+            Assert.That(evt2, Is.InstanceOf<DisposableEvent<string>>());
         });
     }
 

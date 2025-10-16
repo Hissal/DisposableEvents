@@ -8,7 +8,7 @@ public class EventTests {
 
     [Test]
     public void Publish_InvokesSubscriber() {
-        var evt = new Event<int>();
+        var evt = new DisposableEvent<int>();
         var obs = new TestObserver<int>();
 
         evt.Subscribe(obs);
@@ -19,7 +19,7 @@ public class EventTests {
 
     [Test]
     public void OnError_HandlesError_WhenThrown() {
-        var evt = new Event<int>();
+        var evt = new DisposableEvent<int>();
         var obs = new ThrowingObserver<int>(new InvalidOperationException("Test error"));
 
         evt.Subscribe(obs);
@@ -30,7 +30,7 @@ public class EventTests {
 
     [Test]
     public void Dispose_CallsOnCompleted() {
-        var evt = new Event<int>();
+        var evt = new DisposableEvent<int>();
         var obs = new TestObserver<int>();
 
         evt.Subscribe(obs);
@@ -41,7 +41,7 @@ public class EventTests {
 
     [Test]
     public void DisposingSubscription_Unsubscribes() {
-        var evt = new Event<int>();
+        var evt = new DisposableEvent<int>();
         var obs = new TestObserver<int>();
 
         using (evt.Subscribe(obs)) {
@@ -55,7 +55,7 @@ public class EventTests {
 
     [Test]
     public void MultipleSubscribers_AllReceivePublishedValue() {
-        var evt = new Event<int>();
+        var evt = new DisposableEvent<int>();
         var obs1 = new TestObserver<int>();
         var obs2 = new TestObserver<int>();
 
@@ -72,7 +72,7 @@ public class EventTests {
 
     [Test]
     public void SubscribeAfterDispose_ReceivesOnCompleted() {
-        var evt = new Event<int>();
+        var evt = new DisposableEvent<int>();
         var obs = new TestObserver<int>();
 
         evt.Dispose();
@@ -83,13 +83,13 @@ public class EventTests {
 
     [Test]
     public void PublishWithNoSubscribers_DoesNotThrow() {
-        var evt = new Event<int>();
+        var evt = new DisposableEvent<int>();
         Assert.DoesNotThrow(() => evt.Publish(42));
     }
 
     [Test]
     public void Subscribe_AppliesFilters() {
-        var evt = new Event<int>();
+        var evt = new DisposableEvent<int>();
         var obs = new TestObserver<int>();
         var filter = new TestFilter<int>();
 

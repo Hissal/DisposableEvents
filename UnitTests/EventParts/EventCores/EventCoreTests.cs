@@ -13,7 +13,7 @@ public class EventCoreTests {
         var core = new EventCore<int>();
         var obs1 = new TestObserver<int>();
         core.Subscribe(obs1);
-        Assert.That(core.CopyObservers(), Is.EquivalentTo(new[] { obs1 }));
+        Assert.That(core.CopyHandlers(), Is.EquivalentTo(new[] { obs1 }));
     }
 
     [Test]
@@ -96,7 +96,7 @@ public class EventCoreTests {
         var sub = core.Subscribe(obs);
 
         sub.Dispose();
-        Assert.That(core.CopyObservers(), Is.Empty, "Observer should be removed after subscription is disposed");
+        Assert.That(core.CopyHandlers(), Is.Empty, "Observer should be removed after subscription is disposed");
     }
     
     // Edge cases

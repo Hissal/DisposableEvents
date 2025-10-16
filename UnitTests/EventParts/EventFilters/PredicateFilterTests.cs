@@ -10,21 +10,21 @@ public class PredicateFilterTests {
     public void FilterEvent_Passes_WhenPredicateTrue() {
         var filter = new PredicateEventFilter<int>(x => x > 0);
         int value = 5;
-        Assert.That(filter.FilterEvent(ref value), Is.True);
+        Assert.That(filter.Filter(ref value), Is.True);
     }
 
     [Test]
     public void FilterEvent_Blocks_WhenPredicateFalse() {
         var filter = new PredicateEventFilter<int>(x => x > 0);
         int value = -1;
-        Assert.That(filter.FilterEvent(ref value), Is.False);
+        Assert.That(filter.Filter(ref value), Is.False);
     }
 
     [Test]
     public void FilterEvent_DefaultsToTrue_IfNullPredicate() {
         var filter = new PredicateEventFilter<int>();
         int value = 123;
-        Assert.That(filter.FilterEvent(ref value), Is.True);
+        Assert.That(filter.Filter(ref value), Is.True);
     }
 
     // Filter OnCompleted
@@ -102,8 +102,8 @@ public class PredicateFilterTests {
         int value1 = 5;
         int value2 = 15;
 
-        var result1 = multiFilter.FilterEvent(ref value1);
-        var result2 = multiFilter.FilterEvent(ref value2);
+        var result1 = multiFilter.Filter(ref value1);
+        var result2 = multiFilter.Filter(ref value2);
         
         Assert.Multiple(() => {
             Assert.That(result1, Is.True);

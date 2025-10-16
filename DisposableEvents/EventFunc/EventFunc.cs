@@ -12,9 +12,17 @@ public enum FuncResultBehavior {
     ReturnFirstAndStop,
 }
 
-public enum FuncResultEnumerationBehavior {
-    SkipFailures,
-    ReturnAll,
+[Flags]
+public enum FuncResultEnumerationBehaviorFlags {
+    None = 0,
+    SkipFailures = 1 << 1,
+    SkipErrors = 1 << 2,
+    SkipSuccesses = 1 << 3,
+    
+    /// <summary>
+    /// Skips failures and errors, returning only successes.
+    /// </summary>
+    Default = SkipFailures | SkipErrors,
 }
 
 public interface IEventFuncPublisher<in TMessage, TReturn> {
@@ -30,9 +38,9 @@ public interface IEventFuncPublisher<in TMessage, TReturn> {
     /// Publishes a message to the event and returns an enumerator for the results.
     /// </summary>
     /// <param name="message">The message to publish.</param>
-    /// <param name="behavior">The enumeration behavior.</param>
+    /// <param name="behaviorFlags">The enumeration behavior. <see cref="FuncResultEnumerationBehaviorFlags.Default"/> = SkipFailures | SkipErrors</param>
     /// <returns>An enumerator for the results of the function calls.</returns>
-    IEnumerable<FuncResult<TReturn>> PublishEnumerator(TMessage message, FuncResultEnumerationBehavior behavior = FuncResultEnumerationBehavior.SkipFailures);
+    IEnumerable<FuncResult<TReturn>> PublishEnumerator(TMessage message, FuncResultEnumerationBehaviorFlags behaviorFlags = FuncResultEnumerationBehaviorFlags.Default);
 }
 
 public interface IEventFuncSubscriber<TMessage, TReturn> {
@@ -69,8 +77,8 @@ public sealed class EventFunc<TReturn> : IEventFunc<EmptyEvent, TReturn> {
         core.Publish(message, behavior);
 
     public IEnumerable<FuncResult<TReturn>> PublishEnumerator(EmptyEvent message,
-        FuncResultEnumerationBehavior behavior = FuncResultEnumerationBehavior.SkipFailures) =>
-    core.PublishEnumerator(message, behavior);
+        FuncResultEnumerationBehaviorFlags behaviorFlags = FuncResultEnumerationBehaviorFlags.Default) =>
+    core.PublishEnumerator(message, behaviorFlags);
 
     public IDisposable Subscribe(IEventFuncObserver<EmptyEvent, TReturn> observer, params IEventFilter<EmptyEvent>[] filters) =>
         core.Subscribe(observerFactory.Create(observer, filters));
@@ -96,8 +104,8 @@ public sealed class EventFunc<TMessage, TReturn> : IEventFunc<TMessage, TReturn>
     public FuncResult<TReturn> Publish(TMessage message, FuncResultBehavior behavior = FuncResultBehavior.ReturnLastSuccess) => 
         core.Publish(message, behavior);
     
-    public IEnumerable<FuncResult<TReturn>> PublishEnumerator(TMessage message, FuncResultEnumerationBehavior behavior = FuncResultEnumerationBehavior.ReturnAll) => 
-        core.PublishEnumerator(message, behavior);
+    public IEnumerable<FuncResult<TReturn>> PublishEnumerator(TMessage message, FuncResultEnumerationBehaviorFlags behaviorFlags = FuncResultEnumerationBehaviorFlags.Default) => 
+        core.PublishEnumerator(message, behaviorFlags);
     
     public IDisposable Subscribe(IEventFuncObserver<TMessage, TReturn> observer, params IEventFilter<TMessage>[] filters) => 
         core.Subscribe(observerFactory.Create(observer, filters));
@@ -132,9 +140,9 @@ public sealed class BufferedEventFunc<TMessage, TReturn> : IEventFunc<TMessage, 
         return core.Publish(message, behavior);;
     }
 
-    public IEnumerable<FuncResult<TReturn>> PublishEnumerator(TMessage message, FuncResultEnumerationBehavior behavior = FuncResultEnumerationBehavior.ReturnAll) {
+    public IEnumerable<FuncResult<TReturn>> PublishEnumerator(TMessage message, FuncResultEnumerationBehaviorFlags behaviorFlags = FuncResultEnumerationBehaviorFlags.Default) {
         previousMessage = message;
-        return core.PublishEnumerator(message, behavior);
+        return core.PublishEnumerator(message, behaviorFlags);
     }
 
     public IDisposable Subscribe(IEventFuncObserver<TMessage, TReturn> observer, params IEventFilter<TMessage>[] filters) {
