@@ -21,10 +21,8 @@ public sealed class EventCore : IDisposable {
     }
 
     public IDisposable Subscribe(IEventHandler handler) {
-        if (IsDisposed) {
-            handler.OnUnsubscribe();
+        if (IsDisposed)
             return Disposable.Empty;
-        }
 
         var subscriptionKey = Handlers.Add(handler);
         return new Subscription(this, subscriptionKey);
@@ -32,17 +30,11 @@ public sealed class EventCore : IDisposable {
 
     void Unsubscribe(int subscriptionKey) {
         Handlers.Remove(subscriptionKey, true);
-        var handler = Handlers.GetValue(subscriptionKey);
-        handler?.OnUnsubscribe();
     }
 
     public void ClearSubscriptions() {
         if (IsDisposed)
             return;
-        
-        foreach (var handler in Handlers.GetValues()) {
-            handler?.OnUnsubscribe();
-        }
 
         Handlers.Clear();
     }
@@ -50,11 +42,7 @@ public sealed class EventCore : IDisposable {
     public void Dispose() {
         if (IsDisposed)
             return;
-
-        foreach (var handler in Handlers.GetValues()) {
-            handler?.OnUnsubscribe();
-        }
-
+        
         Handlers.Dispose();
         IsDisposed = true;
     }
@@ -99,10 +87,8 @@ public sealed class EventCore<TMessage> : IDisposable {
     }
 
     public IDisposable Subscribe(IEventHandler<TMessage> handler) {
-        if (IsDisposed) {
-            handler.OnUnsubscribe();
+        if (IsDisposed)
             return Disposable.Empty;
-        }
 
         var subscriptionKey = Handlers.Add(handler);
         return new Subscription(this, subscriptionKey);
@@ -110,17 +96,11 @@ public sealed class EventCore<TMessage> : IDisposable {
 
     void Unsubscribe(int subscriptionKey) {
         Handlers.Remove(subscriptionKey, true);
-        var handler = Handlers.GetValue(subscriptionKey);
-        handler?.OnUnsubscribe();
     }
 
     public void ClearSubscriptions() {
         if (IsDisposed)
             return;
-        
-        foreach (var handler in Handlers.GetValues()) {
-            handler?.OnUnsubscribe();
-        }
 
         Handlers.Clear();
     }
@@ -128,10 +108,6 @@ public sealed class EventCore<TMessage> : IDisposable {
     public void Dispose() {
         if (IsDisposed)
             return;
-
-        foreach (var handler in Handlers.GetValues()) {
-            handler?.OnUnsubscribe();
-        }
 
         Handlers.Dispose();
         IsDisposed = true;

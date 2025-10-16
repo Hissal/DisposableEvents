@@ -1,9 +1,25 @@
 ﻿namespace DisposableEvents;
 
+public class VoidEventHandler : IEventHandler<Void> {
+    Action handler;
+    VoidEventHandler(Action handler) {
+        this.handler = handler;
+    }
+
+    public void Handle(Void message) {
+        handler();
+    }
+}
+
 /// <summary>
 /// Provides extension methods for subscribing to and publishing events with various observer and filter configurations.
 /// </summary>
 public static class SubscriberExtensions {
+    public static IDisposable Subscribe(this IEventSubscriber<Void> subscriber, IEventHandler<Void> handler, params IEventFilter<Void>[] filters) 
+    {
+        return subscriber.Subscribe(handler, filters, FilterOrdering.StableSort);
+    }
+    
     public static IDisposable Subscribe<TMessage>(this IEventSubscriber<TMessage> subscriber,
         IEventHandler<TMessage> handler, params IEventFilter<TMessage>[] filters) {
         return subscriber.Subscribe(handler, filters, FilterOrdering.StableSort);

@@ -3,24 +3,22 @@ using DisposableEvents.Factories;
 
 namespace DisposableEvents;
 
+public readonly record struct Void;
+
 public interface IEventHandler {
     void Handle();
-    void OnUnsubscribe();
 }
 
 public interface IFuncHandler<out TResult> {
     TResult Handle();
-    void OnUnsubscribe();
 }
 
 public interface IEventHandler<in TMessage> {
     void Handle(TMessage message);
-    void OnUnsubscribe();
 }
 
 public interface IFuncHandler<in TMessage, out TResult> {
     TResult Handle(TMessage message);
-    void OnUnsubscribe();
 }
 
 public interface IEventPublisher {

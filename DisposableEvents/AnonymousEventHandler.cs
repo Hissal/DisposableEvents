@@ -12,8 +12,6 @@ public sealed class AnonymousEventHandler<TMessage> : IEventHandler<TMessage> {
     public void Handle(TMessage message) {
         onNext.Invoke(message);
     }
-
-    public void OnUnsubscribe() { }
 }
 
 public sealed class FilteredEventHandler<TMessage> : IEventHandler<TMessage> {
@@ -29,10 +27,6 @@ public sealed class FilteredEventHandler<TMessage> : IEventHandler<TMessage> {
         if (filter.Filter(ref message)) {
             handler.Handle(message);
         }
-    }
-
-    public void OnUnsubscribe() {
-        handler.OnUnsubscribe();
     }
 }
 
