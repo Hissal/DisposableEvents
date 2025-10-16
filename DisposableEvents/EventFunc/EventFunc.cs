@@ -63,34 +63,34 @@ public interface IEventFuncObserver<in TMessage, TReturn> : IObserver<TMessage> 
     }
 }
 
-public sealed class EventFunc<TReturn> : IEventFunc<EmptyEvent, TReturn> {
-    readonly EventFuncCore<EmptyEvent, TReturn> core;
-    readonly IEventFuncObserverFactory observerFactory;
-    
-    public EventFunc(int expectedSubscriberCount = 2, IEventFuncObserverFactory? observerFactory = null) : this(new EventFuncCore<EmptyEvent, TReturn>(expectedSubscriberCount), observerFactory) { }
-    public EventFunc(EventFuncCore<EmptyEvent, TReturn> core, IEventFuncObserverFactory? observerFactory = null) {
-        this.core = core;
-        this.observerFactory = observerFactory ?? EventFuncObserverFactory.Default;
-    }
-    
-    public FuncResult<TReturn> Publish(EmptyEvent message, FuncResultBehavior behavior = FuncResultBehavior.ReturnLastSuccess) => 
-        core.Publish(message, behavior);
-
-    public IEnumerable<FuncResult<TReturn>> PublishEnumerator(EmptyEvent message,
-        FuncResultEnumerationBehaviorFlags behaviorFlags = FuncResultEnumerationBehaviorFlags.Default) =>
-    core.PublishEnumerator(message, behaviorFlags);
-
-    public IDisposable Subscribe(IEventFuncObserver<EmptyEvent, TReturn> observer, params IEventFilter<EmptyEvent>[] filters) =>
-        core.Subscribe(observerFactory.Create(observer, filters));
-    
-    ~EventFunc() {
-        Dispose();
-    }
-    public void Dispose() {
-        core.Dispose();
-        GC.SuppressFinalize(this);
-    }
-}
+// public sealed class EventFunc<TReturn> : IEventFunc<EmptyEvent, TReturn> {
+//     readonly EventFuncCore<EmptyEvent, TReturn> core;
+//     readonly IEventFuncObserverFactory observerFactory;
+//     
+//     public EventFunc(int expectedSubscriberCount = 2, IEventFuncObserverFactory? observerFactory = null) : this(new EventFuncCore<EmptyEvent, TReturn>(expectedSubscriberCount), observerFactory) { }
+//     public EventFunc(EventFuncCore<EmptyEvent, TReturn> core, IEventFuncObserverFactory? observerFactory = null) {
+//         this.core = core;
+//         this.observerFactory = observerFactory ?? EventFuncObserverFactory.Default;
+//     }
+//     
+//     public FuncResult<TReturn> Publish(EmptyEvent message, FuncResultBehavior behavior = FuncResultBehavior.ReturnLastSuccess) => 
+//         core.Publish(message, behavior);
+//
+//     public IEnumerable<FuncResult<TReturn>> PublishEnumerator(EmptyEvent message,
+//         FuncResultEnumerationBehaviorFlags behaviorFlags = FuncResultEnumerationBehaviorFlags.Default) =>
+//     core.PublishEnumerator(message, behaviorFlags);
+//
+//     public IDisposable Subscribe(IEventFuncObserver<EmptyEvent, TReturn> observer, params IEventFilter<EmptyEvent>[] filters) =>
+//         core.Subscribe(observerFactory.Create(observer, filters));
+//     
+//     ~EventFunc() {
+//         Dispose();
+//     }
+//     public void Dispose() {
+//         core.Dispose();
+//         GC.SuppressFinalize(this);
+//     }
+// }
 public sealed class EventFunc<TMessage, TReturn> : IEventFunc<TMessage, TReturn> {
     readonly EventFuncCore<TMessage, TReturn> core;
     readonly IEventFuncObserverFactory observerFactory;

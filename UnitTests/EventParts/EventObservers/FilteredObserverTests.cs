@@ -79,7 +79,7 @@ public class FilteredObserverTests {
     [Test]
     public void FilterEvent_CanMutateValue() {
         var observer = new TestObserver<int>();
-        var filter = new MutatingEventFilter<int>(x => x * 2);
+        var filter = new ValueMutatorFilter<int>(x => x * 2);
         var filtered = new FilteredEventHandler<int>(observer, filter);
 
         filtered.OnNext(3);

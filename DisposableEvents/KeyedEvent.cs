@@ -47,7 +47,6 @@ public sealed class KeyedEvent<TKey, TMessage> : IKeyedEvent<TKey, TMessage> whe
     
     public IDisposable Subscribe(TKey key, IEventHandler<TMessage> handler, params IEventFilter<TMessage>[] filters) {
         if (isDisposed) {
-            handler?.OnUnsubscribe();
             return Disposable.Empty;
         }
         

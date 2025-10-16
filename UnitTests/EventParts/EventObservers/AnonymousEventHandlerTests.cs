@@ -3,13 +3,13 @@
 namespace UnitTests.EventParts.EventObservers;
 
 [TestFixture]
-public class AnonymousEventHandlerTests {
+public class EventHandlerTests {
     // Generic Tests
     
     [Test]
     public void OnNext_CallsAction() {
         int received = 0;
-        var obs = new DisposableEvents.AnonymousEventHandler<int>(x => received = x);
+        var obs = new DisposableEvents.EventHandler<int>(x => received = x);
         obs.OnNext(42);
         Assert.That(received, Is.EqualTo(42));
     }
@@ -17,7 +17,7 @@ public class AnonymousEventHandlerTests {
     [Test]
     public void OnError_CallsOnError() {
         Exception captured = null;
-        var obs = new DisposableEvents.AnonymousEventHandler<int>(_ => { }, ex => captured = ex);
+        var obs = new DisposableEvents.EventHandler<int>(_ => { }, ex => captured = ex);
         var ex = new InvalidOperationException("fail");
         obs.OnError(ex);
         Assert.That(captured, Is.EqualTo(ex));
@@ -26,27 +26,27 @@ public class AnonymousEventHandlerTests {
     [Test]
     public void OnCompleted_CallsOnCompleted() {
         bool completed = false;
-        var obs = new DisposableEvents.AnonymousEventHandler<int>(_ => { }, null, () => completed = true);
+        var obs = new DisposableEvents.EventHandler<int>(_ => { }, null, () => completed = true);
         obs.OnCompleted();
         Assert.That(completed, Is.True);
     }
 
     [Test]
     public void OnError_WithoutHandler_Throws() {
-        var obs = new DisposableEvents.AnonymousEventHandler<int>(_ => { });
+        var obs = new DisposableEvents.EventHandler<int>(_ => { });
         Assert.Throws<Exception>(() => obs.OnError(new Exception()));
     }
 
     [Test]
     public void OnCompleted_WithoutHandler_DoesNotThrow() {
-        var obs = new DisposableEvents.AnonymousEventHandler<int>(_ => { });
+        var obs = new DisposableEvents.EventHandler<int>(_ => { });
         Assert.DoesNotThrow(() => obs.OnCompleted());
     }
 
     [Test]
     public void NullOnNext_DoesNotThrow() {
         Assert.DoesNotThrow(() => {
-            var obs = new DisposableEvents.AnonymousEventHandler<int>(null!);
+            var obs = new DisposableEvents.EventHandler<int>(null!);
             obs.OnNext(42);
         });
     }

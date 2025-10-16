@@ -2,8 +2,6 @@
 
 public interface IFilteredEventHandlerFactory {
     IEventHandler<T> CreateFilteredHandler<T>(IEventHandler<T> handler, IEventFilter<T> filter);
-    
-    IEventHandler CreateFilteredHandler(IEventHandler handler, IEmptyEventFilter[] filters, FilterOrdering ordering = FilterOrdering.StableSort);
     IEventHandler<T> CreateFilteredHandler<T>(IEventHandler<T> handler, IEventFilter<T>[] filters, FilterOrdering ordering = FilterOrdering.StableSort);
 }
 
@@ -14,15 +12,6 @@ public class FilteredEventHandlerFactory : IFilteredEventHandlerFactory {
         return new FilteredEventHandler<T>(handler, filter);
     }
     
-    public IEventHandler CreateFilteredHandler(IEventHandler handler, IEmptyEventFilter[] filters, FilterOrdering ordering = FilterOrdering.StableSort) {
-        // return filters.Length switch {
-        //     0 => handler,
-        //     1 => new FilteredEventHandler(handler, filters[0]),
-        //     _ => new FilteredEventHandler(handler, CompositeEventFilter.Create(filters, ordering))
-        // };
-        return null;
-    }
-
     public IEventHandler<T> CreateFilteredHandler<T>(IEventHandler<T> handler, IEventFilter<T>[] filters, FilterOrdering ordering = FilterOrdering.StableSort) {
         return filters.Length switch {
             0 => handler,

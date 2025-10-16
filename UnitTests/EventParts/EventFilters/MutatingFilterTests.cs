@@ -7,7 +7,7 @@ public class MutatingFilterTests {
     [Test]
     public void FilterEvent_MutatesValue() {
         var expected = 10;
-        var filter = new MutatingEventFilter<int>(x => expected);
+        var filter = new ValueMutatorFilter<int>(x => expected);
         int value = 5;
         filter.Filter(ref value);
         Assert.That(value, Is.EqualTo(expected));
@@ -15,7 +15,7 @@ public class MutatingFilterTests {
 
     [Test]
     public void FilterEvent_NoOp_WhenNullFunc() {
-        var filter = new MutatingEventFilter<int>(null!);
+        var filter = new ValueMutatorFilter<int>(null!);
         int value = 7;
         filter.Filter(ref value);
         Assert.That(value, Is.EqualTo(7));
@@ -23,20 +23,20 @@ public class MutatingFilterTests {
 
     [Test]
     public void FilterEvent_AlwaysTrue() {
-        var filter = new MutatingEventFilter<int>(x => x + 1);
+        var filter = new ValueMutatorFilter<int>(x => x + 1);
         int value = 3;
         Assert.That(filter.Filter(ref value), Is.True);
     }
 
     [Test]
     public void FilterOnCompleted_AlwaysTrue() {
-        var filter = new MutatingEventFilter<int>(x => x);
+        var filter = new ValueMutatorFilter<int>(x => x);
         Assert.That(filter.FilterOnCompleted(), Is.True);
     }
 
     [Test]
     public void FilterOnError_AlwaysTrue() {
-        var filter = new MutatingEventFilter<int>(x => x);
+        var filter = new ValueMutatorFilter<int>(x => x);
         Assert.That(filter.FilterOnError(new Exception()), Is.True);
     }
 
@@ -44,13 +44,13 @@ public class MutatingFilterTests {
     
     [Test]
     public void FilterOrder_DefaultsToZero() {
-        var filter = new MutatingEventFilter<int>(x => x);
+        var filter = new ValueMutatorFilter<int>(x => x);
         Assert.That(filter.FilterOrder, Is.EqualTo(0));
     }
 
     [Test]
     public void FilterOrder_CanBeSet() {
-        var filter = new MutatingEventFilter<int>(42, x => x);
+        var filter = new ValueMutatorFilter<int>(42, x => x);
         Assert.That(filter.FilterOrder, Is.EqualTo(42));
     }
 
@@ -59,15 +59,15 @@ public class MutatingFilterTests {
     [Test]
     public void WorksWithMultiFilter() {
         List<int> received = [];
-        var filter1 = new MutatingEventFilter<int>(x => {
+        var filter1 = new ValueMutatorFilter<int>(x => {
             received.Add(x);
             return x + 1;
         });
-        var filter2 = new MutatingEventFilter<int>(x => {
+        var filter2 = new ValueMutatorFilter<int>(x => {
             received.Add(x);
             return x + 1;
         });
-        var filter3 = new MutatingEventFilter<int>(x => {
+        var filter3 = new ValueMutatorFilter<int>(x => {
             received.Add(x);
             return x + 1;
         });
