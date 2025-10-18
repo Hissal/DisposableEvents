@@ -6,7 +6,9 @@ namespace DisposableEvents;
 /// </summary>
 public interface IEventMarker;
 
-public interface IEventPublisher<in TMessage> {
+public interface IEventPublisher<in TMessage> : IDisposable {
+    public bool IsDisposed { get; }
+    
     /// <summary>
     /// Publishes a value to all subscribed observers.
     /// </summary>
@@ -28,13 +30,13 @@ public interface IEventSubscriber<TMessage> {
     }
 }
 
-public interface IDisposableEvent<TMessage> : IEventMarker, IEventPublisher<TMessage>, IEventSubscriber<TMessage>,
-    IDisposable {
+public interface IDisposableEvent<TMessage> : IEventPublisher<TMessage>, IEventSubscriber<TMessage>, IEventMarker {
     void ClearSubscriptions();
 }
 
 public sealed class DisposableEvent<TMessage> : IDisposableEvent<TMessage> {
     readonly EventCore<TMessage> core;
+    public bool IsDisposed => core.IsDisposed;
     
     public DisposableEvent() : this(new EventCore<TMessage>()) { }
     public DisposableEvent(int expectedSubscriberCount) :
@@ -46,6 +48,24 @@ public sealed class DisposableEvent<TMessage> : IDisposableEvent<TMessage> {
     
     public IDisposable Subscribe(IEventHandler<TMessage> handler) => core.Subscribe(handler);
     public void Publish(TMessage message) => core.Publish(message);
+    public void ClearSubscriptions() => core.ClearSubscriptions();
+    public void Dispose() => core.Dispose();
+}
+
+public sealed class DisposableEvent : IDisposableEvent<Void> {
+    readonly EventCore<Void> core;
+    public bool IsDisposed => core.IsDisposed;
+    
+    public DisposableEvent() : this(new EventCore<Void>()) { }
+    public DisposableEvent(int expectedSubscriberCount) :
+        this(new EventCore<Void>(expectedSubscriberCount)) { }
+
+    DisposableEvent(EventCore<Void> core) {
+        this.core = core;
+    }
+    
+    public IDisposable Subscribe(IEventHandler<Void> handler) => core.Subscribe(handler);
+    public void Publish(Void message) => core.Publish(message);
     public void ClearSubscriptions() => core.ClearSubscriptions();
     public void Dispose() => core.Dispose();
 }

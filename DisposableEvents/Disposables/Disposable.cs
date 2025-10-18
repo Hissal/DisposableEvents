@@ -29,7 +29,7 @@ public static class Disposable {
     public static DisposableBag CreateBag(int capacity) => new DisposableBag(capacity);
 
     public static IDisposable Action(Action onDispose) => new ActionDisposable(onDispose);
-    public static IDisposable Action<TClosure>(TClosure closure, Action<TClosure> onDispose) => new ActionDisposable<TClosure>(closure, onDispose);
+    public static IDisposable Action<TState>(TState state, Action<TState> onDispose) => new ActionDisposable<TState>(state, onDispose);
     
     public static BooleanDisposable Boolean() => new BooleanDisposable();
 
@@ -132,7 +132,7 @@ public static class Disposable {
 
     public static void Dispose(params IDisposable[] disposables) {
         foreach (var disposable in disposables) {
-            disposable?.Dispose();
+            disposable.Dispose();
         }
     }
 
@@ -336,18 +336,18 @@ public static class Disposable {
         }
     }
 
-    sealed class ActionDisposable<T> : IDisposable {
-        Action<T>? onDispose;
-        T closure;
+    sealed class ActionDisposable<TState> : IDisposable {
+        Action<TState>? onDispose;
+        TState state;
 
-        public ActionDisposable(T closure, Action<T> onDispose) {
+        public ActionDisposable(TState state, Action<TState> onDispose) {
             this.onDispose = onDispose;
-            this.closure = closure;
+            this.state = state;
         }
 
         public void Dispose() {
-            Interlocked.Exchange(ref onDispose, null)?.Invoke(closure);
-            closure = default!;
+            Interlocked.Exchange(ref onDispose, null)?.Invoke(state);
+            state = default!;
         }
     }
 }

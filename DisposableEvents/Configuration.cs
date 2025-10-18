@@ -4,14 +4,17 @@ namespace DisposableEvents;
 
 internal static class GlobalConfig {
     public static int InitialSubscriberCapacity => DisposableEvents.Config.InitialSubscriberCapacity;
-    public static IFilteredEventHandlerFactory FilteredHandlerFactory => DisposableEvents.Config.FilteredHandlerFactory;
+    public static IFilteredEventHandlerFactory FilteredHandlerFactory => DisposableEvents.Config.FilteredEventHandlerFactory;
+    public static IFilteredFuncHandlerFactory FilteredFuncHandlerFactory => DisposableEvents.Config.FilteredFuncHandlerFactory;
 }
 
 public sealed class DisposableEventsConfig {
     public static DisposableEventsConfig Create() => new DisposableEventsConfig();
     
     public int InitialSubscriberCapacity { get; set; } = 4;
-    public IFilteredEventHandlerFactory FilteredHandlerFactory { get; set; } = FilteredEventHandlerFactory.Default;
+    public IFilteredEventHandlerFactory FilteredEventHandlerFactory { get; set; } = Factories.FilteredEventHandlerFactory.Default;
+
+    public IFilteredFuncHandlerFactory FilteredFuncHandlerFactory { get; set; } = Factories.FilteredFuncHandlerFactory.Default;
 }
 
 public static class DisposableEvents {

@@ -21,19 +21,23 @@ public class FilteredEventHandlerFactory : IFilteredEventHandlerFactory {
     }
 }
 
-public interface IEventFuncObserverFactory {
-    IEventFuncObserver<TMessage, TReturn> Create<TMessage, TReturn>(IEventFuncObserver<TMessage, TReturn> observer,
-        IEventFilter<TMessage>[] filters);
+public interface IFilteredFuncHandlerFactory {
+    IFuncHandler<TMessage, TReturn> CreateFilteredHandler<TMessage, TReturn>(IFuncHandler<TMessage, TReturn> handler, IEventFilter<TMessage> filter);
+    IFuncHandler<TMessage, TReturn> CreateFilteredHandler<TMessage, TReturn>(IFuncHandler<TMessage, TReturn> handler, IEventFilter<TMessage>[] filters, FilterOrdering ordering = FilterOrdering.StableSort);
 }
 
-public class EventFuncObserverFactory : IEventFuncObserverFactory {
-    public static IEventFuncObserverFactory Default { get; } = new EventFuncObserverFactory();
+public class FilteredFuncHandlerFactory : IFilteredFuncHandlerFactory {
+    public static IFilteredFuncHandlerFactory Default { get; } = new FilteredFuncHandlerFactory();
+    
+    public IFuncHandler<TMessage, TReturn> CreateFilteredHandler<TMessage, TReturn>(IFuncHandler<TMessage, TReturn> handler, IEventFilter<TMessage> filter) {
+        return new FilteredFuncHandler<TMessage, TReturn>(handler, filter);
+    }
 
-    public IEventFuncObserver<TMessage, TReturn> Create<TMessage, TReturn>(
-        IEventFuncObserver<TMessage, TReturn> observer, IEventFilter<TMessage>[] filters) =>
-        filters.Length switch {
-            0 => observer,
-            1 => new FilteredEventFuncObserver<TMessage, TReturn>(observer, filters[0]),
-            _ => new FilteredEventFuncObserver<TMessage, TReturn>(observer, CompositeEventFilter<TMessage>.Create(filters))
+    public IFuncHandler<TMessage, TReturn> CreateFilteredHandler<TMessage, TReturn>(IFuncHandler<TMessage, TReturn> handler, IEventFilter<TMessage>[] filters, FilterOrdering ordering = FilterOrdering.StableSort) {
+        return filters.Length switch {
+            0 => handler,
+            1 => new FilteredFuncHandler<TMessage, TReturn>(handler, filters[0]),
+            _ => new FilteredFuncHandler<TMessage, TReturn>(handler, CompositeEventFilter<TMessage>.Create(filters, ordering))
         };
+    }
 }

@@ -10,6 +10,18 @@ public sealed class EventHandler<TMessage> : IEventHandler<TMessage> {
     public void Handle(TMessage message) => handler(message);
 }
 
+public sealed class StatefulEventHandler<TState, TMessage> : IEventHandler<TMessage> {
+    readonly Action<TState, TMessage> handler;
+    readonly TState state;
+
+    public StatefulEventHandler(TState state, Action<TState, TMessage> handler) {
+        this.state = state;
+        this.handler = handler;
+    }
+    
+    public void Handle(TMessage message) => handler(state, message);
+}
+
 public sealed class FilteredEventHandler<TMessage> : IEventHandler<TMessage> {
     readonly IEventHandler<TMessage> handler;
     readonly IEventFilter<TMessage> filter;
@@ -24,18 +36,6 @@ public sealed class FilteredEventHandler<TMessage> : IEventHandler<TMessage> {
             handler.Handle(message);
         }
     }
-}
-
-public sealed class StatefulEventHandler<TState, TMessage> : IEventHandler<TMessage> {
-    readonly Action<TState, TMessage> handler;
-    readonly TState state;
-
-    public StatefulEventHandler(TState state, Action<TState, TMessage> handler) {
-        this.state = state;
-        this.handler = handler;
-    }
-    
-    public void Handle(TMessage message) => handler(state, message);
 }
 
 // ----- Void Handlers ----

@@ -8,6 +8,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Be
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPlayGround", "TestPlayGround\TestPlayGround.csproj", "{52324837-CBF8-463B-8B71-96E906007F03}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisposableEvents.R3", "DisposableEvents.R3\DisposableEvents.R3.csproj", "{9956F837-BD63-4494-81E3-51FA856C2128}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternalsInvisible", "InternalsInvisible\InternalsInvisible.csproj", "{D41A5118-1B26-4CE2-BE00-E7AF1C07B83D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +34,13 @@ Global
 		{52324837-CBF8-463B-8B71-96E906007F03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52324837-CBF8-463B-8B71-96E906007F03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52324837-CBF8-463B-8B71-96E906007F03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9956F837-BD63-4494-81E3-51FA856C2128}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9956F837-BD63-4494-81E3-51FA856C2128}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9956F837-BD63-4494-81E3-51FA856C2128}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9956F837-BD63-4494-81E3-51FA856C2128}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D41A5118-1B26-4CE2-BE00-E7AF1C07B83D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D41A5118-1B26-4CE2-BE00-E7AF1C07B83D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D41A5118-1B26-4CE2-BE00-E7AF1C07B83D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D41A5118-1B26-4CE2-BE00-E7AF1C07B83D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

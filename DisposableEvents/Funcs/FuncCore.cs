@@ -4,9 +4,8 @@ using DisposableEvents.Internal;
 
 namespace DisposableEvents;
 
-// TODO: Benchmark keeping count of observers vs iterating always when clearing subscriptions
-public sealed class EventCore<TMessage> : IDisposableEvent<TMessage> {
-    internal readonly FreeList<IEventHandler<TMessage>> Handlers;
+public sealed class FuncCore<TMessage, TReturn> : IDisposableFunc<TMessage, TReturn> {
+    internal readonly FreeList<IFuncHandler<TMessage, TReturn>> Handlers;
     
     bool disposed;
     public bool IsDisposed {
@@ -19,30 +18,40 @@ public sealed class EventCore<TMessage> : IDisposableEvent<TMessage> {
 
     readonly object gate = new();
     
-    public int HandlerCount => Handlers.GetCount();
+    public int SubscriberCount => Handlers.GetCount();
     
-    IEventHandler<TMessage>[]? cachedHandlers;
-    public IEventHandler<TMessage>[] GetHandlers() {
+    IFuncHandler<TMessage, TReturn>[]? cachedHandlers;
+    public IFuncHandler<TMessage, TReturn>[] GetHandlers() {
         if (cachedHandlers != null)
             return cachedHandlers;
         
         cachedHandlers = Handlers.GetValues().Where(h => h != null).ToArray()!;
         return cachedHandlers;
     }
+
+    public FuncCore() : this(GlobalConfig.InitialSubscriberCapacity) { }
+    public FuncCore(int initialSubscriberCapacity) {
+        Handlers = new FreeList<IFuncHandler<TMessage, TReturn>>(initialSubscriberCapacity);
+    }
     
-    public EventCore() : this(GlobalConfig.InitialSubscriberCapacity) { }
-    public EventCore(int initialSubscriberCapacity) {
-        Handlers = new FreeList<IEventHandler<TMessage>>(initialSubscriberCapacity);
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Publish(TMessage message) {
-        foreach (var handler in Handlers.GetValues()) {
-            handler?.Handle(message);
-        }
+    public FuncResult<TReturn> PublishTo(IFuncHandler<TMessage, TReturn> handler, TMessage message) {
+        return handler.Handle(message);
     }
-
-    public IDisposable Subscribe(IEventHandler<TMessage> handler) {
+    
+    public FuncResult<TReturn> Publish(TMessage message) {
+        var result = FuncResult<TReturn>.Null();
+        
+        foreach (var handler in Handlers.GetValues()) {
+            if (handler != null) {
+                result = PublishTo(handler, message);
+            }
+        }
+        
+        return result;
+    }
+    
+    public IDisposable Subscribe(IFuncHandler<TMessage, TReturn> handler) {
         lock (gate) {
             if (disposed)
                 return Disposable.Empty;
@@ -74,13 +83,13 @@ public sealed class EventCore<TMessage> : IDisposableEvent<TMessage> {
             disposed = true;
         }
     }
-
+    
     sealed class Subscription : IDisposable {
         bool isDisposed;
-        readonly EventCore<TMessage> core;
+        readonly FuncCore<TMessage, TReturn> core;
         readonly int subscriptionKey;
 
-        public Subscription(EventCore<TMessage> core, int subscriptionKey) {
+        public Subscription(FuncCore<TMessage, TReturn> core, int subscriptionKey) {
             this.core = core;
             this.subscriptionKey = subscriptionKey;
         }

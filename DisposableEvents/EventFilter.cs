@@ -36,15 +36,30 @@ public interface IEventFilter<TMessage> : IEventFilter {
 /// <typeparam name="TMessage">The type of the event data.</typeparam>
 public class PredicateEventFilter<TMessage> : IEventFilter<TMessage> {
     public int FilterOrder { get; }
-    readonly Func<TMessage, bool> predicate;
+    readonly System.Func<TMessage, bool> predicate;
 
-    public PredicateEventFilter(Func<TMessage, bool> predicate) : this(0, predicate) { }
-    public PredicateEventFilter(int filterOrder, Func<TMessage, bool> predicate) {
+    public PredicateEventFilter(System.Func<TMessage, bool> predicate) : this(0, predicate) { }
+    public PredicateEventFilter(int filterOrder, System.Func<TMessage, bool> predicate) {
         FilterOrder = filterOrder;
         this.predicate = predicate;
     }
 
     public FilterResult Filter(ref TMessage value) => predicate(value);
+}
+
+public class StatefulPredicateEventFilter<TState, TMessage> : IEventFilter<TMessage> {
+    public int FilterOrder { get; }
+    readonly TState state;
+    readonly Func<TState, TMessage, bool> predicate;
+
+    public StatefulPredicateEventFilter(TState state, Func<TState, TMessage, bool> predicate) : this(0, state, predicate) { }
+    public StatefulPredicateEventFilter(int filterOrder, TState state, Func<TState, TMessage, bool> predicate) {
+        FilterOrder = filterOrder;
+        this.state = state;
+        this.predicate = predicate;
+    }
+
+    public FilterResult Filter(ref TMessage value) => predicate(state, value);
 }
 
 /// <summary>
@@ -68,10 +83,10 @@ public class VoidPredicateEventFilter : IEventFilter<Void> {
 /// <typeparam name="TMessage">The type of the event data.</typeparam>
 public class ValueMutatorFilter<TMessage> : IEventFilter<TMessage> {
     public int FilterOrder { get; }
-    readonly Func<TMessage, TMessage> mutator;
+    readonly System.Func<TMessage, TMessage> mutator;
 
-    public ValueMutatorFilter(Func<TMessage, TMessage> mutator) : this(0, mutator) { }
-    public ValueMutatorFilter(int filterOrder, Func<TMessage, TMessage> mutator) {
+    public ValueMutatorFilter(System.Func<TMessage, TMessage> mutator) : this(0, mutator) { }
+    public ValueMutatorFilter(int filterOrder, System.Func<TMessage, TMessage> mutator) {
         FilterOrder = filterOrder;
         this.mutator = mutator;
     }

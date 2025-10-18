@@ -3,13 +3,13 @@
 namespace UnitTests.EventTypes.EventFuncs;
 
 [TestFixture]
-public class EventFuncTests {
+public class DisposableFuncTests {
     
     // Baseline tests
     [Test]
     public void Publish_InvokesSubscriber() {
-        var evt = new EventFunc<int, int>();
-        var obs = new TestFuncObserver<int, int>(5);
+        var evt = new DisposableEvents.DisposableFunc<int, int>();
+        var obs = new TestFuncHandler<int, int>(5);
 
         evt.Subscribe(obs);
         evt.Publish(10);
@@ -19,8 +19,8 @@ public class EventFuncTests {
     
     [Test]
     public void OnError_HandlesError_WhenThrown() {
-        var evt = new EventFunc<int, int>();
-        var obs = new ThrowingFuncObserver<int, int>(new TestException("Test error"));
+        var evt = new DisposableEvents.DisposableFunc<int, int>();
+        var obs = new ThrowingFuncHandler<int, int>(new TestException("Test error"));
 
         evt.Subscribe(obs);
 
@@ -30,8 +30,8 @@ public class EventFuncTests {
 
     [Test]
     public void Dispose_CallsOnCompleted() {
-        var evt = new EventFunc<int, int>();
-        var obs = new TestFuncObserver<int, int>(10);
+        var evt = new DisposableEvents.DisposableFunc<int, int>();
+        var obs = new TestFuncHandler<int, int>(10);
 
         evt.Subscribe(obs);
         evt.Dispose();
@@ -41,8 +41,8 @@ public class EventFuncTests {
 
     [Test]
     public void DisposingSubscription_Unsubscribes() {
-        var evt = new EventFunc<int, int>();
-        var obs = new TestFuncObserver<int, int>();
+        var evt = new DisposableEvents.DisposableFunc<int, int>();
+        var obs = new TestFuncHandler<int, int>();
 
         using (evt.Subscribe(obs)) {
             evt.Publish(42);
@@ -55,9 +55,9 @@ public class EventFuncTests {
 
     [Test]
     public void MultipleSubscribers_AllReceivePublishedValue() {
-        var evt = new EventFunc<int, int>();
-        var obs1 = new TestFuncObserver<int, int>();
-        var obs2 = new TestFuncObserver<int, int>();
+        var evt = new DisposableEvents.DisposableFunc<int, int>();
+        var obs1 = new TestFuncHandler<int, int>();
+        var obs2 = new TestFuncHandler<int, int>();
 
         evt.Subscribe(obs1);
         evt.Subscribe(obs2);
@@ -83,14 +83,14 @@ public class EventFuncTests {
 
     [Test]
     public void PublishWithNoSubscribers_DoesNotThrow() {
-        var evt = new EventFunc<int, int>();
+        var evt = new DisposableEvents.DisposableFunc<int, int>();
         Assert.DoesNotThrow(() => evt.Publish(42));
     }
 
     [Test]
     public void Subscribe_AppliesFilters() {
-        var evt = new EventFunc<int, int>();
-        var obs = new TestFuncObserver<int, int>();
+        var evt = new DisposableEvents.DisposableFunc<int, int>();
+        var obs = new TestFuncHandler<int, int>();
         var filter = new TestFilter<int>();
 
         evt.Subscribe(obs, filter);
@@ -103,8 +103,8 @@ public class EventFuncTests {
     
     [Test]
     public void Publish_ReturnsResult() {
-        var evt = new EventFunc<int, int>();
-        var obs = new TestFuncObserver<int, int>(5);
+        var evt = new DisposableEvents.DisposableFunc<int, int>();
+        var obs = new TestFuncHandler<int, int>(5);
 
         evt.Subscribe(obs);
         var result = evt.Publish(10);
@@ -114,15 +114,15 @@ public class EventFuncTests {
     
     [Test]
     public void PublishEnumerator_ReturnsEnumeratedResults() {
-        var evt = new EventFunc<int, int>();
-        var obs1 = new TestFuncObserver<int, int>(5);
-        var obs2 = new TestFuncObserver<int, int>(10);
-        var obs3 = new TestFuncObserver<int, int>(15);
+        var evt = new DisposableEvents.DisposableFunc<int, int>();
+        var obs1 = new TestFuncHandler<int, int>(5);
+        var obs2 = new TestFuncHandler<int, int>(10);
+        var obs3 = new TestFuncHandler<int, int>(15);
 
         evt.Subscribe(obs1);
         evt.Subscribe(obs2);
         evt.Subscribe(obs3);
-        var result = evt.PublishEnumerator(20).Select(r => r.Value).ToArray();
+        var result = evt.PublishAsEnumerable(20).Select(r => r.Value).ToArray();
         
         Assert.That(result, Is.EquivalentTo(new[] { 5, 10, 15 }));
     }

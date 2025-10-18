@@ -226,7 +226,7 @@ internal class TestException : Exception {
 }
 
 
-internal class TestFuncObserver<TMessage, TReturn> : IEventFuncObserver<TMessage, TReturn> {
+internal class TestFuncHandler<TMessage, TReturn> : IFuncHandler<TMessage, TReturn> {
     public readonly List<TMessage> Received = new();
     public TMessage LastValue => Received.Count > 0 ? Received[^1] : default!;
     public Exception? Error;
@@ -235,32 +235,32 @@ internal class TestFuncObserver<TMessage, TReturn> : IEventFuncObserver<TMessage
     public TReturn ReturnValue { get; }
     public bool Success { get; } = true;
     
-    public TestFuncObserver(TReturn returnValue = default!, bool success = true) {
+    public TestFuncHandler(TReturn returnValue = default!, bool success = true) {
         ReturnValue = returnValue;
         Success = success;
     }
 
-    public FuncResult<TReturn> OnNext(TMessage value) { 
+    public FuncResult<TReturn> Handle(TMessage value) { 
         Received.Add(value);
         
         return Success
-            ? FuncResult<TReturn>.Success(ReturnValue)
-            : FuncResult<TReturn>.Failure(ReturnValue);
+            ? FuncResult<TReturn>.From(ReturnValue)
+            : FuncResult<TReturn>.Null(ReturnValue);
     }
 
     public void OnError(Exception error) => Error = error;
     public void OnCompleted() => Completed = true;
 }
 
-internal class ThrowingFuncObserver<TMessage, TReturn> : IEventFuncObserver<TMessage, TReturn> {
+internal class ThrowingFuncHandler<TMessage, TReturn> : IFuncHandler<TMessage, TReturn> {
     public Exception? Error;
     readonly Exception toThrow;
 
-    public ThrowingFuncObserver(Exception ex) {
+    public ThrowingFuncHandler(Exception ex) {
         toThrow = ex;
     }
     
-    public FuncResult<TReturn> OnNext(TMessage value) => throw toThrow;
+    public FuncResult<TReturn> Handle(TMessage value) => throw toThrow;
     public void OnError(Exception error) => Error = error;
     public void OnCompleted() { }
 }

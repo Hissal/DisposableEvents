@@ -27,8 +27,8 @@ internal sealed class FreeList<T> : IDisposable
         Volatile.Write(ref values, newValues);
     }
 
-    public T?[] GetValues() => values; // no lock, safe for iterate
-    public T? GetValue(int index) => values[index]; // no lock, safe for read
+    public T?[] GetValues() => values;
+    public T? GetValue(int index) => values[index];
     
     public int GetCount() {
         lock (gate) {
@@ -86,22 +86,6 @@ internal sealed class FreeList<T> : IDisposable
             if (isDisposed) 
                 return;
             Initialize();
-        }
-    }
-    
-    /// <summary>
-    /// Dispose and get cleared count.
-    /// </summary>
-    public bool TryDispose(out int clearedCount) {
-        lock (gate) {
-            if (isDisposed) {
-                clearedCount = 0;
-                return false;
-            }
-
-            clearedCount = count;
-            Dispose();
-            return true;
         }
     }
 
