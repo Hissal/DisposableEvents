@@ -2,19 +2,6 @@
 
 namespace DisposableEvents;
 
-public interface IEventPipelineInput<TMessage> {
-    void Publish(TMessage message);
-    IDisposable Subscribe(IEventHandler<TMessage> handler);
-    IDisposable Subscribe(IEventHandler<TMessage> handler, IEventFilter<TMessage> filter);
-    IDisposable Subscribe(IEventHandler<TMessage> handler, IEventFilter<TMessage>[] filters, FilterOrdering ordering);
-    void ClearSubscriptions();
-}
-
-public interface IEventPipelineOutput<TMessage> {
-    IPipelineEvent<TMessage>? Next { get; }
-    void SetNext(IPipelineEvent<TMessage> next);
-}
-
 public interface IPipelineEvent<TMessage> : IDisposableEvent<TMessage> {
     IPipelineEvent<TMessage>? Next { get; }
     void SetNext(IPipelineEvent<TMessage> next);

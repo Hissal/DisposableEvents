@@ -13,8 +13,8 @@ public interface IFuncPublisher<TMessage, TReturn> : IDisposable {
     /// <returns>The result of the function call.</returns>
     FuncResult<TReturn> Publish(TMessage message);
 
-    protected internal FuncResult<TReturn> PublishTo(IFuncHandler<TMessage, TReturn> handler, TMessage message);
-    protected internal IFuncHandler<TMessage, TReturn>[] GetHandlers();
+    FuncResult<TReturn> PublishTo(IFuncHandler<TMessage, TReturn> handler, TMessage message);
+    IFuncHandler<TMessage, TReturn>[] GetHandlers();
 }
 
 public interface IFuncSubscriber<TMessage, TReturn> {

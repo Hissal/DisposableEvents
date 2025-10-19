@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisposableEvents.R3", "Disp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternalsInvisible", "InternalsInvisible\InternalsInvisible.csproj", "{D41A5118-1B26-4CE2-BE00-E7AF1C07B83D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisposableEvents.ZLinq", "DisposableEvents.ZLinq\DisposableEvents.ZLinq.csproj", "{17F89C6E-7EB4-4E57-A9EE-B880D7CDA703}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{D41A5118-1B26-4CE2-BE00-E7AF1C07B83D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D41A5118-1B26-4CE2-BE00-E7AF1C07B83D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D41A5118-1B26-4CE2-BE00-E7AF1C07B83D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17F89C6E-7EB4-4E57-A9EE-B880D7CDA703}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17F89C6E-7EB4-4E57-A9EE-B880D7CDA703}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17F89C6E-7EB4-4E57-A9EE-B880D7CDA703}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17F89C6E-7EB4-4E57-A9EE-B880D7CDA703}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -2,63 +2,97 @@
 
 namespace DisposableEvents;
 
-public readonly record struct FuncResult<T> {
-    public T? Value { get; }
+public readonly record struct FuncResult<TValue> {
+    public TValue? Value { get; init; }
     
     [MemberNotNullWhen(true, nameof(Value))]
-    public bool HasValue { get; }
+    public bool HasValue { get; init; }
+    public bool IsNull => !HasValue;
     
-    FuncResult(T? value, bool hasValue = true) {
+    FuncResult(TValue? value, bool hasValue = true) {
         Value = value;
         HasValue = hasValue;
     }
     
-    public static implicit operator FuncResult<T>(T value) => From(value);
-    public static implicit operator T?(FuncResult<T> result) => result.Value;
+    public static implicit operator FuncResult<TValue>(TValue value) => From(value);
+    public static implicit operator TValue?(FuncResult<TValue> result) => result.Value;
     
-    public static FuncResult<T> From(T value) => new FuncResult<T>(value, true);
-    public static FuncResult<T> Null() => new FuncResult<T>(default, false);
+    public static FuncResult<TValue> From(TValue value) => new FuncResult<TValue>(value, true);
+    public static FuncResult<TValue> Null() => new FuncResult<TValue>(default, false);
     
-    public bool TryGetValue([NotNullWhen(true)] out T? value) {
+    public TValue? GetValueOrDefault() => HasValue ? Value : default;
+    public TValue GetValueOrDefault(TValue defaultValue) => HasValue ? Value : defaultValue;
+    
+    public bool TryGetValue([NotNullWhen(true)] out TValue? value) {
         value = HasValue ? Value : default;
         return HasValue;
     }
     
-    public TResult Map<TResult>(System.Func<T, TResult> onValue, Func<TResult> onNull) => 
+    public TResult Match<TResult>(Func<TValue, TResult> onValue, Func<TResult> onNull) => 
         HasValue ? onValue(Value) : onNull();
     
-    public TResult Map<TState, TResult>(TState state, Func<TState, T, TResult> onValue, System.Func<TState, TResult> onNull) => 
+    public TResult Match<TState, TResult>(TState state, Func<TState, TValue, TResult> onValue, Func<TState, TResult> onNull) => 
         HasValue ? onValue(state, Value) : onNull(state);
     
-    public TResult Map<TResult>(System.Func<T, TResult> onValue, TResult onNull) => 
+    public TResult Match<TResult>(Func<TValue, TResult> onValue, TResult onNull) => 
         HasValue ? onValue(Value) : onNull;
     
-    public TResult Map<TState, TResult>(TState state, Func<TState, T, TResult> onValue, TResult onNull) => 
+    public TResult Match<TState, TResult>(TState state, Func<TState, TValue, TResult> onValue, TResult onNull) => 
         HasValue ? onValue(state, Value) : onNull;
     
-    public void Switch(Action<T> onValue, Action onNull) {
+    public FuncResult<TResult> Select<TResult>(Func<TValue, TResult> selector) =>
+        HasValue ? FuncResult<TResult>.From(selector(Value)) : FuncResult<TResult>.Null();
+    
+    public FuncResult<TResult> Select<TState, TResult>(TState state, Func<TState, TValue, TResult> selector) =>
+        HasValue ? FuncResult<TResult>.From(selector(state, Value)) : FuncResult<TResult>.Null();
+    
+    public FuncResult<TResult> SelectMany<TResult>(Func<TValue, FuncResult<TResult>> selector) =>
+        HasValue ? selector(Value) : FuncResult<TResult>.Null();
+    
+    public FuncResult<TResult> SelectMany<TState, TResult>(TState state, Func<TState, TValue, FuncResult<TResult>> selector) =>
+        HasValue ? selector(state, Value) : FuncResult<TResult>.Null();
+    
+    public FuncResult<TValue> Where(Func<TValue, bool> predicate) =>
+        HasValue && predicate(Value) ? this : Null();
+    
+    public FuncResult<TValue> Where<TState>(TState state, Func<TState, TValue, bool> predicate) =>
+        HasValue && predicate(state, Value) ? this : Null();
+    
+    public FuncResult<TValue> Where(Func<FuncResult<TValue>, bool> predicate) =>
+        predicate(this) ? this : Null();
+
+    public FuncResult<TValue> Where<TState>(TState state, Func<TState, FuncResult<TValue>, bool> predicate) =>
+        predicate(state, this) ? this : Null();
+    
+    public FuncResult<TValue> Switch(Action<TValue> onValue, Action onNull) {
         if (HasValue) onValue(Value!);
         else onNull();
+        return this;
     }
 
-    public void Switch<TState>(TState state, Action<TState, T> onValue, Action<TState> onNull) {
+    public FuncResult<TValue> Switch<TState>(TState state, Action<TState, TValue> onValue, Action<TState> onNull) {
         if (HasValue) onValue(state, Value!);
         else onNull(state);
+        return this;
     }
     
-    public void OnValue(Action<T> onValue) { 
+    public FuncResult<TValue> OnValue(Action<TValue> onValue) { 
         if (HasValue) onValue(Value!);
+        return this;
     }
-    public void OnValue<TState>(TState state, Action<TState, T> onValue) { 
+    public FuncResult<TValue> OnValue<TState>(TState state, Action<TState, TValue> onValue) { 
         if (HasValue) onValue(state, Value!);
+        return this;
     }
     
-    public void OnNull(Action onNull) { 
+    public FuncResult<TValue> OnNull(Action onNull) { 
         if (!HasValue) onNull();
+        return this;
     }
-    public void OnNull<TState>(TState state, Action<TState> onNull) { 
+    public FuncResult<TValue> OnNull<TState>(TState state, Action<TState> onNull) { 
         if (!HasValue) onNull(state);
+        return this;
     }
     
-    public override string ToString() => HasValue ? $"FuncResult<{typeof(T).Name}>[{Value}]" : $"FuncResult<{typeof(T).Name}>[null]";
+    public override string ToString() => HasValue ? $"FuncResult<{typeof(TValue).Name}>[{Value}]" : $"FuncResult<{typeof(TValue).Name}>[null]";
 }
