@@ -8,28 +8,133 @@ public static class FuncResultExtensions {
         return FuncResult<TResult>.Null();
     }
     
-    public static int CountValues<TValue>(this IEnumerable<FuncResult<TValue>> results) {
-        return results.Count(result => result.HasValue);
+    public static FuncResult<TResult> Combine<TState, T1, T2, TResult>(this FuncResult<T1> first, FuncResult<T2> second, TState state, Func<TState, T1, T2, TResult> combiner) {
+        if (first.HasValue && second.HasValue) {
+            return FuncResult<TResult>.From(combiner(state, first.Value, second.Value));
+        }
+        return FuncResult<TResult>.Null();
+    }
+
+    public static FuncResult<TValue> Combine<TValue>(this IEnumerable<FuncResult<TValue>> results,
+        Func<FuncResult<TValue>, FuncResult<TValue>, FuncResult<TValue>> combiner) 
+    {
+        using var enumerator = results.GetEnumerator();
+        if (!enumerator.MoveNext()) {
+            return FuncResult<TValue>.Null();
+        }
+        
+        var combinedResult = enumerator.Current;;
+        while (enumerator.MoveNext()) {
+            combinedResult = combiner(combinedResult, enumerator.Current);
+        }
+        return combinedResult;
     }
     
-    public static bool AnyValue<TValue>(this IEnumerable<FuncResult<TValue>> results) {
-        return results.Any(result => result.HasValue);
+    public static FuncResult<TValue> Combine<TState, TValue>(this IEnumerable<FuncResult<TValue>> results, TState state,
+        Func<TState, FuncResult<TValue>, FuncResult<TValue>, FuncResult<TValue>> combiner) 
+    {
+        using var enumerator = results.GetEnumerator();
+        if (!enumerator.MoveNext()) {
+            return FuncResult<TValue>.Null();
+        }
+        
+        var combinedResult = enumerator.Current;;
+        while (enumerator.MoveNext()) {
+            combinedResult = combiner(state, combinedResult, enumerator.Current);
+        }
+        return combinedResult;
     }
     
-    public static bool AllValues<TValue>(this IEnumerable<FuncResult<TValue>> results) {
-        return results.All(result => result.HasValue);
+    public static TValue? CombineValues<TValue>(this IEnumerable<FuncResult<TValue>> results,
+        Func<TValue, TValue, TValue> combiner) 
+    {
+        using var enumerator = results.GetEnumerator();
+        while (enumerator.MoveNext()) {
+            if (enumerator.Current.HasValue) {
+                break;
+            }
+        }
+        
+        if (!enumerator.Current.HasValue) {
+            return default;
+        }
+        
+        var combinedValue = enumerator.Current.Value;
+        while (enumerator.MoveNext()) {
+            if (enumerator.Current.HasValue) {
+                combinedValue = combiner(combinedValue, enumerator.Current.Value);
+            }
+        }
+        return combinedValue;
+    }
+
+    public static TValue? CombineValues<TState, TValue>(this IEnumerable<FuncResult<TValue>> results, TState state,
+        Func<TState, TValue, TValue, TValue> combiner) 
+    {
+        using var enumerator = results.GetEnumerator();
+        while (enumerator.MoveNext()) {
+            if (enumerator.Current.HasValue) {
+                break;
+            }
+        }
+        
+        if (!enumerator.Current.HasValue) {
+            return default;
+        }
+        
+        var combinedValue = enumerator.Current.Value;
+        while (enumerator.MoveNext()) {
+            if (enumerator.Current.HasValue) {
+                combinedValue = combiner(state, combinedValue, enumerator.Current.Value);
+            }
+        }
+        return combinedValue;
     }
     
-    public static int CountNulls<TValue>(this IEnumerable<FuncResult<TValue>> results) {
-        return results.Count(result => result.IsNull);
+    public static TValue CombineValues<TValue>(this IEnumerable<FuncResult<TValue>> results,
+        Func<TValue, TValue, TValue> combiner, TValue defaultValue) 
+    {
+        using var enumerator = results.GetEnumerator();
+        while (enumerator.MoveNext()) {
+            if (enumerator.Current.HasValue) {
+                break;
+            }
+        }
+        
+        if (!enumerator.Current.HasValue) {
+            return defaultValue;
+        }
+        
+        var combinedValue = enumerator.Current.Value;
+        while (enumerator.MoveNext()) {
+            if (enumerator.Current.HasValue) {
+                combinedValue = combiner(combinedValue, enumerator.Current.Value);
+            }
+        }
+        return combinedValue;
     }
     
-    public static bool AnyNull<TValue>(this IEnumerable<FuncResult<TValue>> results) {
-        return results.Any(result => result.IsNull);
-    }
-    
-    public static bool AllNulls<TValue>(this IEnumerable<FuncResult<TValue>> results) {
-        return results.All(result => result.IsNull);
+    public static TValue CombineValues<TState, TValue>(this IEnumerable<FuncResult<TValue>> results, TState state,
+        Func<TState, TValue, TValue, TValue> combiner, TValue defaultValue) 
+    {
+        using var enumerator = results.GetEnumerator();
+        while (enumerator.MoveNext()) {
+            if (enumerator.Current.HasValue) {
+                break;
+            }
+        }
+        
+        if (!enumerator.Current.HasValue) {
+            return defaultValue;
+        }
+        
+        var combinedValue = enumerator.Current.Value;
+        while (enumerator.MoveNext()) {
+            if (enumerator.Current.HasValue) {
+                combinedValue = combiner(state, combinedValue, enumerator.Current.Value);
+            }
+        }
+        return combinedValue;
     }
     
     public static TValue? FirstValueOrDefault<TValue>(this IEnumerable<FuncResult<TValue>> results) {
@@ -114,33 +219,35 @@ public static class FuncResultExtensions {
         }
     }
     
-    public static void ForEachNull<TValue>(this IEnumerable<FuncResult<TValue>> results, Action forEach) {
+    public static void ForEachValue<TValue>(this IEnumerable<FuncResult<TValue>> results, Action<TValue, int> forEach) {
+        var currentIndex = 0;
         foreach (var result in results) {
-            if (!result.HasValue) {
-                forEach();
+            if (result.HasValue) {
+                forEach(result.Value, currentIndex);
             }
+            currentIndex++;
         }
     }
     
-    public static void ForEachNull<TState, TValue>(this IEnumerable<FuncResult<TValue>> results, TState state, Action<TState> forEach) {
+    public static void ForEachValue<TState, TValue>(this IEnumerable<FuncResult<TValue>> results, TState state, Action<TState, TValue, int> forEach) {
+        var currentIndex = 0;
         foreach (var result in results) {
-            if (!result.HasValue) {
-                forEach(state);
+            if (result.HasValue) {
+                forEach(state, result.Value, currentIndex);
             }
+            currentIndex++;
         }
     }
     
-    public static IEnumerable<FuncResult<TValue>> Switch<TValue>(this IEnumerable<FuncResult<TValue>> results, Action<TValue> onValue, Action onNull) {
+    public static void Switch<TValue>(this IEnumerable<FuncResult<TValue>> results, Action<TValue> onValue, Action onNull) {
         foreach (var result in results) {
             result.Switch(onValue, onNull);
-            yield return result;
         }
     }
     
-    public static IEnumerable<FuncResult<TValue>> Switch<TState, TValue>(this IEnumerable<FuncResult<TValue>> results, TState state, Action<TState, TValue> onValue, Action<TState> onNull) {
+    public static void Switch<TState, TValue>(this IEnumerable<FuncResult<TValue>> results, TState state, Action<TState, TValue> onValue, Action<TState> onNull) {
         foreach (var result in results) {
             result.Switch(state, onValue, onNull);
-            yield return result;
         }
     }
 
@@ -165,62 +272,6 @@ public static class FuncResultExtensions {
     public static IEnumerable<TResult> Match<TState, TValue, TResult>(this IEnumerable<FuncResult<TValue>> results, TState state, Func<TState, TValue, TResult> onValue, TResult onNull) {
         foreach (var result in results) {
             yield return result.Match(state, onValue, onNull);
-        }
-    }
-
-    public static IEnumerable<FuncResult<TResult>> Select<TValue, TResult>(this IEnumerable<FuncResult<TValue>> results, Func<TValue, TResult> selector) {
-        foreach (var result in results) {
-            yield return result.Select(selector);
-        }
-    }
-    
-    public static IEnumerable<FuncResult<TResult>> Select<TState, TValue, TResult>(this IEnumerable<FuncResult<TValue>> results, TState state, Func<TState, TValue, TResult> selector) {
-        foreach (var result in results) {
-            yield return result.Select(state, selector);
-        }
-    }
-    
-    public static IEnumerable<FuncResult<TResult>> SelectMany<TValue, TResult>(this IEnumerable<FuncResult<TValue>> results, Func<TValue, FuncResult<TResult>> selector) {
-        foreach (var result in results) {
-            yield return result.SelectMany(selector);
-        }
-    }
-    
-    public static IEnumerable<FuncResult<TResult>> SelectMany<TState, TValue, TResult>(this IEnumerable<FuncResult<TValue>> results, TState state, Func<TState, TValue, FuncResult<TResult>> selector) {
-        foreach (var result in results) {
-            yield return result.SelectMany(state, selector);
-        }
-    }
-    
-    public static IEnumerable<FuncResult<TValue>> Where<TValue>(this IEnumerable<FuncResult<TValue>> results, Func<TValue, bool> predicate) {
-        foreach (var result in results) {
-            var filtered = result.Where(predicate);
-            if (filtered.HasValue)
-                yield return filtered;
-        }
-    }
-    
-    public static IEnumerable<FuncResult<TValue>> Where<TState, TValue>(this IEnumerable<FuncResult<TValue>> results, TState state, Func<TState, TValue, bool> predicate) {
-        foreach (var result in results) {
-            var filtered = result.Where(state, predicate);
-            if (filtered.HasValue)
-                yield return filtered;
-        }
-    }
-    
-    public static IEnumerable<FuncResult<TValue>> Where<TValue>(this IEnumerable<FuncResult<TValue>> results, Func<FuncResult<TValue>, bool> predicate) {
-        foreach (var result in results) {
-            var filtered = result.Where(predicate);
-            if (filtered.HasValue)
-                yield return filtered;
-        }
-    }
-    
-    public static IEnumerable<FuncResult<TValue>> Where<TState, TValue>(this IEnumerable<FuncResult<TValue>> results, TState state, Func<TState, FuncResult<TValue>, bool> predicate) {
-        foreach (var result in results) {
-            var filtered = result.Where(state, predicate);
-            if (filtered.HasValue)
-                yield return filtered;
         }
     }
 }

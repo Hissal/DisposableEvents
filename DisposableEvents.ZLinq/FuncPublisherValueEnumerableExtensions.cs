@@ -1,14 +1,11 @@
 ﻿using System.Buffers;
-using System.IO.Compression;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using ZLinq;
 using ZLinq.Internal;
-using ZLinq.Linq;
 
 namespace DisposableEvents.ZLinq;
 
-public static class ZLinqFuncPublisherExtensions {
+public static class FuncPublisherValueEnumerableExtensions {
     /// <summary>
     /// Converts an <see cref="IFuncPublisher{TMessage, TReturn}"/> into a
     /// <see cref="ValueEnumerable{TEnumerator, TItem}"/> that defers work and publishes

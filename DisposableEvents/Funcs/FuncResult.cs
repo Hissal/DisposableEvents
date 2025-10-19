@@ -7,6 +7,8 @@ public readonly record struct FuncResult<TValue> {
     
     [MemberNotNullWhen(true, nameof(Value))]
     public bool HasValue { get; init; }
+    
+    [MemberNotNullWhen(false, nameof(Value))]
     public bool IsNull => !HasValue;
     
     FuncResult(TValue? value, bool hasValue = true) {
@@ -40,40 +42,20 @@ public readonly record struct FuncResult<TValue> {
     public TResult Match<TState, TResult>(TState state, Func<TState, TValue, TResult> onValue, TResult onNull) => 
         HasValue ? onValue(state, Value) : onNull;
     
-    public FuncResult<TResult> Select<TResult>(Func<TValue, TResult> selector) =>
-        HasValue ? FuncResult<TResult>.From(selector(Value)) : FuncResult<TResult>.Null();
-    
-    public FuncResult<TResult> Select<TState, TResult>(TState state, Func<TState, TValue, TResult> selector) =>
-        HasValue ? FuncResult<TResult>.From(selector(state, Value)) : FuncResult<TResult>.Null();
-    
-    public FuncResult<TResult> SelectMany<TResult>(Func<TValue, FuncResult<TResult>> selector) =>
+    public FuncResult<TResult> Select<TResult>(Func<TValue, FuncResult<TResult>> selector) =>
         HasValue ? selector(Value) : FuncResult<TResult>.Null();
     
-    public FuncResult<TResult> SelectMany<TState, TResult>(TState state, Func<TState, TValue, FuncResult<TResult>> selector) =>
+    public FuncResult<TResult> Select<TState, TResult>(TState state, Func<TState, TValue, FuncResult<TResult>> selector) =>
         HasValue ? selector(state, Value) : FuncResult<TResult>.Null();
     
-    public FuncResult<TValue> Where(Func<TValue, bool> predicate) =>
-        HasValue && predicate(Value) ? this : Null();
-    
-    public FuncResult<TValue> Where<TState>(TState state, Func<TState, TValue, bool> predicate) =>
-        HasValue && predicate(state, Value) ? this : Null();
-    
-    public FuncResult<TValue> Where(Func<FuncResult<TValue>, bool> predicate) =>
-        predicate(this) ? this : Null();
-
-    public FuncResult<TValue> Where<TState>(TState state, Func<TState, FuncResult<TValue>, bool> predicate) =>
-        predicate(state, this) ? this : Null();
-    
-    public FuncResult<TValue> Switch(Action<TValue> onValue, Action onNull) {
+    public void Switch(Action<TValue> onValue, Action onNull) {
         if (HasValue) onValue(Value!);
         else onNull();
-        return this;
     }
 
-    public FuncResult<TValue> Switch<TState>(TState state, Action<TState, TValue> onValue, Action<TState> onNull) {
+    public void Switch<TState>(TState state, Action<TState, TValue> onValue, Action<TState> onNull) {
         if (HasValue) onValue(state, Value!);
         else onNull(state);
-        return this;
     }
     
     public FuncResult<TValue> OnValue(Action<TValue> onValue) { 
