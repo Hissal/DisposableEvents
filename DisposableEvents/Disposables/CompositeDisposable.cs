@@ -6,7 +6,9 @@ public sealed class CompositeDisposable : ICollection<IDisposable>, IDisposable 
     readonly List<IDisposable> disposables;
 
     public bool IsDisposed { get; private set; }
-
+    public int Count => disposables.Count;
+    public bool IsReadOnly => false;
+    
     public CompositeDisposable(int capacity = 0) {
         if (capacity < 0)
             throw new ArgumentOutOfRangeException(nameof(capacity), "Capacity cannot be negative.");
@@ -20,7 +22,7 @@ public sealed class CompositeDisposable : ICollection<IDisposable>, IDisposable 
     public CompositeDisposable(IEnumerable<IDisposable> disposables) {
         this.disposables = new List<IDisposable>(disposables);
     }
-
+    
     public void Add(IDisposable item) {
         if (IsDisposed) {
             item.Dispose();
@@ -28,6 +30,7 @@ public sealed class CompositeDisposable : ICollection<IDisposable>, IDisposable 
         }
         disposables.Add(item);
     }
+    public bool Remove(IDisposable item) => disposables.Remove(item);
 
     public void Clear() {
         foreach (var disposable in disposables) {
@@ -42,17 +45,9 @@ public sealed class CompositeDisposable : ICollection<IDisposable>, IDisposable 
         IsDisposed = true;
     }
 
-    public int Count => disposables.Count;
-
-    public bool IsReadOnly => false;
-
     public bool Contains(IDisposable item) => disposables.Contains(item);
-
     public void CopyTo(IDisposable[] array, int arrayIndex) => disposables.CopyTo(array, arrayIndex);
-
+    
     public IEnumerator<IDisposable> GetEnumerator() => disposables.GetEnumerator();
-
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    public bool Remove(IDisposable item) => disposables.Remove(item);
 }

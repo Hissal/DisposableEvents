@@ -38,3 +38,22 @@ public sealed class FilteredFuncHandler<TMessage, TReturn> : IFuncHandler<TMessa
     }
 }
 
+// ----- Void Handlers ---- //
+public sealed class VoidFuncHandler<TReturn> : IFuncHandler<Void, TReturn> {
+    readonly Func<FuncResult<TReturn>> handler;
+    public VoidFuncHandler(Func<FuncResult<TReturn>> handler) => this.handler = handler;
+    public FuncResult<TReturn> Handle(Void value) => handler.Invoke();
+}
+
+public sealed class StatefulVoidFuncHandler<TState, TReturn> : IFuncHandler<Void, TReturn> {
+    readonly Func<TState, FuncResult<TReturn>> handler;
+    readonly TState state;
+
+    public StatefulVoidFuncHandler(TState state, Func<TState, FuncResult<TReturn>> handler) {
+        this.handler = handler;
+        this.state = state;
+    }
+
+    public FuncResult<TReturn> Handle(Void value) => handler.Invoke(state);
+}
+

@@ -2,11 +2,11 @@
 
 namespace DisposableEvents.ZLinq;
 
-public static partial class FuncResultValueEnumerableExtensions {
+public static partial class FuncResultExtensions {
     public static FuncResult<TValue> Combine<TEnumerator, TValue>(
         this ValueEnumerable<TEnumerator, FuncResult<TValue>> results,
         Func<FuncResult<TValue>, FuncResult<TValue>, FuncResult<TValue>> combiner)
-        where TEnumerator : struct, IValueEnumerator<FuncResult<TValue>> 
+        where TEnumerator : struct, IValueEnumerator<FuncResult<TValue>>, allows ref struct
     {
         using var enumerator = results.Enumerator;
 

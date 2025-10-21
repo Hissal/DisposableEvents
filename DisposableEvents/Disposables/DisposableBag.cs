@@ -25,22 +25,30 @@ public struct DisposableBag : IDisposable {
         disposables[count++] = item;
     }
 
-    public void Clear() {
+    public void Clear(bool keepAllocatedArray = false) {
         if (disposables == null)
             return;
 
-        for (int i = 0; i < count; i++) {
-            disposables[i]?.Dispose();
+        if (count == 0 && !keepAllocatedArray) {
+            disposables = null;
+            return;
         }
 
-        disposables = null;
+        for (var i = 0; i < count; i++) {
+            disposables[i].Dispose();
+        }
+
+        if (!keepAllocatedArray) {
+            disposables = null;
+        }
+
         count = 0;
     }
 
     public void Dispose() {
         if (isDisposed)
             return;
-        
+
         Clear();
         isDisposed = true;
     }

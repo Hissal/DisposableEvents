@@ -9,12 +9,3 @@ public class EventFactory : IEventFactory {
 
     public IDisposableEvent<TMessage> Create<TMessage>() => new DisposableEvent<TMessage>();
 }
-
-public interface IKeyedEventFactory {
-    IKeyedEvent<TKey, TMessage> Create<TKey, TMessage>() where TKey : notnull;
-}
-public class KeyedEventFactory : IKeyedEventFactory {
-    public static KeyedEventFactory Default { get; } = new KeyedEventFactory();
-    
-    public IKeyedEvent<TKey, TMessage> Create<TKey, TMessage>() where TKey : notnull => new KeyedEvent<TKey, TMessage>();
-}

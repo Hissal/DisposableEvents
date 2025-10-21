@@ -1,30 +1,12 @@
 ﻿namespace DisposableEvents.Disposables;
 
-public static class DisposableExtensions {
-    public static T AddTo<T>(this T disposable, ref DisposableBag bag) where T : IDisposable {
-        bag.Add(disposable);
-        return disposable;
-    }
-
-    public static T AddTo<T>(this T disposable, ref DisposableBuilder builder) where T : IDisposable {
-        builder.Add(disposable);
-        return disposable;
-    }
-
-    public static T AddTo<T>(this T disposable, ICollection<IDisposable> collection) where T : IDisposable {
-        collection.Add(disposable);
-        return disposable;
-    }
-}
-
 public static class Disposable {
     public static IDisposable Empty { get; } = new EmptyDisposable();
 
     sealed class EmptyDisposable : IDisposable {
         public void Dispose() { }
     }
-
-
+    
     public static DisposableBuilder CreateBuilder() => new DisposableBuilder();
     public static DisposableBag CreateBag(int capacity) => new DisposableBag(capacity);
 

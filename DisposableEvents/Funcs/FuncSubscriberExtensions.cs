@@ -97,11 +97,11 @@ public static class FuncSubscriberExtensions {
         if (additionalFilters.Length == 0)
             return subscriber.Subscribe(
                 new StatefulFuncHandler<TState, TMessage, TReturn>(state, handler), 
-                new StatefulPredicateEventFilter<TState, TMessage>(state, predicateFilter)
+                new PredicateEventFilter<TState, TMessage>(state, predicateFilter)
             );
         
         var filters = new IEventFilter<TMessage>[additionalFilters.Length + 1];
-        filters[0] = new StatefulPredicateEventFilter<TState, TMessage>(state, predicateFilter);
+        filters[0] = new PredicateEventFilter<TState, TMessage>(state, predicateFilter);
         Array.Copy(additionalFilters, 0, filters, 1, additionalFilters.Length);
         return subscriber.Subscribe(new StatefulFuncHandler<TState, TMessage, TReturn>(state, handler), filters);
     }

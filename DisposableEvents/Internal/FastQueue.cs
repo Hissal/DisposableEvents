@@ -11,7 +11,7 @@ internal class FastQueue<T> {
 
     public FastQueue(int capacity) {
         if (capacity < 0) 
-            throw new ArgumentOutOfRangeException(nameof(capacity));
+            throw new ArgumentOutOfRangeException(nameof(capacity), "Capacity must be non-negative.");
         
         array = new T[capacity];
         head = tail = size = 0;

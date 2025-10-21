@@ -12,18 +12,21 @@ internal sealed class FreeList<T> : IDisposable
     readonly object gate = new object();
 
     public FreeList(int initialCapacity = c_defaultInitialCapacity) {
-        Initialize();
+        if (initialCapacity < 0) 
+            throw new ArgumentOutOfRangeException(nameof(initialCapacity), "Capacity must be non-negative.");
+        
+        Initialize(initialCapacity);
     }
     // [MemberNotNull(nameof(freeIndex), nameof(values))]
-    void Initialize() {
-        freeIndex = new FastQueue<int>(c_defaultInitialCapacity);
-        for (int i = 0; i < c_defaultInitialCapacity; i++) {
+    void Initialize(int initialCapacity = c_defaultInitialCapacity) {
+        freeIndex = new FastQueue<int>(initialCapacity);
+        for (var i = 0; i < initialCapacity; i++) {
             freeIndex.Enqueue(i);
         }
 
         count = 0;
 
-        var newValues = new T?[c_defaultInitialCapacity];
+        var newValues = new T?[initialCapacity];
         Volatile.Write(ref values, newValues);
     }
 

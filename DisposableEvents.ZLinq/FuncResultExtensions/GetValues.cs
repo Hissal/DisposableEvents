@@ -3,7 +3,7 @@ using ZLinq;
 
 namespace DisposableEvents.ZLinq;
 
-public static partial class FuncResultValueEnumerableExtensions {
+public static partial class FuncResultExtensions {
     public static ValueEnumerable<GetValuesEnumerator<TEnumerator, TValue>, FuncResult<TValue>> GetValues<TEnumerator, TValue>(this ValueEnumerable<TEnumerator, FuncResult<TValue>> source) where TEnumerator : struct, IValueEnumerator<FuncResult<TValue>> {
         return new(new (source.Enumerator));
     }

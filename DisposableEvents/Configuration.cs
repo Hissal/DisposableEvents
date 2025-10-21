@@ -10,8 +10,17 @@ internal static class GlobalConfig {
 
 public sealed class DisposableEventsConfig {
     public static DisposableEventsConfig Create() => new DisposableEventsConfig();
-    
-    public int InitialSubscriberCapacity { get; set; } = 4;
+
+    int initialSubscriberCapacity = 4;
+    public int InitialSubscriberCapacity {
+        get => initialSubscriberCapacity;
+        set {
+            if (value < 0)
+                throw new ArgumentOutOfRangeException(nameof(value), "Initial subscriber capacity must be non-negative.");
+            initialSubscriberCapacity = value;
+        }
+    }
+
     public IFilteredEventHandlerFactory FilteredEventHandlerFactory { get; set; } = Factories.FilteredEventHandlerFactory.Default;
 
     public IFilteredFuncHandlerFactory FilteredFuncHandlerFactory { get; set; } = Factories.FilteredFuncHandlerFactory.Default;

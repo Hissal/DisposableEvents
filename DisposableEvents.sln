@@ -2,8 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisposableEvents", "DisposableEvents\DisposableEvents.csproj", "{07D671FB-6834-45E9-B46E-E30A1D47C0E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{DCDFE64D-15E5-4362-BA6F-BCC625434CD4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{E126B00F-0D3C-47B6-BFE4-EA1F4E1B05CF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPlayGround", "TestPlayGround\TestPlayGround.csproj", "{52324837-CBF8-463B-8B71-96E906007F03}"
@@ -13,6 +11,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternalsInvisible", "InternalsInvisible\InternalsInvisible.csproj", "{D41A5118-1B26-4CE2-BE00-E7AF1C07B83D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisposableEvents.ZLinq", "DisposableEvents.ZLinq\DisposableEvents.ZLinq.csproj", "{17F89C6E-7EB4-4E57-A9EE-B880D7CDA703}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisposableEvents.Tests", "DisposableEvents.Tests\DisposableEvents.Tests.csproj", "{9F3948FD-5ABA-403E-B15E-83AE8774B58F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,10 +24,6 @@ Global
 		{07D671FB-6834-45E9-B46E-E30A1D47C0E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07D671FB-6834-45E9-B46E-E30A1D47C0E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{07D671FB-6834-45E9-B46E-E30A1D47C0E8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DCDFE64D-15E5-4362-BA6F-BCC625434CD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DCDFE64D-15E5-4362-BA6F-BCC625434CD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DCDFE64D-15E5-4362-BA6F-BCC625434CD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DCDFE64D-15E5-4362-BA6F-BCC625434CD4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E126B00F-0D3C-47B6-BFE4-EA1F4E1B05CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E126B00F-0D3C-47B6-BFE4-EA1F4E1B05CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E126B00F-0D3C-47B6-BFE4-EA1F4E1B05CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -48,5 +44,9 @@ Global
 		{17F89C6E-7EB4-4E57-A9EE-B880D7CDA703}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17F89C6E-7EB4-4E57-A9EE-B880D7CDA703}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17F89C6E-7EB4-4E57-A9EE-B880D7CDA703}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F3948FD-5ABA-403E-B15E-83AE8774B58F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F3948FD-5ABA-403E-B15E-83AE8774B58F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F3948FD-5ABA-403E-B15E-83AE8774B58F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F3948FD-5ABA-403E-B15E-83AE8774B58F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

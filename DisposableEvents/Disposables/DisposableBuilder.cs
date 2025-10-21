@@ -17,9 +17,6 @@ public ref struct DisposableBuilder : IDisposable {
     bool IsDisposed => count == -1;
     
     public void Add(IDisposable disposable) {
-        if (disposable == null)
-            throw new ArgumentNullException(nameof(disposable));
-        
         if (IsDisposed) {
             disposable.Dispose();
             return;
