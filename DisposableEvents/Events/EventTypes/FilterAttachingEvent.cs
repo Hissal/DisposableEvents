@@ -9,7 +9,8 @@ public sealed class FilterAttachingEvent<TMessage> : IPipelineEvent<TMessage> {
     readonly ArrayOrOne<IEventFilter<TMessage>> filters;
     
     public bool IsDisposed => core.IsDisposed;
-    
+    public int HandlerCount => core.HandlerCount;
+
     public FilterAttachingEvent(ReadOnlySpan<IEventFilter<TMessage>> defaultFilters, int expectedSubscriberCount = -1)
         : this(defaultFilters.ToArray(), expectedSubscriberCount) { }
     
@@ -31,6 +32,7 @@ public sealed class FilterAttachingEvent<TMessage> : IPipelineEvent<TMessage> {
     public void Publish(TMessage message) {
         core.Publish(message);
     }
+
 
     public IDisposable Subscribe(IEventHandler<TMessage> handler) {
         return filters.IsArray 
@@ -73,6 +75,7 @@ public sealed class FilterAttachingEvent<TMessage> : IPipelineEvent<TMessage> {
         return combinedSingle;
     }
     
+    public IEventHandler<TMessage>[] GetHandlers() => core.GetHandlers();
     public void ClearSubscriptions() => core.ClearSubscriptions();
     public void Dispose() => core.Dispose();
     

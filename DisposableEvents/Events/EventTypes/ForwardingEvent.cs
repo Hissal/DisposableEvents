@@ -32,7 +32,8 @@ public sealed class ForwardingEvent<TMessage> : IPipelineEvent<TMessage> {
     bool disposed;
     
     public bool IsDisposed => Volatile.Read(ref disposed) || (core?.IsDisposed ?? false);
-    
+    public int HandlerCount => core?.HandlerCount ?? 0;
+
     public ForwardingEvent(params IDisposableEvent<TMessage>[] forwardTargets)
         : this(forwardTargets, ForwardTiming.AfterSelf) { }
     
@@ -78,6 +79,8 @@ public sealed class ForwardingEvent<TMessage> : IPipelineEvent<TMessage> {
             }
         }
     }
+
+
     public IDisposable Subscribe(IEventHandler<TMessage> handler) {
         if (IsDisposed) 
             return Disposable.Empty;
@@ -136,6 +139,8 @@ public sealed class ForwardingEvent<TMessage> : IPipelineEvent<TMessage> {
         }
     }
 
+    public IEventHandler<TMessage>[] GetHandlers() => core?.GetHandlers() ?? Array.Empty<IEventHandler<TMessage>>();
+    
     IPipelineEvent<TMessage>? IPipelineEvent<TMessage>.Next => core?.Next;
     void IPipelineEvent<TMessage>.SetNext(IPipelineEvent<TMessage> next) => core?.SetNext(next);
 }

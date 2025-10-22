@@ -4,6 +4,9 @@ public sealed class FilteredEvent<TMessage> : IPipelineEvent<TMessage> {
     readonly LazyInnerEvent<TMessage> core;
     readonly IEventFilter<TMessage> filter;
     
+    public bool IsDisposed => core.IsDisposed;
+    public int HandlerCount => core.HandlerCount;
+    
     public FilteredEvent(IEnumerable<IEventFilter<TMessage>> filters, int initialSubscriberCapacity = -1) 
         : this(CompositeEventFilter<TMessage>.Create(filters), initialSubscriberCapacity) { }
     public FilteredEvent(IEnumerable<IEventFilter<TMessage>> filters, FilterOrdering ordering, int initialSubscriberCapacity = -1) 
@@ -24,7 +27,7 @@ public sealed class FilteredEvent<TMessage> : IPipelineEvent<TMessage> {
         this.core = new LazyInnerEvent<TMessage>(capacity);
         this.filter = filter;
     }
-
+    
     public void Publish(TMessage message) {
         if (filter.Filter(ref message).Blocked)
             return;
@@ -33,7 +36,8 @@ public sealed class FilteredEvent<TMessage> : IPipelineEvent<TMessage> {
     }
 
     public IDisposable Subscribe(IEventHandler<TMessage> handler) => core.Subscribe(handler);
-    public bool IsDisposed => core.IsDisposed;
+
+    public IEventHandler<TMessage>[] GetHandlers() => core.GetHandlers();
     public void ClearSubscriptions() => core.ClearSubscriptions();
     public void Dispose() => core.Dispose();
 

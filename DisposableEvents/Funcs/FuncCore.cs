@@ -18,7 +18,7 @@ public sealed class FuncCore<TMessage, TReturn> : IDisposableFunc<TMessage, TRet
 
     readonly object gate = new();
     
-    public int SubscriberCount => Handlers.GetCount();
+    public int HandlerCount => Handlers.GetCount();
     
     IFuncHandler<TMessage, TReturn>[]? cachedHandlers;
     public IFuncHandler<TMessage, TReturn>[] GetHandlers() {

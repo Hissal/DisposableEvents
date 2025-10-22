@@ -4,7 +4,7 @@ public sealed class FirstFunc<TMessage, TReturn> : IDisposableFunc<TMessage, TRe
     readonly FuncCore<TMessage, TReturn> core;
 
     public bool IsDisposed => core.IsDisposed;
-    public int SubscriberCount => core.SubscriberCount;
+    public int HandlerCount => core.HandlerCount;
     
     public FirstFunc() : this(GlobalConfig.InitialSubscriberCapacity) { }
     public FirstFunc(int initialSubscriberCapacity) {

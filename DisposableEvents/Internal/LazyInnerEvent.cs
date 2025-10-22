@@ -2,6 +2,7 @@
 
 namespace DisposableEvents;
 
+// TODO: Determine if gate is needed
 internal class LazyInnerEvent<TMessage> : IDisposableEvent<TMessage>, IPipelineEvent<TMessage> {
     readonly int expectedSubscriberCount;
     readonly object gate = new();
@@ -38,7 +39,14 @@ internal class LazyInnerEvent<TMessage> : IDisposableEvent<TMessage>, IPipelineE
             return isDisposed;
         }
     }
-    
+
+    public int HandlerCount {
+        get {
+            var existing = Volatile.Read(ref coreLazy);
+            return existing?.HandlerCount ?? 0;
+        }
+    }
+
     public LazyInnerEvent(int expectedSubscriberCount = -1) {
         this.expectedSubscriberCount = expectedSubscriberCount > 0 
             ? expectedSubscriberCount 
@@ -51,6 +59,14 @@ internal class LazyInnerEvent<TMessage> : IDisposableEvent<TMessage>, IPipelineE
 
         var inner = Volatile.Read(ref coreLazy);
         inner?.Publish(message);
+    }
+
+    public IEventHandler<TMessage>[] GetHandlers() {
+        var existing = Volatile.Read(ref coreLazy);
+        if (existing is null)
+            return Array.Empty<IEventHandler<TMessage>>();
+
+        return existing.GetHandlers();
     }
 
     public IDisposable Subscribe(IEventHandler<TMessage> handler) {

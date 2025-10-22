@@ -17,25 +17,32 @@ public sealed class EventCore<TMessage> : IDisposableEvent<TMessage> {
         }
     }
 
-    readonly object gate = new();
-    
     public int HandlerCount => Handlers.GetCount();
+
+    readonly object gate = new();
     
     // TODO: Consider using ImmutableArray or similar for better thread-safety
     // TODO: Consider using pooled arrays to reduce allocations
     IEventHandler<TMessage>[]? cachedHandlers;
     public IEventHandler<TMessage>[] GetHandlers() {
         lock (gate) {
-            if (disposed)
+            if (disposed || HandlerCount == 0)
                 return Array.Empty<IEventHandler<TMessage>>();
         
             if (cachedHandlers != null)
                 return cachedHandlers;
-        
-            if (HandlerCount == 0)
-                return cachedHandlers = Array.Empty<IEventHandler<TMessage>>();
             
+            // TODO: benchmark which is faster linq vs manual loop
             cachedHandlers = Handlers.GetValues().Where(h => h != null).ToArray()!;
+            
+            // cachedHandlers = new IEventHandler<TMessage>[HandlerCount];
+            // int i = 0;
+            // foreach (var handler in Handlers.GetValues()) {
+            //     if (handler != null) {
+            //         cachedHandlers[i++] = handler;
+            //     }
+            // }
+            
             return cachedHandlers;
         }
     }

@@ -6,6 +6,7 @@ public sealed class BufferedEvent<TMessage> : IPipelineEvent<TMessage> {
     readonly LazyInnerEvent<TMessage> core;
 
     public bool IsDisposed => core.IsDisposed;
+    public int HandlerCount => core.HandlerCount;
 
     Optional<TMessage> previousMessage;
     
@@ -21,6 +22,7 @@ public sealed class BufferedEvent<TMessage> : IPipelineEvent<TMessage> {
         core.Publish(message);
     }
 
+
     public IDisposable Subscribe(IEventHandler<TMessage> handler) {
         if (!core.IsDisposed && previousMessage.TryGetValue(out var message))
             handler.Handle(message);
@@ -28,6 +30,7 @@ public sealed class BufferedEvent<TMessage> : IPipelineEvent<TMessage> {
         return core.Subscribe(handler);
     }
 
+    public IEventHandler<TMessage>[] GetHandlers() => core.GetHandlers();
     public void ClearSubscriptions() => core.ClearSubscriptions();
     public void ClearBufferedMessage() => previousMessage = Optional<TMessage>.Null();
     public void Dispose() => core.Dispose();

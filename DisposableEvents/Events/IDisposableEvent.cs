@@ -7,12 +7,15 @@ public interface IEventMarker;
 
 public interface IEventPublisher<in TMessage> : IDisposable {
     public bool IsDisposed { get; }
+    public int HandlerCount { get; }
     
     /// <summary>
     /// Publishes a value to all subscribed observers.
     /// </summary>
     /// <param name="message">The value to publish.</param>
     void Publish(TMessage message);
+    
+    IEventHandler<TMessage>[] GetHandlers();
 }
 
 public interface IEventSubscriber<TMessage> {

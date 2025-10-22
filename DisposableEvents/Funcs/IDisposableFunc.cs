@@ -4,7 +4,7 @@ public interface IFuncMarker;
 
 public interface IFuncPublisher<TMessage, TReturn> : IDisposable {
     bool IsDisposed { get; }
-    int SubscriberCount { get; }
+    int HandlerCount { get; }
     
     /// <summary>
     /// Publishes a message to the event.

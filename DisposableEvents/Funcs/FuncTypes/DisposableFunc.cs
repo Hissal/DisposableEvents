@@ -9,7 +9,7 @@ public sealed class DisposableFunc<TMessage, TReturn> : IDisposableFunc<TMessage
     }
     
     public bool IsDisposed => core.IsDisposed;
-    public int SubscriberCount => core.SubscriberCount;
+    public int HandlerCount => core.HandlerCount;
 
     public FuncResult<TReturn> Publish(TMessage message) => core.Publish(message);
     public IDisposable Subscribe(IFuncHandler<TMessage, TReturn> handler) => core.Subscribe(handler);
@@ -30,7 +30,7 @@ public sealed class DisposableFunc<TReturn> : IDisposableFunc<Void, TReturn> {
     }
     
     public bool IsDisposed => core.IsDisposed;
-    public int SubscriberCount => core.SubscriberCount;
+    public int HandlerCount => core.HandlerCount;
 
     public FuncResult<TReturn> Publish(Void message) => core.Publish(message);
     public IDisposable Subscribe(IFuncHandler<Void, TReturn> handler) => core.Subscribe(handler);
