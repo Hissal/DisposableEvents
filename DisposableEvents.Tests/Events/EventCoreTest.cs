@@ -104,24 +104,6 @@ public class EventCoreTest {
     }
     
     [Fact]
-    public void GetHandlers_ReturnsCurrentHandlers() {
-        // Arrange
-        var handlers = Enumerable.Range(0, 3)
-            .Select(_ => Substitute.For<IEventHandler<int>>())
-            .ToArray();
-
-        foreach (var handler in handlers) {
-            sut.Subscribe(handler);
-        }
-        
-        // Act
-        var currentHandlers = sut.GetHandlers();
-        
-        // Assert
-        Assert.Equal(handlers, currentHandlers);
-    }
-    
-    [Fact]
     public void HandlerCount_ReturnsCorrectCount() {
         // Arrange
         var handlers = Enumerable.Range(0, 4)
@@ -140,6 +122,24 @@ public class EventCoreTest {
         Assert.False(sut.IsDisposed);
         sut.Dispose();
         Assert.True(sut.IsDisposed);
+    }
+    
+    [Fact]
+    public void GetHandlers_ReturnsCurrentHandlers() {
+        // Arrange
+        var handlers = Enumerable.Range(0, 3)
+            .Select(_ => Substitute.For<IEventHandler<int>>())
+            .ToArray();
+
+        foreach (var handler in handlers) {
+            sut.Subscribe(handler);
+        }
+        
+        // Act
+        var currentHandlers = sut.GetHandlers();
+        
+        // Assert
+        Assert.Equal(handlers, currentHandlers);
     }
     
     [Fact]

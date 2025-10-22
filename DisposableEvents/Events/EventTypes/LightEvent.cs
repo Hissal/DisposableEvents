@@ -18,9 +18,16 @@ public class LightEvent<TMessage> : IDisposableEvent<TMessage> {
         Handlers.Dispose();
     }
     public bool IsDisposed { get; }
+    public int HandlerCount { get; }
+
     public void Publish(TMessage message) {
         throw new NotImplementedException();
     }
+
+    public IEventHandler<TMessage>[] GetHandlers() {
+        throw new NotImplementedException();
+    }
+
     public IDisposable Subscribe(IEventHandler<TMessage> handler) {
         throw new NotImplementedException();
     }

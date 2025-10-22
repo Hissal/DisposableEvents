@@ -1,8 +1,4 @@
-﻿using DisposableEvents;
-using FluentAssertions;
-using Xunit;
-
-namespace DisposableEvents.Tests.Filters;
+﻿namespace DisposableEvents.Tests.Filters;
 
 [TestSubject(typeof(FilterResult))]
 public class FilterResultTest {
