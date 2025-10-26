@@ -35,23 +35,23 @@ public sealed class FuncCore<TMessage, TReturn> : IDisposableFunc<TMessage, TRet
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public FuncResult<TReturn> PublishTo(IFuncHandler<TMessage, TReturn> handler, TMessage message) {
-        return handler.Handle(message);
+    public FuncResult<TReturn> InvokeHandler(IFuncHandler<TMessage, TReturn> handler, TMessage arg) {
+        return handler.Handle(arg);
     }
     
-    public FuncResult<TReturn> Publish(TMessage message) {
+    public FuncResult<TReturn> Invoke(TMessage arg) {
         var result = FuncResult<TReturn>.Null();
         
         foreach (var handler in Handlers.GetValues()) {
             if (handler != null) {
-                result = PublishTo(handler, message);
+                result = InvokeHandler(handler, arg);
             }
         }
         
         return result;
     }
     
-    public IDisposable Subscribe(IFuncHandler<TMessage, TReturn> handler) {
+    public IDisposable RegisterCallback(IFuncHandler<TMessage, TReturn> handler) {
         lock (gate) {
             if (disposed)
                 return Disposable.Empty;
@@ -63,7 +63,7 @@ public sealed class FuncCore<TMessage, TReturn> : IDisposableFunc<TMessage, TRet
         }
     }
 
-    public void ClearSubscriptions() {
+    public void ClearHandlers() {
         lock (gate) {
             if (disposed)
                 return;

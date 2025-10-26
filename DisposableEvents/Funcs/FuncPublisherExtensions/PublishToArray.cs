@@ -1,8 +1,8 @@
 ﻿namespace DisposableEvents;
 
 public static partial class FuncPublisherExtensions {
-    public static FuncResult<TReturn>[] PublishToArray<TMessage, TReturn>(
-        this IFuncPublisher<TMessage, TReturn> publisher, TMessage message) {
+    public static FuncResult<TReturn>[] InvokeToArray<TArg, TReturn>(
+        this IFuncPublisher<TArg, TReturn> publisher, TArg arg) {
         var handlers = publisher.GetHandlers();
 
         if (handlers.Length == 0)
@@ -11,14 +11,14 @@ public static partial class FuncPublisherExtensions {
         var results = new FuncResult<TReturn>[handlers.Length];
 
         for (var i = 0; i < handlers.Length; i++) {
-            results[i] = publisher.PublishTo(handlers[i], message);
+            results[i] = publisher.InvokeHandler(handlers[i], arg);
         }
 
         return results;
     }
 
-    public static int PublishToArrayNonAlloc<TMessage, TReturn>(this IFuncPublisher<TMessage, TReturn> publisher,
-        TMessage message, FuncResult<TReturn>[] results) {
+    public static int InvokeToArrayNonAlloc<TArg, TReturn>(this IFuncPublisher<TArg, TReturn> publisher,
+        TArg arg, FuncResult<TReturn>[] results) {
         var handlers = publisher.GetHandlers();
 
         if (results.Length == 0)
@@ -26,14 +26,14 @@ public static partial class FuncPublisherExtensions {
 
         var count = Math.Min(handlers.Length, results.Length);
         for (var i = 0; i < count; i++) {
-            results[i] = publisher.PublishTo(handlers[i], message);
+            results[i] = publisher.InvokeHandler(handlers[i], arg);
         }
 
         return count;
     }
 
-    public static int PublishToArrayNonAlloc<TMessage, TReturn>(this IFuncPublisher<TMessage, TReturn> publisher,
-        TMessage message, TReturn[] results) {
+    public static int InvokeToArrayNonAlloc<TArg, TReturn>(this IFuncPublisher<TArg, TReturn> publisher,
+        TArg arg, TReturn[] results) {
         var handlers = publisher.GetHandlers();
 
         if (results.Length == 0)
@@ -41,7 +41,7 @@ public static partial class FuncPublisherExtensions {
 
         var count = Math.Min(handlers.Length, results.Length);
         for (var i = 0; i < count; i++) {
-            var funcResult = publisher.PublishTo(handlers[i], message);
+            var funcResult = publisher.InvokeHandler(handlers[i], arg);
             if (funcResult.HasValue) {
                 results[i] = funcResult.Value;
             }

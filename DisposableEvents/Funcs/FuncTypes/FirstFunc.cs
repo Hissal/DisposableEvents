@@ -1,35 +1,35 @@
 ﻿namespace DisposableEvents;
 
-public sealed class FirstFunc<TMessage, TReturn> : IDisposableFunc<TMessage, TReturn> {
-    readonly FuncCore<TMessage, TReturn> core;
+public sealed class FirstFunc<TArg, TReturn> : IDisposableFunc<TArg, TReturn> {
+    readonly FuncCore<TArg, TReturn> core;
 
     public bool IsDisposed => core.IsDisposed;
     public int HandlerCount => core.HandlerCount;
     
     public FirstFunc() : this(GlobalConfig.InitialSubscriberCapacity) { }
     public FirstFunc(int initialSubscriberCapacity) {
-        core = new FuncCore<TMessage, TReturn>(initialSubscriberCapacity);
+        core = new FuncCore<TArg, TReturn>(initialSubscriberCapacity);
     }
     
-    public FuncResult<TReturn> Publish(TMessage message) {
+    public FuncResult<TReturn> Invoke(TArg arg) {
         var result = FuncResult<TReturn>.Null();
         
         foreach (var handler in core.Handlers.GetValues()) {
             if (handler == null)
                 continue;
             
-            result = core.PublishTo(handler, message);
+            result = core.InvokeHandler(handler, arg);
             if (result.HasValue)
                 return result;
         }
         
         return result;
     }
-    public IDisposable Subscribe(IFuncHandler<TMessage, TReturn> handler) => core.Subscribe(handler);
+    public IDisposable RegisterCallback(IFuncHandler<TArg, TReturn> handler) => core.RegisterCallback(handler);
     
-    public void ClearSubscriptions() => core.ClearSubscriptions();
+    public void ClearHandlers() => core.ClearHandlers();
     public void Dispose() => core.Dispose();
     
-    FuncResult<TReturn> IFuncPublisher<TMessage, TReturn>.PublishTo(IFuncHandler<TMessage, TReturn> handler, TMessage message) => core.PublishTo(handler, message);
-    IFuncHandler<TMessage, TReturn>[] IFuncPublisher<TMessage, TReturn>.GetHandlers() => core.GetHandlers();
+    FuncResult<TReturn> IFuncPublisher<TArg, TReturn>.InvokeHandler(IFuncHandler<TArg, TReturn> handler, TArg arg) => core.InvokeHandler(handler, arg);
+    IFuncHandler<TArg, TReturn>[] IFuncPublisher<TArg, TReturn>.GetHandlers() => core.GetHandlers();
 }

@@ -1,24 +1,24 @@
 ﻿namespace DisposableEvents;
 
-public sealed class DisposableFunc<TMessage, TReturn> : IDisposableFunc<TMessage, TReturn> {
-    readonly FuncCore<TMessage, TReturn> core;
+public sealed class DisposableFunc<TArg, TReturn> : IDisposableFunc<TArg, TReturn> {
+    readonly FuncCore<TArg, TReturn> core;
 
     public DisposableFunc() : this(GlobalConfig.InitialSubscriberCapacity) { }
     public DisposableFunc(int initialSubscriberCapacity) {
-        core = new FuncCore<TMessage, TReturn>(initialSubscriberCapacity);
+        core = new FuncCore<TArg, TReturn>(initialSubscriberCapacity);
     }
     
     public bool IsDisposed => core.IsDisposed;
     public int HandlerCount => core.HandlerCount;
 
-    public FuncResult<TReturn> Publish(TMessage message) => core.Publish(message);
-    public IDisposable Subscribe(IFuncHandler<TMessage, TReturn> handler) => core.Subscribe(handler);
+    public FuncResult<TReturn> Invoke(TArg arg) => core.Invoke(arg);
+    public IDisposable RegisterCallback(IFuncHandler<TArg, TReturn> handler) => core.RegisterCallback(handler);
     
-    public void ClearSubscriptions() => core.ClearSubscriptions();
+    public void ClearHandlers() => core.ClearHandlers();
     public void Dispose() => core.Dispose();
     
-    FuncResult<TReturn> IFuncPublisher<TMessage, TReturn>.PublishTo(IFuncHandler<TMessage, TReturn> handler, TMessage message) => core.PublishTo(handler, message);
-    IFuncHandler<TMessage, TReturn>[] IFuncPublisher<TMessage, TReturn>.GetHandlers() => core.GetHandlers();
+    FuncResult<TReturn> IFuncPublisher<TArg, TReturn>.InvokeHandler(IFuncHandler<TArg, TReturn> handler, TArg arg) => core.InvokeHandler(handler, arg);
+    IFuncHandler<TArg, TReturn>[] IFuncPublisher<TArg, TReturn>.GetHandlers() => core.GetHandlers();
 }
 
 public sealed class DisposableFunc<TReturn> : IDisposableFunc<Void, TReturn> {
@@ -32,12 +32,12 @@ public sealed class DisposableFunc<TReturn> : IDisposableFunc<Void, TReturn> {
     public bool IsDisposed => core.IsDisposed;
     public int HandlerCount => core.HandlerCount;
 
-    public FuncResult<TReturn> Publish(Void message) => core.Publish(message);
-    public IDisposable Subscribe(IFuncHandler<Void, TReturn> handler) => core.Subscribe(handler);
+    public FuncResult<TReturn> Invoke(Void arg) => core.Invoke(arg);
+    public IDisposable RegisterCallback(IFuncHandler<Void, TReturn> handler) => core.RegisterCallback(handler);
     
-    public void ClearSubscriptions() => core.ClearSubscriptions();
+    public void ClearHandlers() => core.ClearHandlers();
     public void Dispose() => core.Dispose();
 
-    FuncResult<TReturn> IFuncPublisher<Void, TReturn>.PublishTo(IFuncHandler<Void, TReturn> handler, Void message) => core.PublishTo(handler, message);
+    FuncResult<TReturn> IFuncPublisher<Void, TReturn>.InvokeHandler(IFuncHandler<Void, TReturn> handler, Void arg) => core.InvokeHandler(handler, arg);
     IFuncHandler<Void, TReturn>[] IFuncPublisher<Void, TReturn>.GetHandlers() => core.GetHandlers();
 }

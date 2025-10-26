@@ -5,14 +5,14 @@ namespace DisposableEvents;
 
 public static partial class FuncPublisherExtensions {
     /// <summary>
-    /// Converts an <see cref="IFuncPublisher{TMessage, TReturn}"/> into an
+    /// Converts an <see cref="IFuncPublisher{TArg, TReturn}"/> into an
     /// <see cref="IEnumerable{T}"/> that defers work and publishes
     /// results as the sequence is enumerated (lazy/deferred execution).
     /// </summary>
-    /// <typeparam name="TMessage">The type of the message to be published.</typeparam>
+    /// <typeparam name="TArg">The type of the arg to be published.</typeparam>
     /// <typeparam name="TReturn">The type of the result returned by the publisher.</typeparam>
-    /// <param name="publisher">The publisher that handles the message and produces results.</param>
-    /// <param name="message">The message to be published to the handlers.</param>
+    /// <param name="publisher">The publisher that handles the arg and produces results.</param>
+    /// <param name="arg">The arg to be published to the handlers.</param>
     /// <returns>
     /// An <see cref="IEnumerable{T}"/> that performs no publishing at call time; each iteration
     /// publishes to the next handler and yields its result.
@@ -23,20 +23,20 @@ public static partial class FuncPublisherExtensions {
     /// - Minimizes upfront work and avoids buffering; useful for short-circuiting or filtering during enumeration.<br/>
     /// - Side effects happen progressively as you iterate.
     /// </remarks>
-    /// <seealso cref="PublishAsEnumerableImmediate{TMessage,TReturn}(IFuncPublisher{TMessage,TReturn},TMessage)"/>
-    public static IEnumerable<FuncResult<TReturn>> PublishAsEnumerable<TMessage, TReturn>(this IFuncPublisher<TMessage, TReturn> publisher, TMessage message) {
-        return new PublishEnumerableDeferred<TMessage, TReturn>(publisher, message);
+    /// <seealso cref="InvokeAsEnumerableImmediate{TArg,TReturn}"/>
+    public static IEnumerable<FuncResult<TReturn>> InvokeAsEnumerable<TArg, TReturn>(this IFuncPublisher<TArg, TReturn> publisher, TArg arg) {
+        return new PublishEnumerableDeferred<TArg, TReturn>(publisher, arg);
     }
     
     /// <summary>
-    /// Converts an <see cref="IFuncPublisher{TMessage, TReturn}"/> into an
+    /// Converts an <see cref="IFuncPublisher{TArg, TReturn}"/> into an
     /// <see cref="IEnumerable{T}"/> that eagerly publishes to all handlers
     /// immediately and stores the results for later enumeration (eager/immediate execution).
     /// </summary>
-    /// <typeparam name="TMessage">The type of the message to be published.</typeparam>
+    /// <typeparam name="TArg">The type of the arg to be published.</typeparam>
     /// <typeparam name="TReturn">The type of the result returned by the publisher.</typeparam>
-    /// <param name="publisher">The publisher that handles the message and produces results.</param>
-    /// <param name="message">The message to be published to the handlers.</param>
+    /// <param name="publisher">The publisher that handles the arg and produces results.</param>
+    /// <param name="arg">The arg to be published to the handlers.</param>
     /// <returns>
     /// An <see cref="IEnumerable{T}"/> whose results are computed at call time
     /// and then enumerated from a buffered snapshot.
@@ -44,20 +44,20 @@ public static partial class FuncPublisherExtensions {
     /// <remarks>
     /// - Eager: all handlers are invoked immediately; results are buffered.<br/>
     /// - Enumeration is over the stored results; publishing does not occur during enumeration.<br/>
-    /// - Useful when a stable snapshot is needed or all subscribers need to receive the message.
+    /// - Useful when a stable snapshot is needed or all subscribers need to receive the arg.
     /// </remarks>
-    /// <seealso cref="PublishAsEnumerable{TMessage,TReturn}(IFuncPublisher{TMessage,TReturn},TMessage)"/>
-    public static IEnumerable<FuncResult<TReturn>> PublishAsEnumerableImmediate<TMessage, TReturn>(this IFuncPublisher<TMessage, TReturn> publisher, TMessage message) {
-        return new PublishEnumerableImmediate<TMessage, TReturn>(publisher, message);
+    /// <seealso cref="InvokeAsEnumerable{TArg,TReturn}"/>
+    public static IEnumerable<FuncResult<TReturn>> InvokeAsEnumerableImmediate<TArg, TReturn>(this IFuncPublisher<TArg, TReturn> publisher, TArg arg) {
+        return new PublishEnumerableImmediate<TArg, TReturn>(publisher, arg);
     }
     
     // ----- Classes ----- //
     
-    sealed class PublishEnumerableDeferred<TMessage, TReturn> : IEnumerable<FuncResult<TReturn>> {
+    sealed class PublishEnumerableDeferred<TArg, TReturn> : IEnumerable<FuncResult<TReturn>> {
         readonly Enumerator enumerator;
         
-        public PublishEnumerableDeferred(IFuncPublisher<TMessage, TReturn> publisher, TMessage message) {
-            enumerator = new Enumerator(publisher, message);
+        public PublishEnumerableDeferred(IFuncPublisher<TArg, TReturn> publisher, TArg arg) {
+            enumerator = new Enumerator(publisher, arg);
         }
         
         public IEnumerator<FuncResult<TReturn>> GetEnumerator() {
@@ -69,21 +69,21 @@ public static partial class FuncPublisherExtensions {
         }
         
         sealed class Enumerator : IEnumerator<FuncResult<TReturn>> {
-            readonly IFuncPublisher<TMessage, TReturn> publisher;
-            readonly TMessage message;
-            IFuncHandler<TMessage, TReturn>[]? handlers;
+            readonly IFuncPublisher<TArg, TReturn> publisher;
+            readonly TArg arg;
+            IFuncHandler<TArg, TReturn>[]? handlers;
             
             int index = -1;
             
-            public Enumerator(IFuncPublisher<TMessage, TReturn> publisher, TMessage message) {
+            public Enumerator(IFuncPublisher<TArg, TReturn> publisher, TArg arg) {
                 this.publisher = publisher;
-                this.message = message;
+                this.arg = arg;
             }
             
             public FuncResult<TReturn> Current {
                 get {
                     handlers ??= publisher.GetHandlers();
-                    return publisher.PublishTo(handlers[index], message);
+                    return publisher.InvokeHandler(handlers[index], arg);
                 }
             }
 
@@ -105,11 +105,11 @@ public static partial class FuncPublisherExtensions {
         }
     }
     
-    sealed class PublishEnumerableImmediate<TMessage, TReturn> : IEnumerable<FuncResult<TReturn>> {
+    sealed class PublishEnumerableImmediate<TArg, TReturn> : IEnumerable<FuncResult<TReturn>> {
         readonly Enumerator enumerator;
         
-        public PublishEnumerableImmediate(IFuncPublisher<TMessage, TReturn> publisher, TMessage message) {
-            enumerator = new Enumerator(publisher, message);
+        public PublishEnumerableImmediate(IFuncPublisher<TArg, TReturn> publisher, TArg arg) {
+            enumerator = new Enumerator(publisher, arg);
         }
         
         public IEnumerator<FuncResult<TReturn>> GetEnumerator() {
@@ -126,7 +126,7 @@ public static partial class FuncPublisherExtensions {
             
             int index = -1;
             
-            public Enumerator(IFuncPublisher<TMessage, TReturn> publisher, TMessage message) {
+            public Enumerator(IFuncPublisher<TArg, TReturn> publisher, TArg arg) {
                 var handlers = publisher.GetHandlers();
         
                 if (handlers.Length == 0) {
@@ -139,7 +139,7 @@ public static partial class FuncPublisherExtensions {
                 results = ArrayPool<FuncResult<TReturn>>.Shared.Rent(resultCount);
         
                 for (var i = 0; i < resultCount; i++) {
-                    results[i] = publisher.PublishTo(handlers[i], message);
+                    results[i] = publisher.InvokeHandler(handlers[i], arg);
                 }
             }
             
