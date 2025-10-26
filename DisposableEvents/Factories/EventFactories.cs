@@ -1,11 +1,11 @@
 ﻿namespace DisposableEvents.Factories;
 
 public interface IEventFactory {
-    IDisposableEvent<TMessage> Create<TMessage>();
+    IDisposableEvent<TMessage> CreateEvent<TMessage>();
 }
 
 public class EventFactory : IEventFactory {
     public static EventFactory Default { get; } = new EventFactory();
 
-    public IDisposableEvent<TMessage> Create<TMessage>() => new DisposableEvent<TMessage>();
+    public IDisposableEvent<TMessage> CreateEvent<TMessage>() => new DisposableEvent<TMessage>();
 }

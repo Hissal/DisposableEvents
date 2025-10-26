@@ -3,7 +3,7 @@
 /// <summary>
 /// Marker Interface for events to allow for non-generic storage and disposal.
 /// </summary>
-public interface IEventMarker;
+public interface IEventMarker : IDisposable;
 
 public interface IEventPublisher<in TMessage> : IDisposable {
     public bool IsDisposed { get; }

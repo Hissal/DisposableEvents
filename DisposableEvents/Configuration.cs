@@ -6,6 +6,8 @@ internal static class GlobalConfig {
     public static int InitialSubscriberCapacity => DisposableEvents.Config.InitialSubscriberCapacity;
     public static IFilteredEventHandlerFactory FilteredHandlerFactory => DisposableEvents.Config.FilteredEventHandlerFactory;
     public static IFilteredFuncHandlerFactory FilteredFuncHandlerFactory => DisposableEvents.Config.FilteredFuncHandlerFactory;
+    
+    public static IEventFactory EventFactory => DisposableEvents.Config.EventFactory;
 }
 
 public sealed class DisposableEventsConfig {
@@ -24,6 +26,8 @@ public sealed class DisposableEventsConfig {
     public IFilteredEventHandlerFactory FilteredEventHandlerFactory { get; set; } = Factories.FilteredEventHandlerFactory.Default;
 
     public IFilteredFuncHandlerFactory FilteredFuncHandlerFactory { get; set; } = Factories.FilteredFuncHandlerFactory.Default;
+    
+    public IEventFactory EventFactory { get; set; } = Factories.EventFactory.Default;
 }
 
 public static class DisposableEvents {
