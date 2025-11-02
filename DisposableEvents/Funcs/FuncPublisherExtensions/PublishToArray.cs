@@ -1,14 +1,14 @@
 ﻿namespace DisposableEvents;
 
 public static partial class FuncPublisherExtensions {
-    public static FuncResult<TReturn>[] InvokeToArray<TArg, TReturn>(
-        this IFuncPublisher<TArg, TReturn> publisher, TArg arg) {
+    public static FuncResult<TResult>[] InvokeToArray<TArg, TResult>(
+        this IFuncPublisher<TArg, TResult> publisher, TArg arg) {
         var handlers = publisher.GetHandlers();
 
         if (handlers.Length == 0)
-            return Array.Empty<FuncResult<TReturn>>();
+            return Array.Empty<FuncResult<TResult>>();
 
-        var results = new FuncResult<TReturn>[handlers.Length];
+        var results = new FuncResult<TResult>[handlers.Length];
 
         for (var i = 0; i < handlers.Length; i++) {
             results[i] = publisher.InvokeHandler(handlers[i], arg);
@@ -17,8 +17,8 @@ public static partial class FuncPublisherExtensions {
         return results;
     }
 
-    public static int InvokeToArrayNonAlloc<TArg, TReturn>(this IFuncPublisher<TArg, TReturn> publisher,
-        TArg arg, FuncResult<TReturn>[] results) {
+    public static int InvokeToArrayNonAlloc<TArg, TResult>(this IFuncPublisher<TArg, TResult> publisher,
+        TArg arg, FuncResult<TResult>[] results) {
         var handlers = publisher.GetHandlers();
 
         if (results.Length == 0)
@@ -32,8 +32,8 @@ public static partial class FuncPublisherExtensions {
         return count;
     }
 
-    public static int InvokeToArrayNonAlloc<TArg, TReturn>(this IFuncPublisher<TArg, TReturn> publisher,
-        TArg arg, TReturn[] results) {
+    public static int InvokeToArrayNonAlloc<TArg, TResult>(this IFuncPublisher<TArg, TResult> publisher,
+        TArg arg, TResult[] results) {
         var handlers = publisher.GetHandlers();
 
         if (results.Length == 0)

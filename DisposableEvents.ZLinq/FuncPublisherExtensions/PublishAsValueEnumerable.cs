@@ -5,14 +5,14 @@ using ZLinq.Internal;
 
 namespace DisposableEvents.ZLinq;
 
-public static class FuncPublisherExtensions {
+public static class FuncPublisherExtensionsZLinq {
     /// <summary>
-    /// Converts an <see cref="IFuncPublisher{TArg, TReturn}"/> into a
+    /// Converts an <see cref="IFuncPublisher{TArg, TResult}"/> into a
     /// <see cref="ValueEnumerable{TEnumerator, TItem}"/> that defers work and publishes
     /// results as the sequence is enumerated (lazy/deferred execution).
     /// </summary>
     /// <typeparam name="TArg">The type of the arg to be published.</typeparam>
-    /// <typeparam name="TReturn">The type of the result returned by the publisher.</typeparam>
+    /// <typeparam name="TResult">The type of the result returned by the publisher.</typeparam>
     /// <param name="publisher">The publisher that handles the arg and produces results.</param>
     /// <param name="arg">The arg to be published to the handlers.</param>
     /// <returns>
@@ -25,21 +25,21 @@ public static class FuncPublisherExtensions {
     /// - Minimizes upfront work and avoids buffering; useful for short-circuiting or filtering during enumeration.<br/>
     /// - Side effects happen progressively as you iterate.
     /// </remarks>
-    /// <seealso cref="InvokeAsValueEnumerableImmediate{TArg,TReturn}"/>
-    public static ValueEnumerable<InvokeValueEnumeratorDeferred<TArg, TReturn>, FuncResult<TReturn>> InvokeAsValueEnumerable<TArg, TReturn>(
-            this IFuncPublisher<TArg, TReturn> publisher,
+    /// <seealso cref="InvokeAsValueEnumerableImmediate{TArg,TResult}"/>
+    public static ValueEnumerable<InvokeValueEnumeratorDeferred<TArg, TResult>, FuncResult<TResult>> InvokeAsValueEnumerable<TArg, TResult>(
+            this IFuncPublisher<TArg, TResult> publisher,
             TArg arg) 
     {
         return new(new(publisher, arg));
     }
     
     /// <summary>
-    /// Converts an <see cref="IFuncPublisher{TArg, TReturn}"/> into a
+    /// Converts an <see cref="IFuncPublisher{TArg, TResult}"/> into a
     /// <see cref="ValueEnumerable{TEnumerator, TItem}"/> that eagerly publishes to all handlers
     /// immediately and stores the results for later enumeration (eager/immediate execution).
     /// </summary>
     /// <typeparam name="TArg">The type of the arg to be published.</typeparam>
-    /// <typeparam name="TReturn">The type of the result returned by the publisher.</typeparam>
+    /// <typeparam name="TResult">The type of the result returned by the publisher.</typeparam>
     /// <param name="publisher">The publisher that handles the arg and produces results.</param>
     /// <param name="arg">The arg to be published to the handlers.</param>
     /// <returns>
@@ -51,23 +51,23 @@ public static class FuncPublisherExtensions {
     /// - Enumeration is over the stored results; publishing does not occur during enumeration.<br/>
     /// - Useful when a stable snapshot is needed or all subscribers need to receive the arg.
     /// </remarks>
-    /// <seealso cref="InvokeAsValueEnumerable{TArg,TReturn}"/>
-    public static ValueEnumerable<InvokeValueEnumeratorImmediate<TArg, TReturn>, FuncResult<TReturn>> InvokeAsValueEnumerableImmediate<TArg, TReturn>(
-        this IFuncPublisher<TArg, TReturn> publisher,
+    /// <seealso cref="InvokeAsValueEnumerable{TArg,TResult}"/>
+    public static ValueEnumerable<InvokeValueEnumeratorImmediate<TArg, TResult>, FuncResult<TResult>> InvokeAsValueEnumerableImmediate<TArg, TResult>(
+        this IFuncPublisher<TArg, TResult> publisher,
         TArg arg) 
     {
         return new(new(publisher, arg));
     }
 }
 
-public struct InvokeValueEnumeratorDeferred<TArg, TReturn> : IValueEnumerator<FuncResult<TReturn>> {
-    readonly IFuncPublisher<TArg, TReturn> publisher;
+public struct InvokeValueEnumeratorDeferred<TArg, TResult> : IValueEnumerator<FuncResult<TResult>> {
+    readonly IFuncPublisher<TArg, TResult> publisher;
     readonly TArg arg;
-    IFuncHandler<TArg, TReturn>[]? handlers;
+    IFuncHandler<TArg, TResult>[]? handlers;
     
     int index;
     
-    public InvokeValueEnumeratorDeferred(IFuncPublisher<TArg, TReturn> publisher, TArg arg) {
+    public InvokeValueEnumeratorDeferred(IFuncPublisher<TArg, TResult> publisher, TArg arg) {
         this.publisher = publisher;
         this.arg = arg;
     }
@@ -77,15 +77,15 @@ public struct InvokeValueEnumeratorDeferred<TArg, TReturn> : IValueEnumerator<Fu
         return true;
     }
     
-    public bool TryGetSpan(out ReadOnlySpan<FuncResult<TReturn>> span) {
+    public bool TryGetSpan(out ReadOnlySpan<FuncResult<TResult>> span) {
         span = default;
         return false;
     }
     
-    public bool TryCopyTo(Span<FuncResult<TReturn>> destination, Index offset) {
+    public bool TryCopyTo(Span<FuncResult<TResult>> destination, Index offset) {
         handlers ??= publisher.GetHandlers();
         
-        if (EnumeratorHelper.TryGetSlice<IFuncHandler<TArg, TReturn>>(
+        if (EnumeratorHelper.TryGetSlice<IFuncHandler<TArg, TResult>>(
                 handlers.AsSpan(), 
                 offset,
                 destination.Length, 
@@ -100,7 +100,7 @@ public struct InvokeValueEnumeratorDeferred<TArg, TReturn> : IValueEnumerator<Fu
         return false;
     }
     
-    public bool TryGetNext(out FuncResult<TReturn> current) {
+    public bool TryGetNext(out FuncResult<TResult> current) {
         handlers ??= publisher.GetHandlers();
         if (index < handlers.Length) {
             current = publisher.InvokeHandler(handlers[index], arg);
@@ -117,13 +117,13 @@ public struct InvokeValueEnumeratorDeferred<TArg, TReturn> : IValueEnumerator<Fu
     }
 }
 
-public struct InvokeValueEnumeratorImmediate<TArg, TReturn> : IValueEnumerator<FuncResult<TReturn>> {
-    readonly FuncResult<TReturn>[]? results;
+public struct InvokeValueEnumeratorImmediate<TArg, TResult> : IValueEnumerator<FuncResult<TResult>> {
+    readonly FuncResult<TResult>[]? results;
     readonly int resultCount;
     
     int index;
     
-    public InvokeValueEnumeratorImmediate(IFuncPublisher<TArg, TReturn> publisher, TArg arg) {
+    public InvokeValueEnumeratorImmediate(IFuncPublisher<TArg, TResult> publisher, TArg arg) {
         var handlers = publisher.GetHandlers();
         
         if (handlers.Length == 0) {
@@ -134,7 +134,7 @@ public struct InvokeValueEnumeratorImmediate<TArg, TReturn> : IValueEnumerator<F
         }
         
         resultCount = handlers.Length;
-        results = ArrayPool<FuncResult<TReturn>>.Shared.Rent(resultCount);
+        results = ArrayPool<FuncResult<TResult>>.Shared.Rent(resultCount);
         
         for (var i = 0; i < resultCount; i++) {
             results[i] = publisher.InvokeHandler(handlers[i], arg);
@@ -146,7 +146,7 @@ public struct InvokeValueEnumeratorImmediate<TArg, TReturn> : IValueEnumerator<F
         return true;
     }
     
-    public bool TryGetSpan(out ReadOnlySpan<FuncResult<TReturn>> span) {
+    public bool TryGetSpan(out ReadOnlySpan<FuncResult<TResult>> span) {
         if (resultCount == 0) {
             span = default;
             return false;
@@ -156,12 +156,12 @@ public struct InvokeValueEnumeratorImmediate<TArg, TReturn> : IValueEnumerator<F
         return true;
     }
     
-    public bool TryCopyTo(Span<FuncResult<TReturn>> destination, Index offset) {
+    public bool TryCopyTo(Span<FuncResult<TResult>> destination, Index offset) {
         if (resultCount == 0) {
             return false;
         }
         
-        if (EnumeratorHelper.TryGetSlice<FuncResult<TReturn>>(
+        if (EnumeratorHelper.TryGetSlice<FuncResult<TResult>>(
                 results.AsSpan(0, resultCount), 
                 offset,
                 destination.Length, 
@@ -174,7 +174,7 @@ public struct InvokeValueEnumeratorImmediate<TArg, TReturn> : IValueEnumerator<F
         return false;
     }
     
-    public bool TryGetNext(out FuncResult<TReturn> current) {
+    public bool TryGetNext(out FuncResult<TResult> current) {
         if (index < resultCount) {
             current = results![index];
             index++;
@@ -187,7 +187,7 @@ public struct InvokeValueEnumeratorImmediate<TArg, TReturn> : IValueEnumerator<F
     
     public void Dispose() {
         if (results != null) {
-            ArrayPool<FuncResult<TReturn>>.Shared.Return(results);
+            ArrayPool<FuncResult<TResult>>.Shared.Return(results);
         }
     }
 }

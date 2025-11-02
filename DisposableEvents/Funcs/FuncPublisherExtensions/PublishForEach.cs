@@ -1,19 +1,19 @@
 ﻿namespace DisposableEvents;
 
 public static partial class FuncPublisherExtensions {
-    public static void InvokeForEach<TArg, TReturn>(this IFuncPublisher<TArg, TReturn> publisher, TArg arg, Action<FuncResult<TReturn>> forEach) {
+    public static void InvokeForEach<TArg, TResult>(this IFuncPublisher<TArg, TResult> publisher, TArg arg, Action<FuncResult<TResult>> forEach) {
         foreach (var handler in publisher.GetHandlers()) {
             forEach(publisher.InvokeHandler(handler, arg));
         }
     }
     
-    public static void InvokeForEach<TState, TArg, TReturn>(this IFuncPublisher<TArg, TReturn> publisher, TArg arg, TState state, Action<TState, FuncResult<TReturn>> forEach) {
+    public static void InvokeForEach<TState, TArg, TResult>(this IFuncPublisher<TArg, TResult> publisher, TArg arg, TState state, Action<TState, FuncResult<TResult>> forEach) {
         foreach (var handler in publisher.GetHandlers()) {
             forEach(state, publisher.InvokeHandler(handler, arg));
         }
     }
     
-    public static void InvokeForEach<TArg, TReturn>(this IFuncPublisher<TArg, TReturn> publisher, TArg arg, Action<FuncResult<TReturn>, int> forEach) {
+    public static void InvokeForEach<TArg, TResult>(this IFuncPublisher<TArg, TResult> publisher, TArg arg, Action<FuncResult<TResult>, int> forEach) {
         var currentIndex = 0;
         foreach (var handler in publisher.GetHandlers()) {
             forEach(publisher.InvokeHandler(handler, arg), currentIndex);
@@ -21,7 +21,7 @@ public static partial class FuncPublisherExtensions {
         }
     }
     
-    public static void InvokeForEach<TState, TArg, TReturn>(this IFuncPublisher<TArg, TReturn> publisher, TArg arg, TState state, Action<TState, FuncResult<TReturn>, int> forEach) {
+    public static void InvokeForEach<TState, TArg, TResult>(this IFuncPublisher<TArg, TResult> publisher, TArg arg, TState state, Action<TState, FuncResult<TResult>, int> forEach) {
         var currentIndex = 0;
         foreach (var handler in publisher.GetHandlers()) {
             forEach(state, publisher.InvokeHandler(handler, arg), currentIndex);
@@ -29,7 +29,7 @@ public static partial class FuncPublisherExtensions {
         }
     }
     
-    public static void InvokeForEachValue<TArg, TReturn>(this IFuncPublisher<TArg, TReturn> publisher, TArg arg, Action<TReturn> forEach) {
+    public static void InvokeForEachValue<TArg, TResult>(this IFuncPublisher<TArg, TResult> publisher, TArg arg, Action<TResult> forEach) {
         foreach (var handler in publisher.GetHandlers()) {
             var result = publisher.InvokeHandler(handler, arg);
             if (result.HasValue) {
@@ -38,7 +38,7 @@ public static partial class FuncPublisherExtensions {
         }
     }
     
-    public static void InvokeForEachValue<TState, TArg, TReturn>(this IFuncPublisher<TArg, TReturn> publisher, TArg arg, TState state, Action<TState, TReturn> forEach) {
+    public static void InvokeForEachValue<TState, TArg, TResult>(this IFuncPublisher<TArg, TResult> publisher, TArg arg, TState state, Action<TState, TResult> forEach) {
         foreach (var handler in publisher.GetHandlers()) {
             var result = publisher.InvokeHandler(handler, arg);
             if (result.HasValue) {
@@ -47,7 +47,7 @@ public static partial class FuncPublisherExtensions {
         }
     }
     
-    public static void InvokeForEachValue<TArg, TReturn>(this IFuncPublisher<TArg, TReturn> publisher, TArg arg, Action<TReturn, int> forEach) {
+    public static void InvokeForEachValue<TArg, TResult>(this IFuncPublisher<TArg, TResult> publisher, TArg arg, Action<TResult, int> forEach) {
         var currentIndex = 0;
         foreach (var handler in publisher.GetHandlers()) {
             var result = publisher.InvokeHandler(handler, arg);
@@ -58,7 +58,7 @@ public static partial class FuncPublisherExtensions {
         }
     }
     
-    public static void InvokeForEachValue<TState, TArg, TReturn>(this IFuncPublisher<TArg, TReturn> publisher, TArg arg, TState state, Action<TState, TReturn, int> forEach) {
+    public static void InvokeForEachValue<TState, TArg, TResult>(this IFuncPublisher<TArg, TResult> publisher, TArg arg, TState state, Action<TState, TResult, int> forEach) {
         var currentIndex = 0;
         foreach (var handler in publisher.GetHandlers()) {
             var result = publisher.InvokeHandler(handler, arg);

@@ -1,61 +1,61 @@
 ﻿namespace DisposableEvents;
 
 public static class VoidFuncExtensions {
-    public static FuncResult<TReturn> Invoke<TReturn>(this IFuncPublisher<Void, TReturn> publisher) => publisher.Invoke(Void.Value);
+    public static FuncResult<TResult> Invoke<TResult>(this IFuncPublisher<Void, TResult> publisher) => publisher.Invoke(Void.Value);
     
     // ----- Subscriber Extensions -----
-    public static IDisposable RegisterCallback<TReturn>(
-        this IFuncSubscriber<Void, TReturn> subscriber, 
-        Func<FuncResult<TReturn>> handler,
+    public static IDisposable RegisterHandler<TResult>(
+        this IFuncSubscriber<Void, TResult> subscriber, 
+        Func<FuncResult<TResult>> handler,
         params IEventFilter<Void>[] filters) 
     {
-        return subscriber.RegisterCallback(new VoidFuncHandler<TReturn>(handler), filters);
+        return subscriber.RegisterHandler(new VoidFuncHandler<TResult>(handler), filters);
     }
     
-    public static IDisposable RegisterCallback<TReturn>(
-        this IFuncSubscriber<Void, TReturn> subscriber,
-        Func<FuncResult<TReturn>> handler,
+    public static IDisposable RegisterHandler<TResult>(
+        this IFuncSubscriber<Void, TResult> subscriber,
+        Func<FuncResult<TResult>> handler,
         Func<bool> predicateFilter,
         params IEventFilter<Void>[] additionalFilters) 
     {
         if (additionalFilters.Length == 0)
-            return subscriber.RegisterCallback(
-                new VoidFuncHandler<TReturn>(handler), 
+            return subscriber.RegisterHandler(
+                new VoidFuncHandler<TResult>(handler), 
                 new VoidPredicateEventFilter(predicateFilter)
             );
         
         var filters = new IEventFilter<Void>[additionalFilters.Length + 1];
         filters[0] = new VoidPredicateEventFilter(predicateFilter);
         Array.Copy(additionalFilters, 0, filters, 1, additionalFilters.Length);
-        return subscriber.RegisterCallback(new VoidFuncHandler<TReturn>(handler), filters);
+        return subscriber.RegisterHandler(new VoidFuncHandler<TResult>(handler), filters);
     }
     
     // ----- Stateful Overloads -----
-    public static IDisposable RegisterCallback<TState, TReturn>(
-        this IFuncSubscriber<Void, TReturn> subscriber,
+    public static IDisposable RegisterHandler<TState, TResult>(
+        this IFuncSubscriber<Void, TResult> subscriber,
         TState state,
-        Func<TState, FuncResult<TReturn>> handler,
+        Func<TState, FuncResult<TResult>> handler,
         params IEventFilter<Void>[] filters) 
     {
-        return subscriber.RegisterCallback(new StatefulVoidFuncHandler<TState, TReturn>(state, handler), filters);
+        return subscriber.RegisterHandler(new VoidFuncHandler<TState, TResult>(state, handler), filters);
     }
     
-    public static IDisposable RegisterCallback<TState, TReturn>(
-        this IFuncSubscriber<Void, TReturn> subscriber,
+    public static IDisposable RegisterHandler<TState, TResult>(
+        this IFuncSubscriber<Void, TResult> subscriber,
         TState state,
-        Func<TState, FuncResult<TReturn>> handler,
+        Func<TState, FuncResult<TResult>> handler,
         Func<bool> predicateFilter,
         params IEventFilter<Void>[] additionalFilters) 
     {
         if (additionalFilters.Length == 0)
-            return subscriber.RegisterCallback(
-                new StatefulVoidFuncHandler<TState, TReturn>(state, handler), 
+            return subscriber.RegisterHandler(
+                new VoidFuncHandler<TState, TResult>(state, handler), 
                 new VoidPredicateEventFilter(predicateFilter)
             );
         
         var filters = new IEventFilter<Void>[additionalFilters.Length + 1];
         filters[0] = new VoidPredicateEventFilter(predicateFilter);
         Array.Copy(additionalFilters, 0, filters, 1, additionalFilters.Length);
-        return subscriber.RegisterCallback(new StatefulVoidFuncHandler<TState, TReturn>(state, handler), filters);
+        return subscriber.RegisterHandler(new VoidFuncHandler<TState, TResult>(state, handler), filters);
     }
 }

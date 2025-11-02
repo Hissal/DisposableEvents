@@ -4,8 +4,8 @@ using DisposableEvents.Internal;
 
 namespace DisposableEvents;
 
-public sealed class FuncCore<TMessage, TReturn> : IDisposableFunc<TMessage, TReturn> {
-    internal readonly FreeList<IFuncHandler<TMessage, TReturn>> Handlers;
+public sealed class FuncCore<TArg, TResult> : IDisposableFunc<TArg, TResult> {
+    internal readonly FreeList<IFuncHandler<TArg, TResult>> Handlers;
     
     bool disposed;
     public bool IsDisposed {
@@ -20,8 +20,8 @@ public sealed class FuncCore<TMessage, TReturn> : IDisposableFunc<TMessage, TRet
     
     public int HandlerCount => Handlers.GetCount();
     
-    IFuncHandler<TMessage, TReturn>[]? cachedHandlers;
-    public IFuncHandler<TMessage, TReturn>[] GetHandlers() {
+    IFuncHandler<TArg, TResult>[]? cachedHandlers;
+    public IFuncHandler<TArg, TResult>[] GetHandlers() {
         if (cachedHandlers != null)
             return cachedHandlers;
         
@@ -31,16 +31,16 @@ public sealed class FuncCore<TMessage, TReturn> : IDisposableFunc<TMessage, TRet
 
     public FuncCore() : this(GlobalConfig.InitialSubscriberCapacity) { }
     public FuncCore(int initialSubscriberCapacity) {
-        Handlers = new FreeList<IFuncHandler<TMessage, TReturn>>(initialSubscriberCapacity);
+        Handlers = new FreeList<IFuncHandler<TArg, TResult>>(initialSubscriberCapacity);
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public FuncResult<TReturn> InvokeHandler(IFuncHandler<TMessage, TReturn> handler, TMessage arg) {
+    public FuncResult<TResult> InvokeHandler(IFuncHandler<TArg, TResult> handler, TArg arg) {
         return handler.Handle(arg);
     }
     
-    public FuncResult<TReturn> Invoke(TMessage arg) {
-        var result = FuncResult<TReturn>.Null();
+    public FuncResult<TResult> Invoke(TArg arg) {
+        var result = FuncResult<TResult>.Null();
         
         foreach (var handler in Handlers.GetValues()) {
             if (handler != null) {
@@ -51,7 +51,7 @@ public sealed class FuncCore<TMessage, TReturn> : IDisposableFunc<TMessage, TRet
         return result;
     }
     
-    public IDisposable RegisterCallback(IFuncHandler<TMessage, TReturn> handler) {
+    public IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler) {
         lock (gate) {
             if (disposed)
                 return Disposable.Empty;
@@ -86,10 +86,10 @@ public sealed class FuncCore<TMessage, TReturn> : IDisposableFunc<TMessage, TRet
     
     sealed class Subscription : IDisposable {
         bool isDisposed;
-        readonly FuncCore<TMessage, TReturn> core;
+        readonly FuncCore<TArg, TResult> core;
         readonly int subscriptionKey;
 
-        public Subscription(FuncCore<TMessage, TReturn> core, int subscriptionKey) {
+        public Subscription(FuncCore<TArg, TResult> core, int subscriptionKey) {
             this.core = core;
             this.subscriptionKey = subscriptionKey;
         }

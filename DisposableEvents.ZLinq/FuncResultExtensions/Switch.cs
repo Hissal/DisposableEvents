@@ -2,7 +2,7 @@
 
 namespace DisposableEvents.ZLinq;
 
-public static partial class FuncResultExtensions {
+public static partial class FuncResultExtensionsZLinq {
     public static void Switch<TEnumerator, TValue>(this ValueEnumerable<TEnumerator, FuncResult<TValue>> results,
         Action<TValue> onValue, Action onNull)
         where TEnumerator : struct, IValueEnumerator<FuncResult<TValue>> 

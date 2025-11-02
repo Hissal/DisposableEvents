@@ -1,58 +1,83 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using DisposableEvents.Factories;
+﻿using DisposableEvents.Factories;
 
 namespace DisposableEvents;
 
 public interface IEventHub : IDisposable {
-    public IDisposableEvent<TMessage>? GetEvent<TMessage>();
-    bool TryGetEvent<TMessage>([NotNullWhen(true)] out IDisposableEvent<TMessage>? eventInstance);
+    IEventPublisher<TMessage> GetPublisher<TMessage>();
+    IEventSubscriber<TMessage> GetSubscriber<TMessage>();
 }
 
 public interface IEventHub<in TMessageRestriction> : IDisposable {
-    IDisposableEvent<TMessage>? GetEvent<TMessage>() where TMessage : TMessageRestriction;
-    bool TryGetEvent<TMessage>([NotNullWhen(true)] out IDisposableEvent<TMessage>? eventInstance) where TMessage : TMessageRestriction;
+    IEventPublisher<TMessage> GetPublisher<TMessage>() where TMessage : TMessageRestriction;
+    IEventSubscriber<TMessage> GetSubscriber<TMessage>() where TMessage : TMessageRestriction;
 }
 
 public sealed class EventHub : IEventHub {
-    readonly EventRegistry registry = new EventRegistry();
+    readonly EventRegistry registry = new();
     readonly IEventFactory factory;
+    
+    readonly object gate = new();
+    
+    bool disposed;
     
     public EventHub() : this(GlobalConfig.EventFactory) { }
     public EventHub(IEventFactory factory) {
         this.factory = factory;
     }
-    
-    public IDisposableEvent<TMessage> GetEvent<TMessage>() {
-        return registry.GetOrAddEvent(factory, f => f.CreateEvent<TMessage>());
-    }
 
-    public bool TryGetEvent<TMessage>([NotNullWhen(true)] out IDisposableEvent<TMessage>? eventInstance) {
-        return registry.TryGetEvent(out eventInstance);
+    public IEventPublisher<TMessage> GetPublisher<TMessage>() => GetEvent<TMessage>();
+    public IEventSubscriber<TMessage> GetSubscriber<TMessage>() => GetEvent<TMessage>();
+    
+    IDisposableEvent<TMessage> GetEvent<TMessage>() {
+        lock (gate) {
+            return disposed 
+                ? NullEvent<TMessage>.Instance
+                : registry.GetOrAddEvent(factory, f => f.CreateEvent<TMessage>());
+        }
     }
 
     public void Dispose() {
-        registry.Dispose();
+        lock (gate) {
+            if (disposed)
+                return;
+            
+            disposed = true;
+            registry.Dispose();
+        }
     }
 }
 
 public sealed class EventHub<TMessageRestriction> : IEventHub<TMessageRestriction> {
-    readonly EventRegistry registry = new EventRegistry();
+    readonly EventRegistry registry = new();
     readonly IEventFactory factory;
+    
+    readonly object gate = new();
+    
+    bool disposed;
     
     public EventHub() : this(GlobalConfig.EventFactory) { }
     public EventHub(IEventFactory factory) {
         this.factory = factory;
     }
-
-    public IDisposableEvent<TMessage> GetEvent<TMessage>() where TMessage : TMessageRestriction {
-        return registry.GetOrAddEvent(factory, f => f.CreateEvent<TMessage>());
-    }
     
-    public bool TryGetEvent<TMessage>([NotNullWhen(true)] out IDisposableEvent<TMessage>? eventInstance) where TMessage : TMessageRestriction {
-        return registry.TryGetEvent(out eventInstance);
+    public IEventPublisher<TMessage> GetPublisher<TMessage>() where TMessage : TMessageRestriction => GetEvent<TMessage>();
+    public IEventSubscriber<TMessage> GetSubscriber<TMessage>() where TMessage : TMessageRestriction => GetEvent<TMessage>();
+
+    IDisposableEvent<TMessage> GetEvent<TMessage>() where TMessage : TMessageRestriction {
+        lock (gate) {
+            return disposed 
+                ? NullEvent<TMessage>.Instance
+                : registry.GetOrAddEvent(factory, f => f.CreateEvent<TMessage>());
+        }
     }
 
     public void Dispose() {
-        registry.Dispose();
+        lock (gate) {
+            if (disposed)
+                return;
+            
+            disposed = true;
+            registry.Dispose();
+        }
     }
 }

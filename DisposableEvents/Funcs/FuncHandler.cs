@@ -1,59 +1,59 @@
 ﻿namespace DisposableEvents;
 
-public interface IFuncHandler<in TMessage, TReturn> {
-    FuncResult<TReturn> Handle(TMessage value);
+public interface IFuncHandler<in TArg, TResult> {
+    FuncResult<TResult> Handle(TArg value);
 }
 
-public sealed class FuncHandler<TMessage, TReturn> : IFuncHandler<TMessage, TReturn> {
-    readonly Func<TMessage, FuncResult<TReturn>> handler;
-    public FuncHandler(Func<TMessage, FuncResult<TReturn>> handler) => this.handler = handler;
-    public FuncResult<TReturn> Handle(TMessage value) => handler.Invoke(value);
+public sealed class FuncHandler<TArg, TResult> : IFuncHandler<TArg, TResult> {
+    readonly Func<TArg, FuncResult<TResult>> handler;
+    public FuncHandler(Func<TArg, FuncResult<TResult>> handler) => this.handler = handler;
+    public FuncResult<TResult> Handle(TArg value) => handler.Invoke(value);
 }
 
-public sealed class StatefulFuncHandler<TState, TMessage, TReturn> : IFuncHandler<TMessage, TReturn> {
-    readonly Func<TState, TMessage, FuncResult<TReturn>> handler;
+public sealed class FuncHandler<TState, TArg, TResult> : IFuncHandler<TArg, TResult> {
+    readonly Func<TState, TArg, FuncResult<TResult>> handler;
     readonly TState state;
 
-    public StatefulFuncHandler(TState state, Func<TState, TMessage, FuncResult<TReturn>> handler) {
+    public FuncHandler(TState state, Func<TState, TArg, FuncResult<TResult>> handler) {
         this.handler = handler;
         this.state = state;
     }
 
-    public FuncResult<TReturn> Handle(TMessage value) => handler.Invoke(state, value);
+    public FuncResult<TResult> Handle(TArg value) => handler.Invoke(state, value);
 }
 
-public sealed class FilteredFuncHandler<TMessage, TReturn> : IFuncHandler<TMessage, TReturn> {
-    readonly IFuncHandler<TMessage, TReturn> handler;
-    readonly IEventFilter<TMessage> filter;
+public sealed class FilteredFuncHandler<TArg, TResult> : IFuncHandler<TArg, TResult> {
+    readonly IFuncHandler<TArg, TResult> handler;
+    readonly IEventFilter<TArg> filter;
 
-    public FilteredFuncHandler(IFuncHandler<TMessage, TReturn> handler, IEventFilter<TMessage> filter) {
+    public FilteredFuncHandler(IFuncHandler<TArg, TResult> handler, IEventFilter<TArg> filter) {
         this.handler = handler;
         this.filter = filter;
     }
 
-    public FuncResult<TReturn> Handle(TMessage value) {
+    public FuncResult<TResult> Handle(TArg value) {
         return filter.Filter(ref value).Passed
             ? handler.Handle(value)
-            : FuncResult<TReturn>.Null();
+            : FuncResult<TResult>.Null();
     }
 }
 
 // ----- Void Handlers ---- //
-public sealed class VoidFuncHandler<TReturn> : IFuncHandler<Void, TReturn> {
-    readonly Func<FuncResult<TReturn>> handler;
-    public VoidFuncHandler(Func<FuncResult<TReturn>> handler) => this.handler = handler;
-    public FuncResult<TReturn> Handle(Void value) => handler.Invoke();
+public sealed class VoidFuncHandler<TResult> : IFuncHandler<Void, TResult> {
+    readonly Func<FuncResult<TResult>> handler;
+    public VoidFuncHandler(Func<FuncResult<TResult>> handler) => this.handler = handler;
+    public FuncResult<TResult> Handle(Void value) => handler.Invoke();
 }
 
-public sealed class StatefulVoidFuncHandler<TState, TReturn> : IFuncHandler<Void, TReturn> {
-    readonly Func<TState, FuncResult<TReturn>> handler;
+public sealed class VoidFuncHandler<TState, TResult> : IFuncHandler<Void, TResult> {
+    readonly Func<TState, FuncResult<TResult>> handler;
     readonly TState state;
 
-    public StatefulVoidFuncHandler(TState state, Func<TState, FuncResult<TReturn>> handler) {
+    public VoidFuncHandler(TState state, Func<TState, FuncResult<TResult>> handler) {
         this.handler = handler;
         this.state = state;
     }
 
-    public FuncResult<TReturn> Handle(Void value) => handler.Invoke(state);
+    public FuncResult<TResult> Handle(Void value) => handler.Invoke(state);
 }
 

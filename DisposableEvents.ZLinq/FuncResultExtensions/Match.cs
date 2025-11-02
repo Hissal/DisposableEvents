@@ -3,7 +3,7 @@ using ZLinq;
 
 namespace DisposableEvents.ZLinq;
 
-public static partial class FuncResultExtensions {
+public static partial class FuncResultExtensionsZLinq {
     public static ValueEnumerable<MatchEnumerator<TEnumerator, TValue, TResult>, TResult> Match<TEnumerator, TValue, TResult>(
         this ValueEnumerable<TEnumerator, FuncResult<TValue>> results,
         Func<TValue, TResult> onValue,

@@ -2,107 +2,107 @@
 
 public static class FuncSubscriberExtensions {
     // NOTE: This overload is just for convenience, allowing for use of the default implementation in the interface from any implementation.
-    public static IDisposable RegisterCallback<TMessage, TReturn>(
-        this IFuncSubscriber<TMessage, TReturn> subscriber,
-        IFuncHandler<TMessage, TReturn> handler,
-        IEventFilter<TMessage> filter) 
+    public static IDisposable RegisterHandler<TArg, TResult>(
+        this IFuncSubscriber<TArg, TResult> subscriber,
+        IFuncHandler<TArg, TResult> handler,
+        IEventFilter<TArg> filter) 
     {
-        return subscriber.RegisterCallback(handler, filter);
+        return subscriber.RegisterHandler(handler, filter);
     }
     
     // NOTE: This overload is just for convenience, allowing for use of the default implementation in the interface from any implementation.
-    public static IDisposable RegisterCallback<TMessage, TReturn>(
-        this IFuncSubscriber<TMessage, TReturn> subscriber,
-        IFuncHandler<TMessage, TReturn> handler,
-        IEventFilter<TMessage>[] filters,
+    public static IDisposable RegisterHandler<TArg, TResult>(
+        this IFuncSubscriber<TArg, TResult> subscriber,
+        IFuncHandler<TArg, TResult> handler,
+        IEventFilter<TArg>[] filters,
         FilterOrdering ordering)
     {
-        return subscriber.RegisterCallback(handler, filters, ordering);
+        return subscriber.RegisterHandler(handler, filters, ordering);
     }
     
-    public static IDisposable RegisterCallback<TMessage, TReturn>(
-        this IFuncSubscriber<TMessage, TReturn> subscriber,
-        IFuncHandler<TMessage, TReturn> handler, 
-        params IEventFilter<TMessage>[] filters)
+    public static IDisposable RegisterHandler<TArg, TResult>(
+        this IFuncSubscriber<TArg, TResult> subscriber,
+        IFuncHandler<TArg, TResult> handler, 
+        params IEventFilter<TArg>[] filters)
     {
         return filters.Length switch {
-            0 => subscriber.RegisterCallback(handler),
-            1 => subscriber.RegisterCallback(handler, filters[0]),
-            _ => subscriber.RegisterCallback(handler, filters, FilterOrdering.StableSort)
+            0 => subscriber.RegisterHandler(handler),
+            1 => subscriber.RegisterHandler(handler, filters[0]),
+            _ => subscriber.RegisterHandler(handler, filters, FilterOrdering.StableSort)
         };
     }
     
-    public static IDisposable RegisterCallback<TMessage, TReturn>(
-        this IFuncSubscriber<TMessage, TReturn> subscriber, 
-        Func<TMessage, FuncResult<TReturn>> handler,
-        params IEventFilter<TMessage>[] filters) 
+    public static IDisposable RegisterHandler<TArg, TResult>(
+        this IFuncSubscriber<TArg, TResult> subscriber, 
+        Func<TArg, FuncResult<TResult>> handler,
+        params IEventFilter<TArg>[] filters) 
     {
-        return subscriber.RegisterCallback(new FuncHandler<TMessage, TReturn>(handler), filters);
+        return subscriber.RegisterHandler(new FuncHandler<TArg, TResult>(handler), filters);
     }
 
-    public static IDisposable RegisterCallback<TMessage, TReturn>(
-        this IFuncSubscriber<TMessage, TReturn> subscriber,
-        Func<TMessage, FuncResult<TReturn>> handler, 
-        Func<TMessage, bool> predicateFilter,
-        params IEventFilter<TMessage>[] additionalFilters) 
+    public static IDisposable RegisterHandler<TArg, TResult>(
+        this IFuncSubscriber<TArg, TResult> subscriber,
+        Func<TArg, FuncResult<TResult>> handler, 
+        Func<TArg, bool> predicateFilter,
+        params IEventFilter<TArg>[] additionalFilters) 
     {
         if (additionalFilters.Length == 0)
-            return subscriber.RegisterCallback(
-                new FuncHandler<TMessage, TReturn>(handler), 
-                new PredicateEventFilter<TMessage>(predicateFilter)
+            return subscriber.RegisterHandler(
+                new FuncHandler<TArg, TResult>(handler), 
+                new PredicateEventFilter<TArg>(predicateFilter)
             );
         
-        var filters = new IEventFilter<TMessage>[additionalFilters.Length + 1];
-        filters[0] = new PredicateEventFilter<TMessage>(predicateFilter);
+        var filters = new IEventFilter<TArg>[additionalFilters.Length + 1];
+        filters[0] = new PredicateEventFilter<TArg>(predicateFilter);
         Array.Copy(additionalFilters, 0, filters, 1, additionalFilters.Length);
-        return subscriber.RegisterCallback(new FuncHandler<TMessage, TReturn>(handler), filters);
+        return subscriber.RegisterHandler(new FuncHandler<TArg, TResult>(handler), filters);
     }
     
     // ----- Stateful Overloads -----
-    public static IDisposable RegisterCallback<TState, TMessage, TReturn>(
-        this IFuncSubscriber<TMessage, TReturn> subscriber, 
+    public static IDisposable RegisterHandler<TState, TArg, TResult>(
+        this IFuncSubscriber<TArg, TResult> subscriber, 
         TState state,
-        Func<TState, TMessage, FuncResult<TReturn>> handler,
-        params IEventFilter<TMessage>[] filters) 
+        Func<TState, TArg, FuncResult<TResult>> handler,
+        params IEventFilter<TArg>[] filters) 
     {
-        return subscriber.RegisterCallback(new StatefulFuncHandler<TState, TMessage, TReturn>(state, handler), filters);
+        return subscriber.RegisterHandler(new FuncHandler<TState, TArg, TResult>(state, handler), filters);
     }
     
-    public static IDisposable RegisterCallback<TState, TMessage, TReturn>(
-        this IFuncSubscriber<TMessage, TReturn> subscriber,
+    public static IDisposable RegisterHandler<TState, TArg, TResult>(
+        this IFuncSubscriber<TArg, TResult> subscriber,
         TState state,
-        Func<TState, TMessage, FuncResult<TReturn>> handler, 
-        Func<TMessage, bool> predicateFilter,
-        params IEventFilter<TMessage>[] additionalFilters) 
+        Func<TState, TArg, FuncResult<TResult>> handler, 
+        Func<TArg, bool> predicateFilter,
+        params IEventFilter<TArg>[] additionalFilters) 
     {
         if (additionalFilters.Length == 0)
-            return subscriber.RegisterCallback(
-                new StatefulFuncHandler<TState, TMessage, TReturn>(state, handler), 
-                new PredicateEventFilter<TMessage>(predicateFilter)
+            return subscriber.RegisterHandler(
+                new FuncHandler<TState, TArg, TResult>(state, handler), 
+                new PredicateEventFilter<TArg>(predicateFilter)
             );
         
-        var filters = new IEventFilter<TMessage>[additionalFilters.Length + 1];
-        filters[0] = new PredicateEventFilter<TMessage>(predicateFilter);
+        var filters = new IEventFilter<TArg>[additionalFilters.Length + 1];
+        filters[0] = new PredicateEventFilter<TArg>(predicateFilter);
         Array.Copy(additionalFilters, 0, filters, 1, additionalFilters.Length);
-        return subscriber.RegisterCallback(new StatefulFuncHandler<TState, TMessage, TReturn>(state, handler), filters);
+        return subscriber.RegisterHandler(new FuncHandler<TState, TArg, TResult>(state, handler), filters);
     }
     
-    public static IDisposable RegisterCallback<TState, TMessage, TReturn>(
-        this IFuncSubscriber<TMessage, TReturn> subscriber,
+    public static IDisposable RegisterHandler<TState, TArg, TResult>(
+        this IFuncSubscriber<TArg, TResult> subscriber,
         TState state,
-        Func<TState, TMessage, FuncResult<TReturn>> handler, 
-        Func<TState, TMessage, bool> predicateFilter,
-        params IEventFilter<TMessage>[] additionalFilters) 
+        Func<TState, TArg, FuncResult<TResult>> handler, 
+        Func<TState, TArg, bool> predicateFilter,
+        params IEventFilter<TArg>[] additionalFilters) 
     {
         if (additionalFilters.Length == 0)
-            return subscriber.RegisterCallback(
-                new StatefulFuncHandler<TState, TMessage, TReturn>(state, handler), 
-                new PredicateEventFilter<TState, TMessage>(state, predicateFilter)
+            return subscriber.RegisterHandler(
+                new FuncHandler<TState, TArg, TResult>(state, handler), 
+                new PredicateEventFilter<TState, TArg>(state, predicateFilter)
             );
         
-        var filters = new IEventFilter<TMessage>[additionalFilters.Length + 1];
-        filters[0] = new PredicateEventFilter<TState, TMessage>(state, predicateFilter);
+        var filters = new IEventFilter<TArg>[additionalFilters.Length + 1];
+        filters[0] = new PredicateEventFilter<TState, TArg>(state, predicateFilter);
         Array.Copy(additionalFilters, 0, filters, 1, additionalFilters.Length);
-        return subscriber.RegisterCallback(new StatefulFuncHandler<TState, TMessage, TReturn>(state, handler), filters);
+        return subscriber.RegisterHandler(new FuncHandler<TState, TArg, TResult>(state, handler), filters);
     }
 }

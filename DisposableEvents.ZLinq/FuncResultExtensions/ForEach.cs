@@ -2,7 +2,7 @@
 
 namespace DisposableEvents.ZLinq;
 
-public static partial class FuncResultExtensions {
+public static partial class FuncResultExtensionsZLinq {
     public static void ForEach<TEnumerator, TValue>(this ValueEnumerable<TEnumerator, FuncResult<TValue>> results,
         Action<FuncResult<TValue>> forEach)
         where TEnumerator : struct, IValueEnumerator<FuncResult<TValue>> 

@@ -2,7 +2,7 @@
 
 namespace DisposableEvents.ZLinq;
 
-public static partial class FuncResultExtensions {
+public static partial class FuncResultExtensionsZLinq {
     public static TValue? FirstValueOrDefault<TEnumerator, TValue>(this ValueEnumerable<TEnumerator, FuncResult<TValue>> results) where TEnumerator : struct, IValueEnumerator<FuncResult<TValue>> {
         using var enumerator = results.Enumerator;
         while (enumerator.TryGetNext(out var result)) {

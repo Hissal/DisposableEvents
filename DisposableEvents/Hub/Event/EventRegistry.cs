@@ -3,26 +3,26 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace DisposableEvents;
 
-public enum EventRegisterationResult {
-    Added,
-    AlreadyExists
+public enum EventRegistrationResult {
+    Success,
+    AlreadyRegistered
 }
 
 public sealed class EventRegistry : IDisposable {
     readonly ConcurrentDictionary<Type, IEventMarker> events = new();
 
-    public EventRegisterationResult RegisterEvent<TMessage>(IDisposableEvent<TMessage> eventInstance) {
+    public EventRegistrationResult RegisterEvent<TMessage>(IDisposableEvent<TMessage> eventInstance) {
         return events.TryAdd(typeof(TMessage), eventInstance) 
-            ? EventRegisterationResult.Added
-            : EventRegisterationResult.AlreadyExists;
+            ? EventRegistrationResult.Success
+            : EventRegistrationResult.AlreadyRegistered;
     }
 
-    public IDisposableEvent<TMessage>? GetEvent<TMessage>() {
+    public IDisposableEvent<TMessage> GetEvent<TMessage>() {
         if (events.TryGetValue(typeof(TMessage), out var ev)) {
             return (IDisposableEvent<TMessage>)ev;
         }
 
-        return null;
+        throw new KeyNotFoundException($"No event of type {typeof(TMessage)} is registered in the registry.");
     }
     
     public bool TryGetEvent<TMessage>([NotNullWhen(true)] out IDisposableEvent<TMessage>? eventInstance) {

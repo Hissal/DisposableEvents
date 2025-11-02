@@ -2,7 +2,7 @@
 
 public interface IFuncMarker;
 
-public interface IFuncPublisher<TArg, TReturn> : IDisposable {
+public interface IFuncPublisher<TArg, TResult> : IDisposable {
     bool IsDisposed { get; }
     int HandlerCount { get; }
     
@@ -11,26 +11,26 @@ public interface IFuncPublisher<TArg, TReturn> : IDisposable {
     /// </summary>
     /// <param name="arg">The message to publish.</param>
     /// <returns>The result of the function call.</returns>
-    FuncResult<TReturn> Invoke(TArg arg);
+    FuncResult<TResult> Invoke(TArg arg);
 
-    FuncResult<TReturn> InvokeHandler(IFuncHandler<TArg, TReturn> handler, TArg arg);
-    IFuncHandler<TArg, TReturn>[] GetHandlers();
+    FuncResult<TResult> InvokeHandler(IFuncHandler<TArg, TResult> handler, TArg arg);
+    IFuncHandler<TArg, TResult>[] GetHandlers();
 }
 
-public interface IFuncSubscriber<TArg, TReturn> {
-    IDisposable RegisterCallback(IFuncHandler<TArg, TReturn> handler);
+public interface IFuncSubscriber<TArg, TResult> {
+    IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler);
 
-    IDisposable RegisterCallback(IFuncHandler<TArg, TReturn> handler, IEventFilter<TArg> filter) {
+    IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler, IEventFilter<TArg> filter) {
         var filteredHandler = GlobalConfig.FilteredFuncHandlerFactory.CreateFilteredHandler(handler, filter);
-        return RegisterCallback(filteredHandler);
+        return RegisterHandler(filteredHandler);
     }
     
-    IDisposable RegisterCallback(IFuncHandler<TArg, TReturn> handler, IEventFilter<TArg>[] filters, FilterOrdering ordering) {
+    IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler, IEventFilter<TArg>[] filters, FilterOrdering ordering) {
         var filteredHandler = GlobalConfig.FilteredFuncHandlerFactory.CreateFilteredHandler(handler, filters, ordering);
-        return RegisterCallback(filteredHandler);
+        return RegisterHandler(filteredHandler);
     }
 }
 
-public interface IDisposableFunc<TArg, TReturn> : IFuncPublisher<TArg, TReturn>, IFuncSubscriber<TArg, TReturn>, IFuncMarker {
+public interface IDisposableFunc<TArg, TResult> : IFuncPublisher<TArg, TResult>, IFuncSubscriber<TArg, TResult>, IFuncMarker {
     void ClearHandlers();
 }

@@ -2,7 +2,7 @@
 
 namespace DisposableEvents.ZLinq;
 
-public static partial class FuncResultExtensions {
+public static partial class FuncResultExtensionsZLinq {
     public static FuncResult<TValue> Combine<TEnumerator, TValue>(
         this ValueEnumerable<TEnumerator, FuncResult<TValue>> results,
         Func<FuncResult<TValue>, FuncResult<TValue>, FuncResult<TValue>> combiner)

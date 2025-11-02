@@ -4,6 +4,16 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <Version>1.0.0-alpha1</Version>
+        <Title>DisposableEvents</Title>
+        <Authors>Lassi Harjaluoma (Hissal)</Authors>
+        <Description>PubSub style events that return an IDisposable subscription</Description>
+        <PackageProjectUrl>https://github.com/Hissal/DisposableEvents</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/Hissal/DisposableEvents</RepositoryUrl>
+        <RepositoryType>Git</RepositoryType>
+        <PackageTags>Event, Events, Delegate, Callback, PubSub, Publish, Subscribe, Disposable</PackageTags>
+        <PackageReleaseNotes>This is a prerelease and may be unstable and/or go through breaking changes before full release</PackageReleaseNotes>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

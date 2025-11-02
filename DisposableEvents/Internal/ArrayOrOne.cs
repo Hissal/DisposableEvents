@@ -84,7 +84,7 @@ internal sealed class ArrayOrOne<T> : IEnumerable<T>, ICollection {
         }
 
         public T Current => state == 0 ? value : throw new InvalidOperationException();
-        object IEnumerator.Current => Current;
+        object IEnumerator.Current => Current!;
 
         public bool MoveNext() {
             if (state == -1) {
