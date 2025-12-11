@@ -20,13 +20,25 @@ public sealed class OneShotEventHandler<TMessage> : IEventHandler<TMessage> {
     /// </summary>
     /// <param name="subscription">The subscription to dispose after the first event.</param>
     public void SetSubscription(IDisposable subscription) {
-        if (Interlocked.CompareExchange(ref invoked, 0, 0) == 1) {
-            // already invoked before subscription was set
+        // Atomically set the subscription only if it hasn't been set yet
+        var previous = Interlocked.CompareExchange(ref sub, subscription, null);
+        if (previous != null) {
+            // Subscription was already set somehow, dispose the new one
             subscription.Dispose();
             return;
         }
         
-        sub = subscription;
+        // Check if Handle was already called before we set the subscription
+        if (Interlocked.CompareExchange(ref invoked, 0, 0) == 1) {
+            // Handler already invoked. Try to atomically reclaim the subscription we just set.
+            // CompareExchange will only succeed if sub still equals subscription (we haven't been
+            // raced by Handle's Exchange). If Handle already claimed it, this returns null.
+            var toDispose = Interlocked.CompareExchange(ref sub, null, subscription);
+            // Only dispose if we successfully reclaimed it, ensuring no double-dispose
+            if (toDispose == subscription) {
+                subscription.Dispose();
+            }
+        }
     }
     
     /// <summary>
@@ -39,7 +51,9 @@ public sealed class OneShotEventHandler<TMessage> : IEventHandler<TMessage> {
             return; // already invoked
         
         innerHandler.Handle(message);
-        sub?.Dispose();
+        // Atomically take ownership of the subscription before disposing
+        var toDispose = Interlocked.Exchange(ref sub, null);
+        toDispose?.Dispose();
     }
 }
 
