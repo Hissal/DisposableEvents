@@ -49,11 +49,15 @@ public sealed class OneShotEventHandler<TMessage> : IEventHandler<TMessage> {
     public void Handle(TMessage message) {
         if (Interlocked.Exchange(ref invoked, 1) == 1)
             return; // already invoked
-        
-        innerHandler.Handle(message);
-        // Atomically take ownership of the subscription before disposing
-        var toDispose = Interlocked.Exchange(ref sub, null);
-        toDispose?.Dispose();
+
+        try {
+            innerHandler.Handle(message);
+        }
+        finally {
+            // Atomically take ownership of the subscription before disposing
+            var toDispose = Interlocked.Exchange(ref sub, null);
+            toDispose?.Dispose();
+        }
     }
 }
 
