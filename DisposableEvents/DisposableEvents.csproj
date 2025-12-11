@@ -1,24 +1,96 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <LangVersion>latest</LangVersion>
+        <RootNamespace>DisposableEvents</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>1.0.0-alpha2</Version>
-        <Title>DisposableEvents</Title>
-        <Authors>Lassi Harjaluoma (Hissal)</Authors>
-        <Description>PubSub style events that return an IDisposable subscription</Description>
-        <PackageProjectUrl>https://github.com/Hissal/DisposableEvents</PackageProjectUrl>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <RepositoryUrl>https://github.com/Hissal/DisposableEvents</RepositoryUrl>
-        <RepositoryType>Git</RepositoryType>
-        <PackageTags>Event, Events, Delegate, Callback, PubSub, Publish, Subscribe, Disposable</PackageTags>
-        <PackageReleaseNotes>Add net8
-
-This is a prerelease and may be unstable and/or go through breaking changes before full release</PackageReleaseNotes>
-        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <NoWarn>$(NoWarn);0436</NoWarn>
+        <!--        <NoWarn>$(NoWarn);1701;1702;9124;0436</NoWarn>-->
+        <LangVersion>13</LangVersion>
+        <TargetFrameworks>net9.0;net8.0;netstandard2.0;netstandard2.1</TargetFrameworks>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <Title>DisposableEvents</Title>
+        <Authors>Lassi Harjaluoma</Authors>
+        <Description>PubSub style events that return an IDisposable subscription</Description>
+        <Copyright>Lassi Harjaluoma</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/Hissal/DisposableEvents</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Hissal/DisposableEvents</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>Event, Events, Delegate, Callback, PubSub, Publish, Subscribe, Disposable</PackageTags>
+
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <!--        <PackageIcon>icon.png</PackageIcon>-->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <Owners>Lassi Harjaluoma</Owners>
+        <Company>Hissal</Company>
+        <Product>DisposableEvents</Product>
+        <NeutralLanguage>en</NeutralLanguage>
+    </PropertyGroup>
+<!--    -->
+<!--    <PropertyGroup>-->
+<!--        <LangVersion>latest</LangVersion>-->
+<!--        <ImplicitUsings>enable</ImplicitUsings>-->
+<!--        <Nullable>enable</Nullable>-->
+<!--        <Version>1.0.0-alpha2</Version>-->
+<!--        <Title>DisposableEvents</Title>-->
+<!--        <Authors>Hissal (Lassi Harjaluoma)</Authors>-->
+<!--        <Description>PubSub style events that return an IDisposable subscription</Description>-->
+<!--        <PackageProjectUrl>https://github.com/Hissal/DisposableEvents</PackageProjectUrl>-->
+<!--        <PackageLicenseExpression>MIT</PackageLicenseExpression>-->
+<!--        <RepositoryUrl>https://github.com/Hissal/DisposableEvents</RepositoryUrl>-->
+<!--        <RepositoryType>Git</RepositoryType>-->
+<!--        <PackageTags>Event, Events, Delegate, Callback, PubSub, Publish, Subscribe, Disposable</PackageTags>-->
+<!--        <PackageReleaseNotes>Add net8-->
+
+<!--This is a prerelease and may be unstable and/or go through breaking changes before full release</PackageReleaseNotes>-->
+<!--        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>-->
+<!--    </PropertyGroup>-->
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="../../README.md" Pack="true" PackagePath="\"/>
+        <!--        <None Include="../../icon.png" Pack="true" PackagePath="\" Condition="Exists('../../icon.png')"/>-->
+    </ItemGroup>
+
+    <PropertyGroup Condition="$(TargetFramework) != 'netstandard2.0' AND $(TargetFramework) != 'netstandard2.1'">
+        <IsTrimmable>true</IsTrimmable>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="$(TargetFramework.StartsWith(`netstandard`))">
+        <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+    </PropertyGroup>
+
+    <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+        <PackageReference Include="PolySharp" Version="1.15.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="System.Buffers" Version="4.6.1"/>
+        <PackageReference Include="System.Memory" Version="4.6.3"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="$(TargetFramework) == 'netstandard2.1'">
+        <PackageReference Include="PolySharp" Version="1.15.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+    
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <DefineConstants>TRACE</DefineConstants>
     </PropertyGroup>
