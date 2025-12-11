@@ -19,7 +19,7 @@ public sealed class OneShotEventHandler<TMessage> : IEventHandler<TMessage> {
         }
         
         // Check if Handle was already called before we set the subscription
-        if (Volatile.Read(ref invoked) == 1) {
+        if (Interlocked.CompareExchange(ref invoked, 0, 0) == 1) {
             // Handler already invoked. Try to atomically reclaim the subscription we just set.
             // CompareExchange will only succeed if sub still equals subscription (we haven't been
             // raced by Handle's Exchange). If Handle already claimed it, this returns null.
