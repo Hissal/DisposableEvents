@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>1.0.0-alpha1</Version>
+        <Version>1.0.0-alpha2</Version>
         <Title>DisposableEvents</Title>
         <Authors>Lassi Harjaluoma (Hissal)</Authors>
         <Description>PubSub style events that return an IDisposable subscription</Description>
@@ -13,7 +13,10 @@
         <RepositoryUrl>https://github.com/Hissal/DisposableEvents</RepositoryUrl>
         <RepositoryType>Git</RepositoryType>
         <PackageTags>Event, Events, Delegate, Callback, PubSub, Publish, Subscribe, Disposable</PackageTags>
-        <PackageReleaseNotes>This is a prerelease and may be unstable and/or go through breaking changes before full release</PackageReleaseNotes>
+        <PackageReleaseNotes>Add net8
+
+This is a prerelease and may be unstable and/or go through breaking changes before full release</PackageReleaseNotes>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
