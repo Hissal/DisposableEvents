@@ -10,6 +10,12 @@ public sealed class OneShotEventHandler<TMessage> : IEventHandler<TMessage> {
     }
 
     public void SetSubscription(IDisposable subscription) {
+        if (Interlocked.CompareExchange(ref invoked, 0, 0) == 1) {
+            // already invoked before subscription was set
+            subscription.Dispose();
+            return;
+        }
+        
         sub = subscription;
     }
     
@@ -102,27 +108,6 @@ public static class SubscribeOnceExtensions {
         this IEventSubscriber<TMessage> subscriber,
         TState state,
         Action<TState, TMessage> handler, 
-        Func<TMessage, bool> predicateFilter,
-        params IEventFilter<TMessage>[] additionalFilters) 
-    {
-        if (additionalFilters.Length == 0)
-            return subscriber.SubscribeOnce(
-                new EventHandler<TState, TMessage>(state, handler), 
-                new PredicateEventFilter<TMessage>(predicateFilter)
-            );
-        
-        var filters = new IEventFilter<TMessage>[additionalFilters.Length + 1];
-        filters[0] = new PredicateEventFilter<TMessage>(predicateFilter);
-        Array.Copy(additionalFilters, 0, filters, 1, additionalFilters.Length);
-        
-        var eventHandler = new EventHandler<TState, TMessage>(state, handler);
-        return subscriber.SubscribeOnce(eventHandler, filters);
-    }
-    
-    public static IDisposable SubscribeOnce<TState, TMessage>(
-        this IEventSubscriber<TMessage> subscriber,
-        TState state,
-        Action<TState, TMessage> handler, 
         Func<TState, TMessage, bool> predicateFilter,
         params IEventFilter<TMessage>[] additionalFilters) 
     {
@@ -184,17 +169,17 @@ public static class SubscribeOnceExtensions {
         this IEventSubscriber<Void> subscriber,
         TState state,
         Action<TState> handler,
-        Func<bool> predicateFilter,
+        Func<TState, bool> predicateFilter,
         params IEventFilter<Void>[] additionalFilters) 
     {
         if (additionalFilters.Length == 0)
-            return subscriber.Subscribe(
+            return subscriber.SubscribeOnce(
                 new VoidEventHandler<TState>(state, handler), 
-                new VoidPredicateEventFilter(predicateFilter)
+                new VoidPredicateEventFilter<TState>(state, predicateFilter)
             );
         
         var filters = new IEventFilter<Void>[additionalFilters.Length + 1];
-        filters[0] = new VoidPredicateEventFilter(predicateFilter);
+        filters[0] = new VoidPredicateEventFilter<TState>(state, predicateFilter);
         Array.Copy(additionalFilters, 0, filters, 1, additionalFilters.Length);
         return subscriber.SubscribeOnce(new VoidEventHandler<TState>(state, handler), filters);
     }
