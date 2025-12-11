@@ -44,6 +44,20 @@ public class OneShotEventHandlerTest {
     }
     
     [Fact]
+    public void SecondSubscription_IsDisposedImmediately_WhenSetSubscriptionCalledTwice() {
+        var firstSubscriptionSub = Substitute.For<IDisposable>();
+        var secondSubscriptionSub = Substitute.For<IDisposable>();
+        
+        sut.SetSubscription(firstSubscriptionSub);
+        sut.SetSubscription(secondSubscriptionSub);
+        
+        // First subscription should not be disposed yet
+        firstSubscriptionSub.DidNotReceive().Dispose();
+        // Second subscription should be disposed immediately
+        secondSubscriptionSub.Received(1).Dispose();
+    }
+    
+    [Fact]
     public async Task Handle_ConcurrentInvocations_InvokeHandlerOnlyOnce() {
         // Arrange
         var invokeCount = 0;
