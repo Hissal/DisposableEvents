@@ -2,7 +2,11 @@
 
 namespace DisposableEvents.Disposables;
 
-public ref struct DisposableBuilder : IDisposable {
+public ref struct DisposableBuilder
+#if NET9_0_OR_GREATER
+    : IDisposable
+#endif 
+{
     IDisposable? disposable1;
     IDisposable? disposable2;
     IDisposable? disposable3;

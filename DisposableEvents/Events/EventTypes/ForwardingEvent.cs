@@ -29,9 +29,9 @@ public sealed class ForwardingEvent<TMessage> : IPipelineEvent<TMessage> {
     readonly ForwardFlags forwardFlags;
     readonly ForwardTiming forwardTiming;
     
-    bool disposed;
+    int disposed;
     
-    public bool IsDisposed => Volatile.Read(ref disposed) || (core?.IsDisposed ?? false);
+    public bool IsDisposed => Volatile.Read(ref disposed) != 0 || (core?.IsDisposed ?? false);
     public int HandlerCount => core?.HandlerCount ?? 0;
 
     public ForwardingEvent(params IDisposableEvent<TMessage>[] forwardTargets)
@@ -110,7 +110,7 @@ public sealed class ForwardingEvent<TMessage> : IPipelineEvent<TMessage> {
         if (IsDisposed)
             return;
         
-        if (Interlocked.Exchange(ref disposed, true))
+        if (Interlocked.Exchange(ref disposed, 1) != 0)
             return;
         
         if (forwardFlags.HasFlag(ForwardFlags.Dispose)) {
