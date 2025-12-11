@@ -303,10 +303,7 @@ public class SubscribeOnceExtensionsTest {
         var filter = Substitute.For<IEventFilter<int>>();
         
         // First event is rejected
-        filter.Filter(ref Arg.Any<int>()).Returns(callInfo => {
-            callInfo[0] = 10;
-            return FilterResult.Block;
-        });
+        filter.Filter(ref Arg.Any<int>()).Returns(FilterResult.Block);
         
         evt.SubscribeOnce(action, filter);
         evt.Publish(10);
@@ -315,10 +312,7 @@ public class SubscribeOnceExtensionsTest {
         action.DidNotReceive().Invoke(Arg.Any<int>());
         
         // Second event passes the filter
-        filter.Filter(ref Arg.Any<int>()).Returns(callInfo => {
-            callInfo[0] = 20;
-            return FilterResult.Pass;
-        });
+        filter.Filter(ref Arg.Any<int>()).Returns(FilterResult.Pass);
         
         evt.Publish(20);
         
