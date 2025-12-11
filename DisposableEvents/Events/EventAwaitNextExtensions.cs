@@ -18,12 +18,12 @@ public sealed class AsyncTaskEventHandler<TMessage> : IEventHandler<TMessage>, I
         FilterOrdering filterOrdering = FilterOrdering.StableSort) 
     {
         this.cancellationToken = cancellationToken;
+        this.callOnce = callOnce;
+
         if (cancellationToken.IsCancellationRequested) {
             isDisposed = 1;
             return;
         }
-        
-        this.callOnce = callOnce;
 
         if (filter is not null) {
             subscription = subscriber.Subscribe(this, filter);
