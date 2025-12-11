@@ -21,8 +21,10 @@ public sealed class OneShotEventHandler<TMessage> : IEventHandler<TMessage> {
         // Check if Handle was already called before we set the subscription
         if (Interlocked.CompareExchange(ref invoked, 0, 0) == 1) {
             // already invoked before subscription was set, need to dispose it
-            // Use CompareExchange to ensure we only dispose if we're the one who set it
-            if (Interlocked.CompareExchange(ref sub, null, subscription) == subscription) {
+            // Use CompareExchange to atomically remove and get the subscription
+            var toDispose = Interlocked.CompareExchange(ref sub, null, subscription);
+            // Only dispose if we successfully removed it (meaning Handle hasn't disposed it yet)
+            if (toDispose == subscription) {
                 subscription.Dispose();
             }
         }
@@ -33,7 +35,9 @@ public sealed class OneShotEventHandler<TMessage> : IEventHandler<TMessage> {
             return; // already invoked
         
         innerHandler.Handle(message);
-        sub?.Dispose();
+        // Atomically take ownership of the subscription before disposing
+        var toDispose = Interlocked.Exchange(ref sub, null);
+        toDispose?.Dispose();
     }
 }
 
