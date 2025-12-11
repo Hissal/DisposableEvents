@@ -184,4 +184,74 @@ public class EventAwaitNextExtensionsTest {
         stopwatch.Stop();
         stopwatch.ElapsedMilliseconds.Should().BeGreaterThanOrEqualTo(c_delayMs);
     }
+    
+    // ===== Pre-Cancelled Token ===== //
+    [Fact]
+    public async Task AwaitNextAsync_NoFilter_PreCancelledToken_ThrowsImmediately() {
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        
+        stopwatch.Start();
+        await FluentActions.Awaiting(() => evt.AwaitNextAsync(cts.Token))
+            .Should().ThrowAsync<OperationCanceledException>();
+        stopwatch.Stop();
+        
+        // Should throw immediately without waiting
+        stopwatch.ElapsedMilliseconds.Should().BeLessThan(c_delayMs);
+    }
+    
+    [Fact]
+    public async Task AwaitNextAsync_OneFilter_PreCancelledToken_ThrowsImmediately() {
+        var filter = filters[0];
+        filter.Filter(ref Arg.Any<int>()).Returns(FilterResult.Pass);
+        
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        
+        stopwatch.Start();
+        await FluentActions.Awaiting(() => evt.AwaitNextAsync(filter, cts.Token))
+            .Should().ThrowAsync<OperationCanceledException>();
+        stopwatch.Stop();
+        
+        // Should throw immediately without waiting
+        stopwatch.ElapsedMilliseconds.Should().BeLessThan(c_delayMs);
+    }
+    
+    [Fact]
+    public async Task AwaitNextAsync_MultipleFilters_PreCancelledToken_ThrowsImmediately() {
+        var filter1 = filters[0];
+        var filter2 = filters[1];
+        filter1.Filter(ref Arg.Any<int>()).Returns(FilterResult.Pass);
+        filter2.Filter(ref Arg.Any<int>()).Returns(FilterResult.Pass);
+        
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        
+        stopwatch.Start();
+        await FluentActions.Awaiting(() => evt.AwaitNextAsync(filters, cancellationToken: cts.Token))
+            .Should().ThrowAsync<OperationCanceledException>();
+        stopwatch.Stop();
+        
+        // Should throw immediately without waiting
+        stopwatch.ElapsedMilliseconds.Should().BeLessThan(c_delayMs);
+    }
+    
+    [Fact]
+    public async Task AwaitNextAsync_ParamsFilters_PreCancelledToken_ThrowsImmediately() {
+        var filter1 = filters[0];
+        var filter2 = filters[1];
+        filter1.Filter(ref Arg.Any<int>()).Returns(FilterResult.Pass);
+        filter2.Filter(ref Arg.Any<int>()).Returns(FilterResult.Pass);
+        
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        
+        stopwatch.Start();
+        await FluentActions.Awaiting(() => evt.AwaitNextAsync(cts.Token, filter1, filter2))
+            .Should().ThrowAsync<OperationCanceledException>();
+        stopwatch.Stop();
+        
+        // Should throw immediately without waiting
+        stopwatch.ElapsedMilliseconds.Should().BeLessThan(c_delayMs);
+    }
 }
