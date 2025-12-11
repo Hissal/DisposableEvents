@@ -68,12 +68,23 @@ public sealed class AsyncTaskEventHandler<TMessage> : IEventHandler<TMessage>, I
     }
     
     public async Task<TMessage> AwaitNextAsync() {
-        var localTcs = tcs ??= new TaskCompletionSource<TMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
-        
-        if (isDisposed == 1)
-            localTcs.TrySetCanceled(cancellationToken);
-        
-        return await localTcs.Task.ConfigureAwait(false);
+        while (true) {
+            // Check if disposed first with volatile read
+            if (Interlocked.CompareExchange(ref isDisposed, 0, 0) == 1) {
+                var canceledTcs = new TaskCompletionSource<TMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
+                canceledTcs.TrySetCanceled(cancellationToken);
+                return await canceledTcs.Task.ConfigureAwait(false);
+            }
+            
+            var currentTcs = tcs;
+            if (currentTcs != null)
+                return await currentTcs.Task.ConfigureAwait(false);
+            
+            var newTcs = new TaskCompletionSource<TMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
+            if (Interlocked.CompareExchange(ref tcs, newTcs, null) == null)
+                return await newTcs.Task.ConfigureAwait(false);
+            // else, another thread set tcs, loop again
+        }
     }
 
     public void Dispose() {
