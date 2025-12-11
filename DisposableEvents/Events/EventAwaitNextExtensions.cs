@@ -18,28 +18,28 @@ public sealed class AsyncTaskEventHandler<TMessage> : IEventHandler<TMessage>, I
         FilterOrdering filterOrdering = FilterOrdering.StableSort) 
     {
         this.cancellationToken = cancellationToken;
-        if (cancellationToken.IsCancellationRequested) {
-            isDisposed = 1;
-            return;
-        }
-        
         this.callOnce = callOnce;
 
-        if (filter is not null) {
-            subscription = subscriber.Subscribe(this, filter);
-        } 
-        else if (filterArray is not null) {
-            subscription = subscriber.Subscribe(this, filterArray, filterOrdering);
+        if (cancellationToken.IsCancellationRequested) {
+            isDisposed = 1;
         } 
         else {
-            subscription = subscriber.Subscribe(this);
-        }
+            if (filter is not null) {
+                subscription = subscriber.Subscribe(this, filter);
+            } 
+            else if (filterArray is not null) {
+                subscription = subscriber.Subscribe(this, filterArray, filterOrdering);
+            } 
+            else {
+                subscription = subscriber.Subscribe(this);
+            }
 
-        if (cancellationToken.CanBeCanceled) {
-            ctr = cancellationToken.Register(state => {
-                var self = (AsyncTaskEventHandler<TMessage>)state!;
-                self.Dispose();
-            }, this, useSynchronizationContext: false);
+            if (cancellationToken.CanBeCanceled) {
+                ctr = cancellationToken.Register(state => {
+                    var self = (AsyncTaskEventHandler<TMessage>)state!;
+                    self.Dispose();
+                }, this, useSynchronizationContext: false);
+            }
         }
     }
     
