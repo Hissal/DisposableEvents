@@ -19,11 +19,12 @@ public sealed class OneShotEventHandler<TMessage> : IEventHandler<TMessage> {
         }
         
         // Check if Handle was already called before we set the subscription
-        if (Interlocked.CompareExchange(ref invoked, 0, 0) == 1) {
-            // already invoked before subscription was set, need to dispose it
-            // Use CompareExchange to atomically remove and get the subscription
+        if (Volatile.Read(ref invoked) == 1) {
+            // Handler already invoked. Try to atomically reclaim the subscription we just set.
+            // CompareExchange will only succeed if sub still equals subscription (we haven't been
+            // raced by Handle's Exchange). If Handle already claimed it, this returns null.
             var toDispose = Interlocked.CompareExchange(ref sub, null, subscription);
-            // Only dispose if we successfully removed it (meaning Handle hasn't disposed it yet)
+            // Only dispose if we successfully reclaimed it, ensuring no double-dispose
             if (toDispose == subscription) {
                 subscription.Dispose();
             }
