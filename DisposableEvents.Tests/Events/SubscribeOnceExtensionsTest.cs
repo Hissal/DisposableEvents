@@ -295,4 +295,70 @@ public class SubscribeOnceExtensionsTest {
             filter.Received(1).Filter(ref Arg.Any<Void>());
         }
     }
+    
+    // ===== Edge Case Tests ===== //
+    [Fact]
+    public void SubscribeOnce_WhenFilterRejects_HandlerNotInvokedAndSubscriptionRemainsActive() {
+        var action = Substitute.For<Action<int>>();
+        var filter = Substitute.For<IEventFilter<int>>();
+        
+        // First event is rejected
+        filter.Filter(ref Arg.Any<int>()).Returns(callInfo => {
+            callInfo[0] = 10;
+            return FilterResult.Block;
+        });
+        
+        evt.SubscribeOnce(action, filter);
+        evt.Publish(10);
+        
+        // Handler should not have been invoked yet
+        action.DidNotReceive().Invoke(Arg.Any<int>());
+        
+        // Second event passes the filter
+        filter.Filter(ref Arg.Any<int>()).Returns(callInfo => {
+            callInfo[0] = 20;
+            return FilterResult.Pass;
+        });
+        
+        evt.Publish(20);
+        
+        // Handler should now be invoked exactly once
+        action.Received(1).Invoke(20);
+        
+        // Third event should not invoke handler (already unsubscribed)
+        evt.Publish(30);
+        action.Received(1).Invoke(Arg.Any<int>());
+    }
+    
+    [Fact]
+    public void SubscribeOnce_ManualDisposalBeforeFirstEvent_HandlerNeverInvoked() {
+        var action = Substitute.For<Action<int>>();
+        
+        var subscription = evt.SubscribeOnce(action);
+        subscription.Dispose();
+        
+        evt.Publish(42);
+        evt.Publish(43);
+        
+        // Handler should never be invoked after disposal
+        action.DidNotReceive().Invoke(Arg.Any<int>());
+    }
+    
+    [Fact]
+    public void SubscribeOnce_HandlerThrowsException_SubscriptionStillDisposed() {
+        var action = Substitute.For<Action<int>>();
+        action.When(x => x.Invoke(Arg.Any<int>())).Do(_ => throw new InvalidOperationException("Test exception"));
+        
+        evt.SubscribeOnce(action);
+        
+        // Handler throws, but should not crash the test
+        Assert.Throws<InvalidOperationException>(() => evt.Publish(42));
+        
+        // Even though handler threw, subscription should be disposed
+        // Second event should not invoke handler again
+        action.ClearReceivedCalls();
+        evt.Publish(43);
+        
+        action.DidNotReceive().Invoke(Arg.Any<int>());
+    }
 }
