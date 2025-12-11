@@ -22,24 +22,24 @@ public sealed class AsyncTaskEventHandler<TMessage> : IEventHandler<TMessage>, I
 
         if (cancellationToken.IsCancellationRequested) {
             isDisposed = 1;
+            return;
+        }
+
+        if (filter is not null) {
+            subscription = subscriber.Subscribe(this, filter);
+        } 
+        else if (filterArray is not null) {
+            subscription = subscriber.Subscribe(this, filterArray, filterOrdering);
         } 
         else {
-            if (filter is not null) {
-                subscription = subscriber.Subscribe(this, filter);
-            } 
-            else if (filterArray is not null) {
-                subscription = subscriber.Subscribe(this, filterArray, filterOrdering);
-            } 
-            else {
-                subscription = subscriber.Subscribe(this);
-            }
+            subscription = subscriber.Subscribe(this);
+        }
 
-            if (cancellationToken.CanBeCanceled) {
-                ctr = cancellationToken.Register(state => {
-                    var self = (AsyncTaskEventHandler<TMessage>)state!;
-                    self.Dispose();
-                }, this, useSynchronizationContext: false);
-            }
+        if (cancellationToken.CanBeCanceled) {
+            ctr = cancellationToken.Register(state => {
+                var self = (AsyncTaskEventHandler<TMessage>)state!;
+                self.Dispose();
+            }, this, useSynchronizationContext: false);
         }
     }
     
