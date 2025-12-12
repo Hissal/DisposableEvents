@@ -1,7 +1,7 @@
 ﻿namespace DisposableEvents.Tests.Events;
 
-[TestSubject(typeof(SubscribeOnceExtensions))]
-public class SubscribeOnceExtensionsTest {
+[TestSubject(typeof(EventSubscribeOnceExtensions))]
+public class EventSubscribeOnceExtensionsTest {
     readonly DisposableEvent<int> evt = new();
     readonly IEventHandler<int> handler = Substitute.For<IEventHandler<int>>();
     readonly IEventFilter<int>[] filters = Enumerable.Range(0, 2)
@@ -13,7 +13,7 @@ public class SubscribeOnceExtensionsTest {
         .Select(_ => Substitute.For<IEventFilter<Void>>())
         .ToArray();
     
-    public SubscribeOnceExtensionsTest() {
+    public EventSubscribeOnceExtensionsTest() {
         foreach (var filter in filters) {
             filter.Filter(ref Arg.Any<int>()).Returns(callInfo => {
                 callInfo[0] = 42;

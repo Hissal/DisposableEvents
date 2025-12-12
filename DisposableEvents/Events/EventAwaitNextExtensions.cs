@@ -1,6 +1,6 @@
 ﻿namespace DisposableEvents;
 
-public sealed class AsyncTaskEventHandler<TMessage> : IEventHandler<TMessage>, IDisposable {
+public sealed class AwaitNextAsyncEventHandler<TMessage> : IEventHandler<TMessage>, IDisposable {
     readonly IDisposable? subscription;
     readonly CancellationToken cancellationToken;
     readonly CancellationTokenRegistration ctr;
@@ -9,7 +9,7 @@ public sealed class AsyncTaskEventHandler<TMessage> : IEventHandler<TMessage>, I
     TaskCompletionSource<TMessage>? tcs;
     int isDisposed = 0; // 0 = false, 1 = true
 
-    AsyncTaskEventHandler(
+    AwaitNextAsyncEventHandler(
         IEventSubscriber<TMessage> subscriber,
         CancellationToken cancellationToken = default,
         bool callOnce = true,
@@ -37,23 +37,23 @@ public sealed class AsyncTaskEventHandler<TMessage> : IEventHandler<TMessage>, I
 
         if (cancellationToken.CanBeCanceled) {
             ctr = cancellationToken.Register(state => {
-                var self = (AsyncTaskEventHandler<TMessage>)state!;
+                var self = (AwaitNextAsyncEventHandler<TMessage>)state!;
                 self.Dispose();
             }, this, useSynchronizationContext: false);
         }
     }
     
-    public AsyncTaskEventHandler(IEventSubscriber<TMessage> subscriber, CancellationToken cancellationToken = default, bool callOnce = true) 
+    public AwaitNextAsyncEventHandler(IEventSubscriber<TMessage> subscriber, CancellationToken cancellationToken = default, bool callOnce = true) 
         : this(subscriber, cancellationToken, callOnce, filter: null, filterArray: null) { }
     
-    public AsyncTaskEventHandler(
+    public AwaitNextAsyncEventHandler(
         IEventSubscriber<TMessage> subscriber,
         IEventFilter<TMessage> filter,
         bool callOnce = true,
         CancellationToken cancellationToken = default) 
         : this(subscriber, cancellationToken, callOnce, filter) { }
     
-    public AsyncTaskEventHandler(
+    public AwaitNextAsyncEventHandler(
         IEventSubscriber<TMessage> subscriber,
         IEventFilter<TMessage>[] filters,
         FilterOrdering filterOrdering = FilterOrdering.StableSort,
@@ -138,7 +138,7 @@ public static class EventAwaitNextExtensions {
         this IEventSubscriber<TMessage> subscriber,
         CancellationToken cancellationToken = default) 
     {
-        using var handler = new AsyncTaskEventHandler<TMessage>(subscriber, cancellationToken, true);
+        using var handler = new AwaitNextAsyncEventHandler<TMessage>(subscriber, cancellationToken, true);
         return await handler.AwaitNextAsync().ConfigureAwait(false);
     }
     
@@ -181,7 +181,7 @@ public static class EventAwaitNextExtensions {
         IEventFilter<TMessage> filter,
         CancellationToken cancellationToken = default)
     {
-        using var handler = new AsyncTaskEventHandler<TMessage>(subscriber, filter, true, cancellationToken);
+        using var handler = new AwaitNextAsyncEventHandler<TMessage>(subscriber, filter, true, cancellationToken);
         return await handler.AwaitNextAsync().ConfigureAwait(false);
     }
     
@@ -233,7 +233,7 @@ public static class EventAwaitNextExtensions {
         FilterOrdering filterOrdering = FilterOrdering.StableSort,
         CancellationToken cancellationToken = default)
     {
-        using var handler = new AsyncTaskEventHandler<TMessage>(subscriber, filters, filterOrdering, true, cancellationToken);
+        using var handler = new AwaitNextAsyncEventHandler<TMessage>(subscriber, filters, filterOrdering, true, cancellationToken);
         return await handler.AwaitNextAsync().ConfigureAwait(false);
     }
     
@@ -282,7 +282,7 @@ public static class EventAwaitNextExtensions {
         CancellationToken cancellationToken = default,
         params IEventFilter<TMessage>[] filters)
     {
-        using var handler = new AsyncTaskEventHandler<TMessage>(subscriber, filters, FilterOrdering.StableSort, true, cancellationToken);
+        using var handler = new AwaitNextAsyncEventHandler<TMessage>(subscriber, filters, FilterOrdering.StableSort, true, cancellationToken);
         return await handler.AwaitNextAsync().ConfigureAwait(false);
     }
 }

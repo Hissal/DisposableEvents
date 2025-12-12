@@ -35,7 +35,7 @@ public sealed class OneShotEventHandler<TMessage> : IEventHandler<TMessage> {
             // raced by Handle's Exchange). If Handle already claimed it, this returns null.
             var toDispose = Interlocked.CompareExchange(ref sub, null, subscription);
             // Only dispose if we successfully reclaimed it, ensuring no double-dispose
-            if (toDispose == subscription) {
+            if (ReferenceEquals(toDispose, subscription)) {
                 subscription.Dispose();
             }
         }
@@ -64,7 +64,7 @@ public sealed class OneShotEventHandler<TMessage> : IEventHandler<TMessage> {
 /// <summary>
 /// Provides extension methods for subscribing to events with automatic unsubscription after the first matching event.
 /// </summary>
-public static class SubscribeOnceExtensions {
+public static class EventSubscribeOnceExtensions {
     /// <summary>
     /// Subscribes to an event with a handler that will be invoked at most once and then automatically unsubscribed.
     /// </summary>
