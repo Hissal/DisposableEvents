@@ -13,13 +13,15 @@
     <PropertyGroup>
         <Title>DisposableEvents.R3</Title>
         <Authors>Lassi Harjaluoma</Authors>
-        <Description>R3 Extensions for DisposableEvents</Description>
         <Copyright>Lassi Harjaluoma</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/Hissal/DisposableEvents</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Hissal/DisposableEvents</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
+        
+        <IsPackable>true</IsPackable>
         <PackageTags>Event, Events, Delegate, Callback, PubSub, Publish, Subscribe, Disposable</PackageTags>
+        <Description>R3 Extensions for DisposableEvents</Description>
 
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <!--        <PackageIcon>icon.png</PackageIcon>-->

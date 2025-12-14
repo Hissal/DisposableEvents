@@ -1,0 +1,89 @@
+﻿name: Build-Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "NuGet / assembly version (e.g. 0.1.0)"
+        required: true
+      dry-run:
+        description: "If true, do not push to NuGet or create a GitHub release."
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  build-and-pack:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            9.0.x
+            8.0.x
+            6.0.x
+
+      - name: Restore
+        run: dotnet restore DisposableEvents.sln
+
+      - name: Build
+        run: dotnet build DisposableEvents.sln -c Release --no-restore /p:Version=${{ inputs.version }}
+
+      - name: Test
+        run: dotnet test DisposableEvents.sln -c Release --no-build --verbosity normal
+
+      - name: Pack
+        run: >
+          dotnet pack DisposableEvents.sln
+          -c Release
+          --no-build
+          /p:PackageVersion=${{ inputs.version }}
+          /p:IncludeSymbols=true
+          /p:SymbolPackageFormat=snupkg
+          -o ./artifacts
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: nuget
+          path: ./artifacts/*.nupkg
+
+  publish:
+    needs: build-and-pack
+    runs-on: ubuntu-24.04
+    if: ${{ inputs.dry-run == false }}
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v6
+        with:
+          name: nuget
+          path: ./artifacts
+
+      - name: Publish to NuGet
+        run: dotnet nuget push "./artifacts/*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
+  
+  github-release:
+    needs: publish
+    runs-on: ubuntu-24.04
+    if: ${{ inputs.dry-run == false }}
+    permissions:
+      contents: write
+    steps:
+      - name: Create Git tag and GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: v${{ inputs.version }}
+          body: |
+            DisposableEvents v${{ inputs.version }}
+
+            - TODO: fill in notable changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

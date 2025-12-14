@@ -13,13 +13,15 @@
     <PropertyGroup>
         <Title>DisposableEvents</Title>
         <Authors>Lassi Harjaluoma</Authors>
-        <Description>PubSub style events that return an IDisposable subscription</Description>
         <Copyright>Lassi Harjaluoma</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/Hissal/DisposableEvents</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Hissal/DisposableEvents</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
+        
+        <IsPackable>true</IsPackable>
         <PackageTags>Event, Events, Delegate, Callback, PubSub, Publish, Subscribe, Disposable</PackageTags>
+        <Description>PubSub style events that return an IDisposable subscription</Description>
 
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <!--        <PackageIcon>icon.png</PackageIcon>-->
@@ -64,5 +66,5 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
-    
+
 </Project>

@@ -13,13 +13,15 @@
     <PropertyGroup>
         <Title>DisposableEvents.ZLinq</Title>
         <Authors>Lassi Harjaluoma</Authors>
-        <Description>ZLinq Extensions for DisposableEvents</Description>
         <Copyright>Lassi Harjaluoma</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/Hissal/DisposableEvents</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Hissal/DisposableEvents</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
+        
+        <IsPackable>true</IsPackable>
         <PackageTags>Event, Events, Delegate, Callback, PubSub, Publish, Subscribe, Disposable</PackageTags>
+        <Description>ZLinq Extensions for DisposableEvents</Description>
 
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <!--        <PackageIcon>icon.png</PackageIcon>-->
