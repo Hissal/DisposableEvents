@@ -22,7 +22,7 @@ public enum ForwardTiming {
     BeforeSelf,
 }
 
-public sealed class ForwardingEvent<TMessage> : IPipelineEvent<TMessage> {
+public sealed class ForwardingEvent<TMessage> : AbstractSubscriber<TMessage>, IPipelineEvent<TMessage> {
     readonly LazyInnerEvent<TMessage>? core;
     readonly ArrayOrOne<IDisposableEvent<TMessage>> forwardTargets;
 
@@ -81,7 +81,7 @@ public sealed class ForwardingEvent<TMessage> : IPipelineEvent<TMessage> {
     }
 
 
-    public IDisposable Subscribe(IEventHandler<TMessage> handler) {
+    public override IDisposable Subscribe(IEventHandler<TMessage> handler) {
         if (IsDisposed) 
             return Disposable.Empty;
 
@@ -105,7 +105,7 @@ public sealed class ForwardingEvent<TMessage> : IPipelineEvent<TMessage> {
 
         return db.Build();
     }
-    
+
     public void Dispose() {
         if (IsDisposed)
             return;

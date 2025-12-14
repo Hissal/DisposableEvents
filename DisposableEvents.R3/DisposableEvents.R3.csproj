@@ -1,17 +1,73 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+    
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <RootNamespace>DisposableEvents.R3</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+<!--        <NoWarn>$(NoWarn);0433</NoWarn>-->
+        <!--        <NoWarn>$(NoWarn);1701;1702;9124;0436</NoWarn>-->
+        <LangVersion>13</LangVersion>
+        <TargetFrameworks>net9.0;net8.0;netstandard2.0;netstandard2.1</TargetFrameworks>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Title>DisposableEvents.R3</Title>
+        <Authors>Lassi Harjaluoma</Authors>
+        <Description>R3 Extensions for DisposableEvents</Description>
+        <Copyright>Lassi Harjaluoma</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/Hissal/DisposableEvents</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Hissal/DisposableEvents</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>Event, Events, Delegate, Callback, PubSub, Publish, Subscribe, Disposable</PackageTags>
+
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <!--        <PackageIcon>icon.png</PackageIcon>-->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <Owners>Lassi Harjaluoma</Owners>
+        <Company>Hissal</Company>
+        <Product>DisposableEvents.R3</Product>
+        <NeutralLanguage>en</NeutralLanguage>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="R3" Version="1.3.0" />
+        <None Include="../../README.md" Pack="true" PackagePath="\"/>
+        <!--        <None Include="../../icon.png" Pack="true" PackagePath="\" Condition="Exists('../../icon.png')"/>-->
+    </ItemGroup>
+
+    <PropertyGroup Condition="$(TargetFramework) != 'netstandard2.0' AND $(TargetFramework) != 'netstandard2.1'">
+        <IsTrimmable>true</IsTrimmable>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="$(TargetFramework.StartsWith(`netstandard`))">
+        <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="R3" Version="1.3.0"/>
+        <PackageReference Include="PolySharp" Version="1.15.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DisposableEvents\DisposableEvents.csproj" />
+        <ProjectReference Include="..\DisposableEvents\DisposableEvents.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <!-- Internals visible to for testing -->
+        <Compile Include="..\DisposableEvents\Internal\ArrayOrOne.cs" LinkBase="InternalInclude" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="InternalInclude\" />
+    </ItemGroup>
+    
 </Project>

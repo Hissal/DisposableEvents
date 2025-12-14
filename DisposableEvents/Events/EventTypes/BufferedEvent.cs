@@ -2,7 +2,7 @@
 
 namespace DisposableEvents;
 
-public sealed class BufferedEvent<TMessage> : IPipelineEvent<TMessage> {
+public sealed class BufferedEvent<TMessage> : AbstractSubscriber<TMessage>, IPipelineEvent<TMessage> {
     readonly LazyInnerEvent<TMessage> core;
 
     public bool IsDisposed => core.IsDisposed;
@@ -22,8 +22,7 @@ public sealed class BufferedEvent<TMessage> : IPipelineEvent<TMessage> {
         core.Publish(message);
     }
 
-
-    public IDisposable Subscribe(IEventHandler<TMessage> handler) {
+    public override IDisposable Subscribe(IEventHandler<TMessage> handler) {
         if (!core.IsDisposed && previousMessage.TryGetValue(out var message))
             handler.Handle(message);
 

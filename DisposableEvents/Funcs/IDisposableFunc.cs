@@ -20,15 +20,25 @@ public interface IFuncPublisher<TArg, TResult> : IDisposable {
 public interface IFuncSubscriber<TArg, TResult> {
     IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler);
 
-    IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler, IEventFilter<TArg> filter) {
+    IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler, IEventFilter<TArg> filter)
+#if NETSTANDARD2_0
+        ;
+#else
+    {
         var filteredHandler = GlobalConfig.FilteredFuncHandlerFactory.CreateFilteredHandler(handler, filter);
         return RegisterHandler(filteredHandler);
     }
+#endif
     
-    IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler, IEventFilter<TArg>[] filters, FilterOrdering ordering) {
+    IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler, IEventFilter<TArg>[] filters, FilterOrdering ordering)
+#if NETSTANDARD2_0
+        ;
+#else
+    {
         var filteredHandler = GlobalConfig.FilteredFuncHandlerFactory.CreateFilteredHandler(handler, filters, ordering);
         return RegisterHandler(filteredHandler);
     }
+#endif
 }
 
 public interface IDisposableFunc<TArg, TResult> : IFuncPublisher<TArg, TResult>, IFuncSubscriber<TArg, TResult>, IFuncMarker {

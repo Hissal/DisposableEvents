@@ -1,6 +1,6 @@
 ﻿namespace DisposableEvents;
 
-public sealed class DisposableFunc<TArg, TResult> : IDisposableFunc<TArg, TResult> {
+public sealed class DisposableFunc<TArg, TResult> : AbstractFuncSubscriber<TArg, TResult>, IDisposableFunc<TArg, TResult> {
     readonly FuncCore<TArg, TResult> core;
 
     public DisposableFunc() : this(GlobalConfig.InitialSubscriberCapacity) { }
@@ -12,7 +12,7 @@ public sealed class DisposableFunc<TArg, TResult> : IDisposableFunc<TArg, TResul
     public int HandlerCount => core.HandlerCount;
 
     public FuncResult<TResult> Invoke(TArg arg) => core.Invoke(arg);
-    public IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler) => core.RegisterHandler(handler);
+    public override IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler) => core.RegisterHandler(handler);
     
     public void ClearHandlers() => core.ClearHandlers();
     public void Dispose() => core.Dispose();
@@ -21,7 +21,7 @@ public sealed class DisposableFunc<TArg, TResult> : IDisposableFunc<TArg, TResul
     IFuncHandler<TArg, TResult>[] IFuncPublisher<TArg, TResult>.GetHandlers() => core.GetHandlers();
 }
 
-public sealed class DisposableFunc<TResult> : IDisposableFunc<Void, TResult> {
+public sealed class DisposableFunc<TResult> : AbstractFuncSubscriber<Void, TResult>, IDisposableFunc<Void, TResult> {
     readonly FuncCore<Void, TResult> core;
 
     public DisposableFunc() : this(GlobalConfig.InitialSubscriberCapacity) { }
@@ -33,7 +33,7 @@ public sealed class DisposableFunc<TResult> : IDisposableFunc<Void, TResult> {
     public int HandlerCount => core.HandlerCount;
 
     public FuncResult<TResult> Invoke(Void arg) => core.Invoke(arg);
-    public IDisposable RegisterHandler(IFuncHandler<Void, TResult> handler) => core.RegisterHandler(handler);
+    public override IDisposable RegisterHandler(IFuncHandler<Void, TResult> handler) => core.RegisterHandler(handler);
     
     public void ClearHandlers() => core.ClearHandlers();
     public void Dispose() => core.Dispose();

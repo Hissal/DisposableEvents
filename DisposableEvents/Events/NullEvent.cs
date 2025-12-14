@@ -2,7 +2,10 @@
 
 namespace DisposableEvents;
 
-internal class NullEvent<TMessage> : IDisposableEvent<TMessage> {
+public class NullEvent<TMessage> :
+    AbstractSubscriber<TMessage>,
+    IDisposableEvent<TMessage>
+{
     public static NullEvent<TMessage> Instance { get; } = new NullEvent<TMessage>();
     
     public bool IsDisposed => true;
@@ -11,7 +14,8 @@ internal class NullEvent<TMessage> : IDisposableEvent<TMessage> {
     public IEventHandler<TMessage>[] GetHandlers() => Array.Empty<IEventHandler<TMessage>>();
     
     public void Publish(TMessage message) { }
-    public IDisposable Subscribe(IEventHandler<TMessage> handler) => Disposable.Empty;
+    
+    public override IDisposable Subscribe(IEventHandler<TMessage> handler) => Disposable.Empty;
     
     public void ClearSubscriptions() { }
     public void Dispose() { }

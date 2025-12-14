@@ -5,7 +5,7 @@ using DisposableEvents.Internal;
 
 namespace DisposableEvents;
 
-public sealed class EventCore<TMessage> : IDisposableEvent<TMessage> {
+public sealed class EventCore<TMessage> : AbstractSubscriber<TMessage>, IDisposableEvent<TMessage> {
     internal readonly FreeList<IEventHandler<TMessage>> Handlers;
     
     bool disposed;
@@ -64,7 +64,7 @@ public sealed class EventCore<TMessage> : IDisposableEvent<TMessage> {
         }
     }
 
-    public IDisposable Subscribe(IEventHandler<TMessage> handler) {
+    public override IDisposable Subscribe(IEventHandler<TMessage> handler) {
         lock (gate) {
             if (disposed)
                 return Disposable.Empty;
