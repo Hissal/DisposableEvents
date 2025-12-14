@@ -49,9 +49,12 @@ public sealed class EventRegistry : IDisposable {
                 return (IDisposableEvent<TMessage>)existingEv;
             }
             
-            var newEv = factory();
-            events[typeof(TMessage)] = newEv;
-            return newEv;
+            var newEvt = factory();
+            if (events.TryAdd(typeof(TMessage), newEvt)) {
+                return newEvt;
+            }
+
+            return (IDisposableEvent<TMessage>)events[typeof(TMessage)];
         }
 #endif
     }
@@ -65,9 +68,12 @@ public sealed class EventRegistry : IDisposable {
                 return (IDisposableEvent<TMessage>)existingEv;
             }
             
-            var newEv = factory(state);
-            events[typeof(TMessage)] = newEv;
-            return newEv;
+            var newEvt = factory(state);
+            if (events.TryAdd(typeof(TMessage), newEvt)) {
+                return newEvt;
+            }
+            
+            return (IDisposableEvent<TMessage>)events[typeof(TMessage)];
         }
 #endif
     }
