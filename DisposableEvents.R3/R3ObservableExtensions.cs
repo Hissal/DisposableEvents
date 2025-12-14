@@ -48,9 +48,7 @@ internal sealed class R3ObservableAdapter<T> : Observable<T> {
         };
     }
     
-    sealed class R3ObserverAdapter : IEventHandler<T> {
-        readonly Observer<T> observer;
-        public R3ObserverAdapter(Observer<T> observer) => this.observer = observer;
+    sealed class R3ObserverAdapter(Observer<T> observer) : IEventHandler<T> {
         public void Handle(T message) => observer.OnNext(message);
     }
 }

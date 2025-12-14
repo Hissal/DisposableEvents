@@ -6,10 +6,10 @@ namespace DisposableEvents.Tests.Events;
 public class EventSubscriberTest {
     readonly SpySubscriber<int> sut = new();
     
-    sealed class SpySubscriber<T> : IEventSubscriber<T> {
+    sealed class SpySubscriber<T> : AbstractSubscriber<T>, IEventSubscriber<T> {
         public IEventHandler<T>? LastSubscribedHandler { get; private set; }
 
-        public IDisposable Subscribe(IEventHandler<T> handler) {
+        public override IDisposable Subscribe(IEventHandler<T> handler) {
             LastSubscribedHandler = handler;
             return Disposable.Empty;
         }

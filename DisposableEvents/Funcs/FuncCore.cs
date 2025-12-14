@@ -4,7 +4,7 @@ using DisposableEvents.Internal;
 
 namespace DisposableEvents;
 
-public sealed class FuncCore<TArg, TResult> : IDisposableFunc<TArg, TResult> {
+public sealed class FuncCore<TArg, TResult> : AbstractFuncSubscriber<TArg, TResult>, IDisposableFunc<TArg, TResult> {
     internal readonly FreeList<IFuncHandler<TArg, TResult>> Handlers;
     
     bool disposed;
@@ -51,7 +51,7 @@ public sealed class FuncCore<TArg, TResult> : IDisposableFunc<TArg, TResult> {
         return result;
     }
     
-    public IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler) {
+    public override IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler) {
         lock (gate) {
             if (disposed)
                 return Disposable.Empty;

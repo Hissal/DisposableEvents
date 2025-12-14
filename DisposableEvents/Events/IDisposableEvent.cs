@@ -21,15 +21,25 @@ public interface IEventPublisher<in TMessage> : IDisposable {
 public interface IEventSubscriber<TMessage> {
     IDisposable Subscribe(IEventHandler<TMessage> handler);
 
-    IDisposable Subscribe(IEventHandler<TMessage> handler, IEventFilter<TMessage> filter) {
-        var filteredHandler = GlobalConfig.FilteredHandlerFactory.CreateFilteredHandler(handler, filter);
-        return Subscribe(filteredHandler);
-    }
-    
-    IDisposable Subscribe(IEventHandler<TMessage> handler, IEventFilter<TMessage>[] filters, FilterOrdering ordering) {
-        var filteredHandler = GlobalConfig.FilteredHandlerFactory.CreateFilteredHandler(handler, filters, ordering);
-        return Subscribe(filteredHandler);
-    }
+    IDisposable Subscribe(IEventHandler<TMessage> handler, IEventFilter<TMessage> filter);
+// #if NETSTANDARD2_0
+//         ;
+// #else
+//     {
+//         var filteredHandler = GlobalConfig.FilteredHandlerFactory.CreateFilteredHandler(handler, filter);
+//         return Subscribe(filteredHandler);
+//     }
+// #endif
+
+    IDisposable Subscribe(IEventHandler<TMessage> handler, IEventFilter<TMessage>[] filters, FilterOrdering ordering);
+// #if NETSTANDARD2_0
+//         ;
+// #else
+//     {
+//         var filteredHandler = GlobalConfig.FilteredHandlerFactory.CreateFilteredHandler(handler, filters, ordering);
+//         return Subscribe(filteredHandler);
+//     }
+// #endif
 }
 
 public interface IDisposableEvent<TMessage> : IEventPublisher<TMessage>, IEventSubscriber<TMessage>, IEventMarker {

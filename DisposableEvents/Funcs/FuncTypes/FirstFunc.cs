@@ -1,6 +1,6 @@
 ﻿namespace DisposableEvents;
 
-public sealed class FirstFunc<TArg, TResult> : IDisposableFunc<TArg, TResult> {
+public sealed class FirstFunc<TArg, TResult> : AbstractFuncSubscriber<TArg, TResult>, IDisposableFunc<TArg, TResult> {
     readonly FuncCore<TArg, TResult> core;
 
     public bool IsDisposed => core.IsDisposed;
@@ -25,7 +25,8 @@ public sealed class FirstFunc<TArg, TResult> : IDisposableFunc<TArg, TResult> {
         
         return result;
     }
-    public IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler) => core.RegisterHandler(handler);
+    
+    public override IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler) => core.RegisterHandler(handler);
     
     public void ClearHandlers() => core.ClearHandlers();
     public void Dispose() => core.Dispose();

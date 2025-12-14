@@ -1,4 +1,3 @@
-﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("DisposableEvents.Tests")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Benchmarks")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("DisposableEvents.R3")]
+﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Benchmarks")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("DisposableEvents.Tests")]
 namespace DisposableEvents;

@@ -6,7 +6,10 @@ public static partial class FuncResultExtensionsZLinq {
     public static FuncResult<TValue> Combine<TEnumerator, TValue>(
         this ValueEnumerable<TEnumerator, FuncResult<TValue>> results,
         Func<FuncResult<TValue>, FuncResult<TValue>, FuncResult<TValue>> combiner)
-        where TEnumerator : struct, IValueEnumerator<FuncResult<TValue>>, allows ref struct
+        where TEnumerator : struct, IValueEnumerator<FuncResult<TValue>>
+#if NET9_0_OR_GREATER
+        , allows ref struct
+#endif
     {
         using var enumerator = results.Enumerator;
 

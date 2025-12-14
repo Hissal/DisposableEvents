@@ -11,6 +11,10 @@ public enum EventRegistrationResult {
 public sealed class EventRegistry : IDisposable {
     readonly ConcurrentDictionary<Type, IEventMarker> events = new();
 
+#if NETSTANDARD2_0
+    readonly object syncRoot = new();
+#endif
+
     public EventRegistrationResult RegisterEvent<TMessage>(IDisposableEvent<TMessage> eventInstance) {
         return events.TryAdd(typeof(TMessage), eventInstance) 
             ? EventRegistrationResult.Success
@@ -36,12 +40,42 @@ public sealed class EventRegistry : IDisposable {
     }
 
     public IDisposableEvent<TMessage> GetOrAddEvent<TMessage>(Func<IDisposableEvent<TMessage>> factory) {
+#if !NETSTANDARD2_0
         var ev = events.GetOrAdd(typeof(TMessage), static (_, f) => f(), factory);
         return (IDisposableEvent<TMessage>)ev;
+#else
+        lock (syncRoot) {
+            if (events.TryGetValue(typeof(TMessage), out var existingEv)) {
+                return (IDisposableEvent<TMessage>)existingEv;
+            }
+            
+            var newEvt = factory();
+            if (events.TryAdd(typeof(TMessage), newEvt)) {
+                return newEvt;
+            }
+
+            return (IDisposableEvent<TMessage>)events[typeof(TMessage)];
+        }
+#endif
     }
     public IDisposableEvent<TMessage> GetOrAddEvent<TState, TMessage>(TState state, Func<TState, IDisposableEvent<TMessage>> factory) {
+#if !NETSTANDARD2_0
         var ev = events.GetOrAdd(typeof(TMessage), static (_, s) => s.factory(s.state), (state, factory));
         return (IDisposableEvent<TMessage>)ev;
+#else
+        lock (syncRoot) {
+            if (events.TryGetValue(typeof(TMessage), out var existingEv)) {
+                return (IDisposableEvent<TMessage>)existingEv;
+            }
+            
+            var newEvt = factory(state);
+            if (events.TryAdd(typeof(TMessage), newEvt)) {
+                return newEvt;
+            }
+            
+            return (IDisposableEvent<TMessage>)events[typeof(TMessage)];
+        }
+#endif
     }
 
     public bool ContainsEvent<TMessage>() {
