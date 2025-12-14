@@ -40,7 +40,10 @@ public class EventHubTest {
         var publisher = sut.GetPublisher<int>();
         var subscriber = sut.GetSubscriber<int>();
         
-        publisher.Should().BeSameAs(NullEvent<int>.Instance);
-        subscriber.Should().BeSameAs(NullEvent<int>.Instance);
+        // publisher.Should().BeOfType<NullEvent<int>>().Which.IsDisposed.Should().BeTrue();
+        // subscriber.Should().BeOfType<NullEvent<int>>().Which.IsDisposed.Should().BeTrue();
+        
+        publisher.Should().BeAssignableTo<NullEvent<int>>().Which.IsDisposed.Should().BeTrue();
+        subscriber.Should().BeAssignableTo<NullEvent<int>>().Which.IsDisposed.Should().BeTrue();
     }
 }

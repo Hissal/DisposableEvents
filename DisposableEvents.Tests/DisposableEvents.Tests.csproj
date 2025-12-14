@@ -6,8 +6,7 @@
         <Nullable>enable</Nullable>
         <TargetFrameworks>net6.0;net8.0;net9.0</TargetFrameworks>
         <LangVersion>13</LangVersion>
-        <NoWarn>$(NoWarn);0436</NoWarn>
-        <NoWarn>$(NoWarn);0433</NoWarn>
+        
         <!-- Microsoft.Testing.Platform Support -->
         <OutputType>Exe</OutputType>
         <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
@@ -41,10 +40,10 @@
 
     <ItemGroup>
         <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
-        <PackageReference Include="PolySharp" Version="1.15.0">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
+<!--        <PackageReference Include="PolySharp" Version="1.15.0">-->
+<!--            <PrivateAssets>all</PrivateAssets>-->
+<!--            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
+<!--        </PackageReference>-->
         <PackageReference Include="coverlet.collector" Version="6.0.2"/>
         <PackageReference Include="FluentAssertions" Version="[7.2.0]" />
         <PackageReference Include="JetBrains.dotMemoryUnit" Version="3.2.20220510" />
@@ -65,14 +64,6 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-    </ItemGroup>
-
-    <ItemGroup>
-        <!-- Internals visible to for testing -->
-    </ItemGroup>
-    
-    <ItemGroup>
-        <Folder Include="InternalInclude\" />
     </ItemGroup>
     
     <ItemGroup>

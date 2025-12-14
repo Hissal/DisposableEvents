@@ -2,7 +2,7 @@
 
 namespace DisposableEvents;
 
-public class NullEvent<TMessage> :
+internal class NullEvent<TMessage> :
     AbstractSubscriber<TMessage>,
     IDisposableEvent<TMessage>
 {
