@@ -19,7 +19,7 @@ public class EventAwaitNextExtensionsTest {
         _ = Task.Run(async () => {
             await Task.Delay(c_delayMs);
             evt.Publish(7);
-        });
+        }, TestContext.Current.CancellationToken);
         
         var result = await evt.AwaitNextAsync(CancellationToken.None);
         stopwatch.Stop();
@@ -113,7 +113,7 @@ public class EventAwaitNextExtensionsTest {
         _ = Task.Run(async () => {
             await Task.Delay(c_delayMs);
             cts.Cancel();
-        });
+        }, TestContext.Current.CancellationToken);
         
         await FluentActions.Awaiting(() => evt.AwaitNextAsync(cts.Token))
             .Should().ThrowAsync<OperationCanceledException>();
@@ -133,7 +133,7 @@ public class EventAwaitNextExtensionsTest {
         _ = Task.Run(async () => {
             await Task.Delay(c_delayMs);
             cts.Cancel();
-        });
+        }, TestContext.Current.CancellationToken);
 
         await FluentActions.Awaiting(() => evt.AwaitNextAsync(filter, cts.Token))
             .Should().ThrowAsync<OperationCanceledException>();
@@ -155,7 +155,7 @@ public class EventAwaitNextExtensionsTest {
         _ = Task.Run(async () => {
             await Task.Delay(c_delayMs);
             cts.Cancel();
-        });
+        }, TestContext.Current.CancellationToken);
 
         await FluentActions.Awaiting(() => evt.AwaitNextAsync(filters, cancellationToken: cts.Token))
             .Should().ThrowAsync<OperationCanceledException>();
@@ -176,7 +176,7 @@ public class EventAwaitNextExtensionsTest {
         _ = Task.Run(async () => {
             await Task.Delay(c_delayMs);
             cts.Cancel();
-        });
+        }, TestContext.Current.CancellationToken);
 
         await FluentActions.Awaiting(() => evt.AwaitNextAsync(cts.Token, filter1, filter2))
             .Should().ThrowAsync<OperationCanceledException>();
@@ -189,7 +189,7 @@ public class EventAwaitNextExtensionsTest {
     [Fact]
     public async Task AwaitNextAsync_NoFilter_PreCancelledToken_ThrowsImmediately() {
         using var cts = new CancellationTokenSource();
-        cts.Cancel();
+        await CancelAsync(cts);
         
         stopwatch.Start();
         await FluentActions.Awaiting(() => evt.AwaitNextAsync(cts.Token))
@@ -206,7 +206,7 @@ public class EventAwaitNextExtensionsTest {
         filter.Filter(ref Arg.Any<int>()).Returns(FilterResult.Pass);
         
         using var cts = new CancellationTokenSource();
-        cts.Cancel();
+        await CancelAsync(cts);
         
         stopwatch.Start();
         await FluentActions.Awaiting(() => evt.AwaitNextAsync(filter, cts.Token))
@@ -225,7 +225,7 @@ public class EventAwaitNextExtensionsTest {
         filter2.Filter(ref Arg.Any<int>()).Returns(FilterResult.Pass);
         
         using var cts = new CancellationTokenSource();
-        cts.Cancel();
+        await CancelAsync(cts);
         
         stopwatch.Start();
         await FluentActions.Awaiting(() => evt.AwaitNextAsync(filters, cancellationToken: cts.Token))
@@ -244,7 +244,7 @@ public class EventAwaitNextExtensionsTest {
         filter2.Filter(ref Arg.Any<int>()).Returns(FilterResult.Pass);
         
         using var cts = new CancellationTokenSource();
-        cts.Cancel();
+        await CancelAsync(cts);
         
         stopwatch.Start();
         await FluentActions.Awaiting(() => evt.AwaitNextAsync(cts.Token, filter1, filter2))
@@ -253,5 +253,14 @@ public class EventAwaitNextExtensionsTest {
         
         // Should throw immediately without waiting
         stopwatch.ElapsedMilliseconds.Should().BeLessThan(c_delayMs);
+    }
+    
+    Task CancelAsync(CancellationTokenSource cts) {
+#if NET7_0_OR_GREATER
+        return cts.CancelAsync();
+#else
+        cts.Cancel();
+        return Task.CompletedTask;
+#endif
     }
 }
