@@ -116,4 +116,43 @@ public class DisposableEventTest {
 
         subscribedHandlers.Should().BeEmpty();
     }
+
+    [Fact]
+    public void HandlerCount_IncrementsWithEachSubscription() {
+        sut.HandlerCount.Should().Be(0);
+        
+        var handler1 = Substitute.For<IEventHandler<int>>();
+        sut.Subscribe(handler1);
+        sut.HandlerCount.Should().Be(1);
+        
+        var handler2 = Substitute.For<IEventHandler<int>>();
+        sut.Subscribe(handler2);
+        sut.HandlerCount.Should().Be(2);
+        
+        var handler3 = Substitute.For<IEventHandler<int>>();
+        sut.Subscribe(handler3);
+        sut.HandlerCount.Should().Be(3);
+    }
+
+    [Fact]
+    public void HandlerCount_DecrementsWhenSubscriptionDisposed() {
+        var handler1 = Substitute.For<IEventHandler<int>>();
+        var handler2 = Substitute.For<IEventHandler<int>>();
+        var handler3 = Substitute.For<IEventHandler<int>>();
+        
+        var sub1 = sut.Subscribe(handler1);
+        var sub2 = sut.Subscribe(handler2);
+        var sub3 = sut.Subscribe(handler3);
+
+        sut.HandlerCount.Should().Be(3);
+
+        sub2.Dispose();
+        sut.HandlerCount.Should().Be(2);
+
+        sub1.Dispose();
+        sut.HandlerCount.Should().Be(1);
+
+        sub3.Dispose();
+        sut.HandlerCount.Should().Be(0);
+    }
 }
