@@ -7,6 +7,7 @@ public class LazyInnerEventTest {
     [Fact]
     public void Constructor_WithoutParameter_UsesGlobalConfig() {
         var sut = new LazyInnerEvent<int>();
+        
         sut.Should().NotBeNull();
         sut.IsDisposed.Should().BeFalse();
         sut.HandlerCount.Should().Be(0);
@@ -15,6 +16,7 @@ public class LazyInnerEventTest {
     [Fact]
     public void Constructor_WithExpectedSubscriberCount_InitializesCorrectly() {
         var sut = new LazyInnerEvent<int>(10);
+        
         sut.Should().NotBeNull();
         sut.IsDisposed.Should().BeFalse();
         sut.HandlerCount.Should().Be(0);
@@ -32,7 +34,9 @@ public class LazyInnerEventTest {
         var sut = new LazyInnerEvent<int>();
         var handler = Substitute.For<IEventHandler<int>>();
         sut.Subscribe(handler);
+        
         sut.Publish(69);
+        
         handler.Received(1).Handle(69);
     }
 
@@ -40,7 +44,9 @@ public class LazyInnerEventTest {
     public void Subscribe_MaterializesCore_AndReturnsDisposable() {
         var sut = new LazyInnerEvent<int>();
         var handler = Substitute.For<IEventHandler<int>>();
+        
         var subscription = sut.Subscribe(handler);
+        
         subscription.Should().NotBeNull();
         subscription.Should().NotBe(Disposable.Empty);
         sut.HandlerCount.Should().Be(1);
@@ -87,7 +93,9 @@ public class LazyInnerEventTest {
         var sut = new LazyInnerEvent<int>();
         var handler = Substitute.For<IEventHandler<int>>();
         sut.Dispose();
+        
         var subscription = sut.Subscribe(handler);
+        
         subscription.Should().Be(Disposable.Empty);
         sut.HandlerCount.Should().Be(0);
     }
@@ -97,8 +105,10 @@ public class LazyInnerEventTest {
         var sut = new LazyInnerEvent<int>();
         var handler = Substitute.For<IEventHandler<int>>();
         sut.Dispose();
+        
         sut.Subscribe(handler);
         sut.Publish(42);
+        
         handler.DidNotReceive().Handle(Arg.Any<int>());
     }
 
@@ -107,8 +117,10 @@ public class LazyInnerEventTest {
         var sut = new LazyInnerEvent<int>();
         var handler = Substitute.For<IEventHandler<int>>();
         sut.Subscribe(handler);
+        
         sut.Dispose();
         sut.Publish(69);
+        
         handler.DidNotReceive().Handle(Arg.Any<int>());
     }
 
@@ -116,7 +128,9 @@ public class LazyInnerEventTest {
     public void Publish_AfterDisposeBeforeMaterialization_DoesNothing() {
         var sut = new LazyInnerEvent<int>();
         sut.Dispose();
+        
         sut.Publish(42);
+        
         sut.IsDisposed.Should().BeTrue();
     }
 
@@ -184,7 +198,9 @@ public class LazyInnerEventTest {
         var sut = new LazyInnerEvent<int>();
         var handler = Substitute.For<IEventHandler<int>>();
         sut.Subscribe(handler);
+        
         sut.Dispose();
+        
         sut.IsDisposed.Should().BeTrue();
     }
 
@@ -248,15 +264,19 @@ public class LazyInnerEventTest {
         var handler = Substitute.For<IEventHandler<int>>();
         sut.Subscribe(handler);
         sut.Dispose();
+        
         sut.ClearHandlers();
+        
         sut.IsDisposed.Should().BeTrue();
     }
 
     [Fact]
     public void Dispose_Multiple_DoesNotThrow() {
         var sut = new LazyInnerEvent<int>();
+        
         sut.Dispose();
         sut.Dispose();
+        
         sut.IsDisposed.Should().BeTrue();
     }
 
@@ -265,7 +285,9 @@ public class LazyInnerEventTest {
         var sut = new LazyInnerEvent<int>();
         var handler = Substitute.For<IEventHandler<int>>();
         sut.Subscribe(handler);
+        
         sut.Dispose();
+        
         sut.IsDisposed.Should().BeTrue();
         sut.HandlerCount.Should().Be(0);
     }
@@ -273,7 +295,9 @@ public class LazyInnerEventTest {
     [Fact]
     public void Next_BeforeMaterialization_ReturnsNull() {
         var sut = new LazyInnerEvent<int>();
+        
         var next = sut.Next;
+        
         next.Should().BeNull();
     }
 
@@ -282,7 +306,9 @@ public class LazyInnerEventTest {
         var sut = new LazyInnerEvent<int>();
         var nextEvent = new LazyInnerEvent<int>();
         sut.SetNext(nextEvent);
+        
         var next = sut.Next;
+        
         next.Should().Be(nextEvent);
     }
 
@@ -290,7 +316,9 @@ public class LazyInnerEventTest {
     public void SetNext_BeforeMaterialization_SetsCore() {
         var sut = new LazyInnerEvent<int>();
         var nextEvent = new LazyInnerEvent<int>();
+        
         sut.SetNext(nextEvent);
+        
         sut.Next.Should().Be(nextEvent);
     }
 
@@ -300,7 +328,9 @@ public class LazyInnerEventTest {
         var handler = Substitute.For<IEventHandler<int>>();
         sut.Subscribe(handler);
         var nextEvent = new LazyInnerEvent<int>();
+        
         var act = () => sut.SetNext(nextEvent);
+        
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("Inner already materialized; cannot set after first use.");
     }
@@ -310,7 +340,9 @@ public class LazyInnerEventTest {
         var sut = new LazyInnerEvent<int>();
         sut.Dispose();
         var nextEvent = new LazyInnerEvent<int>();
+        
         var act = () => sut.SetNext(nextEvent);
+        
         act.Should().Throw<ObjectDisposedException>();
     }
 
@@ -319,7 +351,9 @@ public class LazyInnerEventTest {
         var sut = new LazyInnerEvent<int>();
         sut.Publish(42);
         var nextEvent = new LazyInnerEvent<int>();
+        
         sut.SetNext(nextEvent);
+        
         sut.Next.Should().Be(nextEvent);
     }
 
@@ -330,7 +364,9 @@ public class LazyInnerEventTest {
         var handler = Substitute.For<IEventHandler<int>>();
         sut.SetNext(nextEvent);
         nextEvent.Subscribe(handler);
+        
         sut.Publish(69);
+        
         handler.Received(1).Handle(69);
     }
 
@@ -340,7 +376,9 @@ public class LazyInnerEventTest {
         var nextEvent = new LazyInnerEvent<int>();
         var handler = Substitute.For<IEventHandler<int>>();
         sut.SetNext(nextEvent);
+        
         sut.Subscribe(handler);
+        
         sut.HandlerCount.Should().Be(1);
     }
 }
