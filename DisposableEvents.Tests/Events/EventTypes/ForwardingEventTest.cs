@@ -1,3 +1,5 @@
+using DisposableEvents;
+
 namespace DisposableEvents.Tests.Events.EventTypes;
 
 [TestSubject(typeof(ForwardingEvent<>))]
