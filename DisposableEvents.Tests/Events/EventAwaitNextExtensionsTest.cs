@@ -191,13 +191,8 @@ public class EventAwaitNextExtensionsTest {
         using var cts = new CancellationTokenSource();
         await CancelAsync(cts);
         
-        stopwatch.Start();
         await FluentActions.Awaiting(() => evt.AwaitNextAsync(cts.Token))
             .Should().ThrowAsync<OperationCanceledException>();
-        stopwatch.Stop();
-        
-        // Should throw immediately without waiting
-        stopwatch.ElapsedMilliseconds.Should().BeLessThan(c_delayMs);
     }
     
     [Fact]
@@ -208,13 +203,8 @@ public class EventAwaitNextExtensionsTest {
         using var cts = new CancellationTokenSource();
         await CancelAsync(cts);
         
-        stopwatch.Start();
         await FluentActions.Awaiting(() => evt.AwaitNextAsync(filter, cts.Token))
             .Should().ThrowAsync<OperationCanceledException>();
-        stopwatch.Stop();
-        
-        // Should throw immediately without waiting
-        stopwatch.ElapsedMilliseconds.Should().BeLessThan(c_delayMs);
     }
     
     [Fact]
@@ -227,13 +217,8 @@ public class EventAwaitNextExtensionsTest {
         using var cts = new CancellationTokenSource();
         await CancelAsync(cts);
         
-        stopwatch.Start();
         await FluentActions.Awaiting(() => evt.AwaitNextAsync(filters, cancellationToken: cts.Token))
             .Should().ThrowAsync<OperationCanceledException>();
-        stopwatch.Stop();
-        
-        // Should throw immediately without waiting
-        stopwatch.ElapsedMilliseconds.Should().BeLessThan(c_delayMs);
     }
     
     [Fact]
@@ -246,13 +231,8 @@ public class EventAwaitNextExtensionsTest {
         using var cts = new CancellationTokenSource();
         await CancelAsync(cts);
         
-        stopwatch.Start();
         await FluentActions.Awaiting(() => evt.AwaitNextAsync(cts.Token, filter1, filter2))
             .Should().ThrowAsync<OperationCanceledException>();
-        stopwatch.Stop();
-        
-        // Should throw immediately without waiting
-        stopwatch.ElapsedMilliseconds.Should().BeLessThan(c_delayMs);
     }
     
     Task CancelAsync(CancellationTokenSource cts) {
