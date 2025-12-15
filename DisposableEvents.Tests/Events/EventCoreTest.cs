@@ -50,7 +50,7 @@ public class EventCoreTest {
         }
         
         // Act
-        sut.ClearSubscriptions();
+        sut.ClearHandlers();
         sut.Publish(69);
         
         // Assert
