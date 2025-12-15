@@ -5,6 +5,9 @@ using System.Runtime.CompilerServices;
 namespace DisposableEvents.Internal;
 
 internal struct PooledArray<T>(T[] array, int length) : IDisposable {
+    public static PooledArray<T> Empty { get; } = new ([], 0);
+    public static PooledArray<T> Disposed { get; } = new (null!, 0);
+    
     T[]? _array = array;
     
     /// <summary>

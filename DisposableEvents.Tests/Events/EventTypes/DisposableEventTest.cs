@@ -98,7 +98,8 @@ public class DisposableEventTest {
             sut.Subscribe(handler);
         }
 
-        var subscribedHandlers = sut.GetHandlers().ToArray();
+        using var handlerSnapshot = sut.SnapshotHandlers();
+        var subscribedHandlers = handlerSnapshot.Span.ToArray();
 
         subscribedHandlers.Should().Contain(handlers);
     }
@@ -110,7 +111,8 @@ public class DisposableEventTest {
         }
 
         sut.Dispose();
-        var subscribedHandlers = sut.GetHandlers().ToArray();
+        using var handlerSnapshot = sut.SnapshotHandlers();
+        var subscribedHandlers = handlerSnapshot.Span.ToArray();
 
         subscribedHandlers.Should().BeEmpty();
     }

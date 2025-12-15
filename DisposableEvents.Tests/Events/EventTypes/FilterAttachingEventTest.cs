@@ -23,7 +23,8 @@ public class FilterAttachingEventTest {
         
         sutWithFilter.Subscribe(handler);
         
-        var subscribedHandler = sutWithFilter.GetHandlers().ToArray().First();
+        using var handlerSnapshot = sutWithFilter.SnapshotHandlers();
+        var subscribedHandler = handlerSnapshot.Span.ToArray().First();
         subscribedHandler.Should().BeOfType<FilteredEventHandler<int>>();
     }
 
@@ -119,7 +120,8 @@ public class FilterAttachingEventTest {
             sut.Subscribe(handler);
         }
 
-        var subscribedHandlers = sut.GetHandlers().ToArray();
+        using var handlerSnapshot = sut.SnapshotHandlers();
+        var subscribedHandlers = handlerSnapshot.Span.ToArray();
 
         // Extract the original handlers from the FilteredEventHandler wrappers
         subscribedHandlers.Select(f => f.GetAnyPrivateFieldOrPropertyOfType<IEventHandler<int>>()).Should().BeEquivalentTo(handlers);
@@ -132,7 +134,8 @@ public class FilterAttachingEventTest {
         }
 
         sut.Dispose();
-        var subscribedHandlers = sut.GetHandlers().ToArray();
+        using var handlerSnapshot = sut.SnapshotHandlers();
+        var subscribedHandlers = handlerSnapshot.Span.ToArray();
 
         subscribedHandlers.Should().BeEmpty();
     }

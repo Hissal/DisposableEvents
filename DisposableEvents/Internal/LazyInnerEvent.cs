@@ -61,11 +61,11 @@ internal class LazyInnerEvent<TMessage> : IDisposableEvent<TMessage>, IPipelineE
         inner?.Publish(message);
     }
 
-    public ReadOnlySpan<IEventHandler<TMessage>> GetHandlers() {
+    public EventHandlerSnapshot<TMessage> SnapshotHandlers() {
         var existing = Volatile.Read(ref coreLazy);
         return existing != null 
-            ? existing.GetHandlers()
-            : ReadOnlySpan<IEventHandler<TMessage>>.Empty;
+            ? existing.SnapshotHandlers() 
+            : EventHandlerSnapshot<TMessage>.Empty;
     }
 
     public IDisposable Subscribe(IEventHandler<TMessage> handler) {

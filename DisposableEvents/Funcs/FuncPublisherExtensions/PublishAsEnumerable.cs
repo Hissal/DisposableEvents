@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Collections;
+using DisposableEvents.Internal;
 
 namespace DisposableEvents;
 
@@ -53,13 +54,9 @@ public static partial class FuncPublisherExtensions {
     
     // ----- Classes ----- //
     
-    sealed class PublishEnumerableDeferred<TArg, TResult> : IEnumerable<FuncResult<TResult>> {
-        readonly Enumerator enumerator;
-        
-        public PublishEnumerableDeferred(IFuncPublisher<TArg, TResult> publisher, TArg arg) {
-            enumerator = new Enumerator(publisher, arg);
-        }
-        
+    sealed class PublishEnumerableDeferred<TArg, TResult>(IFuncPublisher<TArg, TResult> publisher, TArg arg) : IEnumerable<FuncResult<TResult>> {
+        readonly Enumerator enumerator = new(publisher, arg);
+
         public IEnumerator<FuncResult<TResult>> GetEnumerator() {
             return enumerator;
         }
@@ -68,31 +65,39 @@ public static partial class FuncPublisherExtensions {
             return GetEnumerator();
         }
         
-        sealed class Enumerator : IEnumerator<FuncResult<TResult>> {
-            readonly IFuncPublisher<TArg, TResult> publisher;
-            readonly TArg arg;
+        sealed class Enumerator(IFuncPublisher<TArg, TResult> publisher, TArg arg) : IEnumerator<FuncResult<TResult>> {
             IFuncHandler<TArg, TResult>[]? handlers;
+            int handlerCount = 0;
             
             int index = -1;
-            
-            public Enumerator(IFuncPublisher<TArg, TResult> publisher, TArg arg) {
-                this.publisher = publisher;
-                this.arg = arg;
-            }
-            
+
             public FuncResult<TResult> Current {
                 get {
-                    handlers ??= publisher.GetHandlers();
+                    handlers ??= GetHandlers();
                     return publisher.InvokeHandler(handlers[index], arg);
                 }
+            }
+
+            IFuncHandler<TArg, TResult>[] GetHandlers() {
+                if (handlers != null)
+                    return handlers;
+                
+                using var handlerSnapshot = publisher.SnapshotHandlers();
+                var handlerSpan = handlerSnapshot.Span;
+                
+                var buffer = ArrayPool<IFuncHandler<TArg, TResult>>.Shared.Rent(handlerSpan.Length);
+                handlerSpan.CopyTo(buffer.AsSpan(0, handlerSpan.Length));
+                handlerCount = handlerSpan.Length;
+                handlers = buffer;
+                return handlers;
             }
 
             object IEnumerator.Current => Current;
             
             public bool MoveNext() {
-                handlers ??= publisher.GetHandlers();
+                handlers ??= GetHandlers();
                 index++;
-                return index < handlers.Length;
+                return index < handlerCount;
             }
             
             public void Reset() {
@@ -101,17 +106,18 @@ public static partial class FuncPublisherExtensions {
             }
 
             public void Dispose() {
+                if (handlers == null)
+                    return;
+                
+                ArrayPool<IFuncHandler<TArg, TResult>>.Shared.Return(handlers);
+                handlers = null;
             }
         }
     }
     
-    sealed class PublishEnumerableImmediate<TArg, TResult> : IEnumerable<FuncResult<TResult>> {
-        readonly Enumerator enumerator;
-        
-        public PublishEnumerableImmediate(IFuncPublisher<TArg, TResult> publisher, TArg arg) {
-            enumerator = new Enumerator(publisher, arg);
-        }
-        
+    sealed class PublishEnumerableImmediate<TArg, TResult>(IFuncPublisher<TArg, TResult> publisher, TArg arg) : IEnumerable<FuncResult<TResult>> {
+        readonly Enumerator enumerator = new(publisher, arg);
+
         public IEnumerator<FuncResult<TResult>> GetEnumerator() {
             return enumerator;
         }
@@ -127,7 +133,8 @@ public static partial class FuncPublisherExtensions {
             int index = -1;
             
             public Enumerator(IFuncPublisher<TArg, TResult> publisher, TArg arg) {
-                var handlers = publisher.GetHandlers();
+                using var handlerSnapshot = publisher.SnapshotHandlers();
+                var handlers = handlerSnapshot.Span;
         
                 if (handlers.Length == 0) {
                     results = null;

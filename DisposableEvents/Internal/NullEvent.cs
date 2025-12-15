@@ -10,9 +10,9 @@ internal class NullEvent<TMessage> :
     
     public bool IsDisposed => true;
     public int HandlerCount => 0;
-    
-    public ReadOnlySpan<IEventHandler<TMessage>> GetHandlers() => ReadOnlySpan<IEventHandler<TMessage>>.Empty;
-    
+
+    public EventHandlerSnapshot<TMessage> SnapshotHandlers() => EventHandlerSnapshot<TMessage>.Empty;
+
     public void Publish(TMessage message) { }
     
     public override IDisposable Subscribe(IEventHandler<TMessage> handler) => Disposable.Empty;

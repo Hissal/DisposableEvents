@@ -138,11 +138,11 @@ public sealed class ForwardingEvent<TMessage> : AbstractSubscriber<TMessage>, IP
             core?.ClearSubscriptions();
         }
     }
-
-    public ReadOnlySpan<IEventHandler<TMessage>> GetHandlers() {
+    
+    public EventHandlerSnapshot<TMessage> SnapshotHandlers() {
         return core != null 
-            ? core.GetHandlers() 
-            : ReadOnlySpan<IEventHandler<TMessage>>.Empty;
+            ? core.SnapshotHandlers() 
+            : EventHandlerSnapshot<TMessage>.Empty;
     }
 
     IPipelineEvent<TMessage>? IPipelineEvent<TMessage>.Next => core?.Next;

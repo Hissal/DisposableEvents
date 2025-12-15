@@ -38,7 +38,7 @@ public sealed partial class EventPipeline<TMessage> : IDisposableEvent<TMessage>
         Pipeline.Dispose();
     }
 
-    public ReadOnlySpan<IEventHandler<TMessage>> GetHandlers() => Pipeline.GetHandlers();
+    public EventHandlerSnapshot<TMessage> SnapshotHandlers() => Pipeline.SnapshotHandlers();
     public void ClearSubscriptions() => Pipeline.ClearSubscriptions();
 }
 

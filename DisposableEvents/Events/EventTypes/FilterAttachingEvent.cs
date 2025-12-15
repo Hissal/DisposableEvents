@@ -75,7 +75,7 @@ public sealed class FilterAttachingEvent<TMessage> : IPipelineEvent<TMessage> {
         return combinedSingle;
     }
     
-    public ReadOnlySpan<IEventHandler<TMessage>> GetHandlers() => core.GetHandlers();
+    public EventHandlerSnapshot<TMessage> SnapshotHandlers() => core.SnapshotHandlers();
     public void ClearSubscriptions() => core.ClearSubscriptions();
     public void Dispose() => core.Dispose();
     

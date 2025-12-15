@@ -15,7 +15,11 @@ public interface IEventPublisher<TMessage> : IDisposable {
     /// <param name="message">The value to publish.</param>
     void Publish(TMessage message);
     
-    ReadOnlySpan<IEventHandler<TMessage>> GetHandlers();
+    EventHandlerSnapshot<TMessage> SnapshotHandlers();
+    
+    // Would require synchronization to implement properly
+    // Maybe in the future with a publicly available sync root
+    // ReadOnlySpan<IEventHandler<TMessage>> GetHandlersSpan();
 }
 
 public interface IEventSubscriber<TMessage> {

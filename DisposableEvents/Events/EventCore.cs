@@ -22,7 +22,18 @@ public sealed class EventCore<TMessage> : AbstractSubscriber<TMessage>, IDisposa
     readonly object gate = new();
     
     PooledArray<IEventHandler<TMessage>>? pooledHandlers;
-    public ReadOnlySpan<IEventHandler<TMessage>> GetHandlers() {
+    
+    public EventCore() : this(GlobalConfig.InitialSubscriberCapacity) { }
+    public EventCore(int initialSubscriberCapacity) {
+        if (initialSubscriberCapacity < 0) {
+            Debug.WriteLine($"[DisposableEvents] Warning: Creating event with negative initial subscriber capacity {initialSubscriberCapacity}. Using default value {GlobalConfig.InitialSubscriberCapacity} instead.");
+            initialSubscriberCapacity = GlobalConfig.InitialSubscriberCapacity;
+        }
+        
+        Handlers = new FreeList<IEventHandler<TMessage>>(initialSubscriberCapacity);
+    }
+    
+    ReadOnlySpan<IEventHandler<TMessage>> GetHandlersSpan() {
         lock (gate) {
             if (disposed || HandlerCount == 0)
                 return ReadOnlySpan<IEventHandler<TMessage>>.Empty;
@@ -53,14 +64,10 @@ public sealed class EventCore<TMessage> : AbstractSubscriber<TMessage>, IDisposa
         }
     }
     
-    public EventCore() : this(GlobalConfig.InitialSubscriberCapacity) { }
-    public EventCore(int initialSubscriberCapacity) {
-        if (initialSubscriberCapacity < 0) {
-            Debug.WriteLine($"[DisposableEvents] Warning: Creating event with negative initial subscriber capacity {initialSubscriberCapacity}. Using default value {GlobalConfig.InitialSubscriberCapacity} instead.");
-            initialSubscriberCapacity = GlobalConfig.InitialSubscriberCapacity;
+    public EventHandlerSnapshot<TMessage> SnapshotHandlers() {
+        lock (gate) {
+            return new EventHandlerSnapshot<TMessage>(GetHandlersSpan());
         }
-        
-        Handlers = new FreeList<IEventHandler<TMessage>>(initialSubscriberCapacity);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

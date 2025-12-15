@@ -20,18 +20,48 @@ public sealed class FuncCore<TArg, TResult> : AbstractFuncSubscriber<TArg, TResu
     
     public int HandlerCount => Handlers.GetCount();
     
-    IFuncHandler<TArg, TResult>[]? cachedHandlers;
-    public IFuncHandler<TArg, TResult>[] GetHandlers() {
-        if (cachedHandlers != null)
-            return cachedHandlers;
-        
-        cachedHandlers = Handlers.GetValues().Where(h => h != null).ToArray()!;
-        return cachedHandlers;
-    }
-
+    PooledArray<IFuncHandler<TArg, TResult>>? pooledHandlers;
+    
     public FuncCore() : this(GlobalConfig.InitialSubscriberCapacity) { }
     public FuncCore(int initialSubscriberCapacity) {
         Handlers = new FreeList<IFuncHandler<TArg, TResult>>(initialSubscriberCapacity);
+    }
+    
+    ReadOnlySpan<IFuncHandler<TArg, TResult>> GetHandlersSpan() {
+        lock (gate) {
+            if (disposed || HandlerCount == 0)
+                return ReadOnlySpan<IFuncHandler<TArg, TResult>>.Empty;
+            
+            if (pooledHandlers != null)
+                return pooledHandlers.Value.Span;
+        
+            var buffer = PooledArray<IFuncHandler<TArg, TResult>>.Rent(HandlerCount);
+            var count = 0;
+            foreach (var handler in Handlers.GetValues()) {
+                if (handler != null) {
+                    buffer[count++] = handler;
+                }
+            }
+            
+            pooledHandlers = buffer;
+            return buffer.Span;
+        }
+    }
+    
+    void DisposePooledHandlers() {
+        lock (gate) {
+            if (pooledHandlers == null)
+                return;
+            
+            pooledHandlers.Value.Dispose();
+            pooledHandlers = null;
+        }
+    }
+    
+    public FuncHandlerSnapshot<TArg, TResult> SnapshotHandlers() {
+        lock (gate) {
+            return new FuncHandlerSnapshot<TArg, TResult>(GetHandlersSpan());
+        }
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -56,7 +86,7 @@ public sealed class FuncCore<TArg, TResult> : AbstractFuncSubscriber<TArg, TResu
             if (disposed)
                 return Disposable.Empty;
 
-            cachedHandlers = null;
+            DisposePooledHandlers();
             
             var subscriptionKey = Handlers.Add(handler);
             return new Subscription(this, subscriptionKey);
@@ -68,7 +98,7 @@ public sealed class FuncCore<TArg, TResult> : AbstractFuncSubscriber<TArg, TResu
             if (disposed)
                 return;
 
-            cachedHandlers = null;
+            DisposePooledHandlers();
             Handlers.Clear();
         }
     }
@@ -78,7 +108,7 @@ public sealed class FuncCore<TArg, TResult> : AbstractFuncSubscriber<TArg, TResu
             if (disposed)
                 return;
 
-            cachedHandlers = null;
+            DisposePooledHandlers();
             Handlers.Dispose();
             disposed = true;
         }
@@ -103,7 +133,7 @@ public sealed class FuncCore<TArg, TResult> : AbstractFuncSubscriber<TArg, TResu
                 if (core.disposed)
                     return;
 
-                core.cachedHandlers = null;
+                core.DisposePooledHandlers();
                 core.Handlers.Remove(subscriptionKey, true);
             }
         }
