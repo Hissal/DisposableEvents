@@ -108,7 +108,7 @@ public class BufferedEventTest {
             sut.Subscribe(handler);
         }
 
-        var subscribedHandlers = sut.GetHandlers();
+        var subscribedHandlers = sut.GetHandlers().ToArray();
 
         subscribedHandlers.Should().Contain(handlers);
     }
@@ -120,7 +120,7 @@ public class BufferedEventTest {
         }
 
         sut.Dispose();
-        var subscribedHandlers = sut.GetHandlers();
+        var subscribedHandlers = sut.GetHandlers().ToArray();
 
         subscribedHandlers.Should().BeEmpty();
     }

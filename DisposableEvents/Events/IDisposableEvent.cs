@@ -5,7 +5,7 @@
 /// </summary>
 public interface IEventMarker : IDisposable;
 
-public interface IEventPublisher<in TMessage> : IDisposable {
+public interface IEventPublisher<TMessage> : IDisposable {
     public bool IsDisposed { get; }
     public int HandlerCount { get; }
     
@@ -15,7 +15,7 @@ public interface IEventPublisher<in TMessage> : IDisposable {
     /// <param name="message">The value to publish.</param>
     void Publish(TMessage message);
     
-    IEventHandler<TMessage>[] GetHandlers();
+    ReadOnlySpan<IEventHandler<TMessage>> GetHandlers();
 }
 
 public interface IEventSubscriber<TMessage> {

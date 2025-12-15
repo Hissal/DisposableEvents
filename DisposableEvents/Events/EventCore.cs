@@ -21,29 +21,35 @@ public sealed class EventCore<TMessage> : AbstractSubscriber<TMessage>, IDisposa
 
     readonly object gate = new();
     
-    // TODO: Consider using ImmutableArray or similar for better thread-safety
-    // TODO: Consider using pooled arrays to reduce allocations
-    IEventHandler<TMessage>[]? cachedHandlers;
-    public IEventHandler<TMessage>[] GetHandlers() {
+    PooledArray<IEventHandler<TMessage>>? pooledHandlers;
+    public ReadOnlySpan<IEventHandler<TMessage>> GetHandlers() {
         lock (gate) {
             if (disposed || HandlerCount == 0)
-                return Array.Empty<IEventHandler<TMessage>>();
+                return ReadOnlySpan<IEventHandler<TMessage>>.Empty;
         
-            if (cachedHandlers != null)
-                return cachedHandlers;
+            if (pooledHandlers != null)
+                return pooledHandlers.Value.Span;
+
+            var buffer = PooledArray<IEventHandler<TMessage>>.Rent(HandlerCount);
+            var count = 0;
+            foreach (var handler in Handlers.GetValues()) {
+                if (handler != null) {
+                    buffer[count++] = handler;
+                }
+            }
             
-            // TODO: benchmark which is faster linq vs manual loop
-            cachedHandlers = Handlers.GetValues().Where(h => h != null).ToArray()!;
+            pooledHandlers = buffer;
+            return buffer.Span;
+        }
+    }
+    
+    void DisposePooledHandlers() {
+        lock (gate) {
+            if (pooledHandlers == null)
+                return;
             
-            // cachedHandlers = new IEventHandler<TMessage>[HandlerCount];
-            // int i = 0;
-            // foreach (var handler in Handlers.GetValues()) {
-            //     if (handler != null) {
-            //         cachedHandlers[i++] = handler;
-            //     }
-            // }
-            
-            return cachedHandlers;
+            pooledHandlers.Value.Dispose();
+            pooledHandlers = null;
         }
     }
     
@@ -69,7 +75,7 @@ public sealed class EventCore<TMessage> : AbstractSubscriber<TMessage>, IDisposa
             if (disposed)
                 return Disposable.Empty;
 
-            cachedHandlers = null;
+            DisposePooledHandlers();
             
             var subscriptionKey = Handlers.Add(handler);
             return new Subscription(this, subscriptionKey);
@@ -81,7 +87,7 @@ public sealed class EventCore<TMessage> : AbstractSubscriber<TMessage>, IDisposa
             if (disposed)
                 return;
 
-            cachedHandlers = null;
+            DisposePooledHandlers();
             Handlers.Clear();
         }
     }
@@ -91,7 +97,7 @@ public sealed class EventCore<TMessage> : AbstractSubscriber<TMessage>, IDisposa
             if (disposed)
                 return;
 
-            cachedHandlers = null;
+            DisposePooledHandlers();
             Handlers.Dispose();
             disposed = true;
         }
@@ -116,7 +122,7 @@ public sealed class EventCore<TMessage> : AbstractSubscriber<TMessage>, IDisposa
                 if (core.disposed)
                     return;
 
-                core.cachedHandlers = null;
+                core.DisposePooledHandlers();
                 core.Handlers.Remove(subscriptionKey, true);
             }
         }

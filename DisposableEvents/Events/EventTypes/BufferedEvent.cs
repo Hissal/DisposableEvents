@@ -29,7 +29,7 @@ public sealed class BufferedEvent<TMessage> : AbstractSubscriber<TMessage>, IPip
         return core.Subscribe(handler);
     }
 
-    public IEventHandler<TMessage>[] GetHandlers() => core.GetHandlers();
+    public ReadOnlySpan<IEventHandler<TMessage>> GetHandlers() => core.GetHandlers();
     public void ClearSubscriptions() => core.ClearSubscriptions();
     public void ClearBufferedMessage() => previousMessage = Optional<TMessage>.Null();
     public void Dispose() => core.Dispose();

@@ -11,7 +11,7 @@ internal class NullEvent<TMessage> :
     public bool IsDisposed => true;
     public int HandlerCount => 0;
     
-    public IEventHandler<TMessage>[] GetHandlers() => Array.Empty<IEventHandler<TMessage>>();
+    public ReadOnlySpan<IEventHandler<TMessage>> GetHandlers() => ReadOnlySpan<IEventHandler<TMessage>>.Empty;
     
     public void Publish(TMessage message) { }
     
