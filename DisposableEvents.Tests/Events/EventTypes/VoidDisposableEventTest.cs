@@ -1,12 +1,11 @@
-﻿using DisposableEvents;
+using DisposableEvents;
 
 namespace DisposableEvents.Tests.Events.EventTypes;
 
-[TestSubject(typeof(DisposableEvent<>))]
-public class DisposableEventTest {
-    readonly DisposableEvent<int> sut = new();
-    readonly IEventHandler<int>[] handlers = Enumerable.Range(0, 5).Select(_ => Substitute.For<IEventHandler<int>>()).ToArray();
-    const int c_message = 69;
+[TestSubject(typeof(DisposableEvent))]
+public class VoidDisposableEventTest {
+    readonly DisposableEvent sut = new();
+    readonly IEventHandler<Void>[] handlers = Enumerable.Range(0, 5).Select(_ => Substitute.For<IEventHandler<Void>>()).ToArray();
 
     [Fact]
     public void Publish_SendsMessageToHandlers() {
@@ -14,20 +13,20 @@ public class DisposableEventTest {
             sut.Subscribe(handler);
         }
         
-        sut.Publish(c_message);
+        sut.Publish();
         
-        Assert.All(handlers, h => h.Received(1).Handle(c_message));
+        Assert.All(handlers, h => h.Received(1).Handle(Void.Value));
     }
 
     [Fact]
     public void DisposedSubscription_Handler_DoesNotReceiveMessages() {
-        var handler = Substitute.For<IEventHandler<int>>();
+        var handler = Substitute.For<IEventHandler<Void>>();
         var subscription = sut.Subscribe(handler);
 
         subscription.Dispose();
-        sut.Publish(c_message);
+        sut.Publish();
 
-        handler.DidNotReceive().Handle(Arg.Any<int>());
+        handler.DidNotReceive().Handle(Arg.Any<Void>());
     }
 
     [Fact]
@@ -37,9 +36,9 @@ public class DisposableEventTest {
         }
 
         sut.ClearHandlers();
-        sut.Publish(c_message);
+        sut.Publish();
 
-        Assert.All(handlers, h => h.DidNotReceive().Handle(Arg.Any<int>()));
+        Assert.All(handlers, h => h.DidNotReceive().Handle(Arg.Any<Void>()));
     }
 
     [Fact]
@@ -49,20 +48,20 @@ public class DisposableEventTest {
         }
 
         sut.Dispose();
-        sut.Publish(c_message);
+        sut.Publish();
 
-        Assert.All(handlers, h => h.DidNotReceive().Handle(Arg.Any<int>()));
+        Assert.All(handlers, h => h.DidNotReceive().Handle(Arg.Any<Void>()));
     }
     
     [Fact]
     public void Subscribe_AfterDispose_HandlerDoesNotReceiveMessages() {
-        var handler = Substitute.For<IEventHandler<int>>();
+        var handler = Substitute.For<IEventHandler<Void>>();
         sut.Dispose();
 
         sut.Subscribe(handler);
-        sut.Publish(c_message);
+        sut.Publish();
 
-        handler.DidNotReceive().Handle(Arg.Any<int>());
+        handler.DidNotReceive().Handle(Arg.Any<Void>());
     }
     
     [Fact]
@@ -86,7 +85,7 @@ public class DisposableEventTest {
     }
     
     [Fact]
-    public void IsDisposed_ReturnsReflectsDisposedState() {
+    public void IsDisposed_ReflectsDisposedState() {
         sut.IsDisposed.Should().BeFalse();
         sut.Dispose();
         sut.IsDisposed.Should().BeTrue();
@@ -121,24 +120,24 @@ public class DisposableEventTest {
     public void HandlerCount_IncrementsWithEachSubscription() {
         sut.HandlerCount.Should().Be(0);
         
-        var handler1 = Substitute.For<IEventHandler<int>>();
+        var handler1 = Substitute.For<IEventHandler<Void>>();
         sut.Subscribe(handler1);
         sut.HandlerCount.Should().Be(1);
         
-        var handler2 = Substitute.For<IEventHandler<int>>();
+        var handler2 = Substitute.For<IEventHandler<Void>>();
         sut.Subscribe(handler2);
         sut.HandlerCount.Should().Be(2);
         
-        var handler3 = Substitute.For<IEventHandler<int>>();
+        var handler3 = Substitute.For<IEventHandler<Void>>();
         sut.Subscribe(handler3);
         sut.HandlerCount.Should().Be(3);
     }
 
     [Fact]
     public void HandlerCount_DecrementsWhenSubscriptionDisposed() {
-        var handler1 = Substitute.For<IEventHandler<int>>();
-        var handler2 = Substitute.For<IEventHandler<int>>();
-        var handler3 = Substitute.For<IEventHandler<int>>();
+        var handler1 = Substitute.For<IEventHandler<Void>>();
+        var handler2 = Substitute.For<IEventHandler<Void>>();
+        var handler3 = Substitute.For<IEventHandler<Void>>();
         
         var sub1 = sut.Subscribe(handler1);
         var sub2 = sut.Subscribe(handler2);
