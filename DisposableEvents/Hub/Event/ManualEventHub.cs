@@ -3,7 +3,7 @@ using DisposableEvents.Factories;
 
 namespace DisposableEvents;
 
-public sealed class ManualEventHub : IEventHub {
+public sealed class ManualEventHub : IDisposableEventHub {
     readonly EventRegistry registry;
     readonly object gate = new();
     
@@ -76,7 +76,7 @@ public sealed class ManualEventHub : IEventHub {
 
 }
 
-public sealed class ManualEventHub<TMessageRestriction> : IEventHub<TMessageRestriction> {
+public sealed class ManualEventHub<TMessageRestriction> : IDisposableEventHub<TMessageRestriction> {
     readonly EventRegistry registry;
     readonly object gate = new();
     
