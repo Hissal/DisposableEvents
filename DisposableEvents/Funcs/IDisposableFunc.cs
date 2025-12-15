@@ -14,9 +14,13 @@ public interface IFuncPublisher<TArg, TResult> : IDisposable {
     FuncResult<TResult> Invoke(TArg arg);
 
     FuncResult<TResult> InvokeHandler(IFuncHandler<TArg, TResult> handler, TArg arg);
-    IFuncHandler<TArg, TResult>[] GetHandlers();
-    
+
+    FuncHandlerSnapshot<TArg, TResult> SnapshotHandlers();
     void ClearHandlers();
+  
+    // Would require synchronization to implement properly
+    // Maybe in the future with a publicly available sync root
+    // ReadOnlySpan<IFuncHandler<TArg, TResult>> GetHandlersSpan();
 }
 
 public interface IFuncSubscriber<TArg, TResult> {

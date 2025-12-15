@@ -75,8 +75,9 @@ public sealed class FilterAttachingEvent<TMessage> : IPipelineEvent<TMessage> {
         return combinedSingle;
     }
     
-    public IEventHandler<TMessage>[] GetHandlers() => core.GetHandlers();
+    public EventHandlerSnapshot<TMessage> SnapshotHandlers() => core.SnapshotHandlers();
     public void ClearHandlers() => core.ClearHandlers();
+  
     public void Dispose() => core.Dispose();
     
     IPipelineEvent<TMessage>? IPipelineEvent<TMessage>.Next => core.Next;

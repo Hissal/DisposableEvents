@@ -60,20 +60,31 @@ public static class FuncPublisherExtensionsZLinq {
     }
 }
 
-public struct InvokeValueEnumeratorDeferred<TArg, TResult> : IValueEnumerator<FuncResult<TResult>> {
-    readonly IFuncPublisher<TArg, TResult> publisher;
-    readonly TArg arg;
+public struct InvokeValueEnumeratorDeferred<TArg, TResult>(IFuncPublisher<TArg, TResult> publisher, TArg arg) : IValueEnumerator<FuncResult<TResult>> {
     IFuncHandler<TArg, TResult>[]? handlers;
+    int handlerCount = 0;
     
     int index;
-    
-    public InvokeValueEnumeratorDeferred(IFuncPublisher<TArg, TResult> publisher, TArg arg) {
-        this.publisher = publisher;
-        this.arg = arg;
+
+    IFuncHandler<TArg, TResult>[] GetHandlers() {
+        if (handlers != null)
+            return handlers;
+                
+        using var handlerSnapshot = publisher.SnapshotHandlers();
+        var handlerSpan = handlerSnapshot.Span;
+        
+        var buffer = ArrayPool<IFuncHandler<TArg, TResult>>.Shared.Rent(handlerSpan.Length);
+        handlerSpan.CopyTo(buffer.AsSpan(0, handlerSpan.Length));
+        
+        handlerCount = handlerSpan.Length;
+        handlers = buffer;
+        
+        return handlers;
     }
 
     public bool TryGetNonEnumeratedCount(out int count) {
-        count = (handlers ??= publisher.GetHandlers()).Length;
+        handlers ??= GetHandlers();
+        count = handlerCount;
         return true;
     }
     
@@ -83,10 +94,10 @@ public struct InvokeValueEnumeratorDeferred<TArg, TResult> : IValueEnumerator<Fu
     }
     
     public bool TryCopyTo(Span<FuncResult<TResult>> destination, Index offset) {
-        handlers ??= publisher.GetHandlers();
+        handlers ??= GetHandlers();
         
         if (EnumeratorHelper.TryGetSlice<IFuncHandler<TArg, TResult>>(
-                handlers.AsSpan(), 
+                handlers.AsSpan(0, handlerCount), 
                 offset,
                 destination.Length, 
                 out var slice)) 
@@ -101,8 +112,8 @@ public struct InvokeValueEnumeratorDeferred<TArg, TResult> : IValueEnumerator<Fu
     }
     
     public bool TryGetNext(out FuncResult<TResult> current) {
-        handlers ??= publisher.GetHandlers();
-        if (index < handlers.Length) {
+        handlers ??= GetHandlers();
+        if (index < handlerCount) {
             current = publisher.InvokeHandler(handlers[index], arg);
             index++;
             return true;
@@ -113,7 +124,11 @@ public struct InvokeValueEnumeratorDeferred<TArg, TResult> : IValueEnumerator<Fu
     }
     
     public void Dispose() {
+        if (handlers == null)
+            return;
         
+        ArrayPool<IFuncHandler<TArg, TResult>>.Shared.Return(handlers);
+        handlers = null;
     }
 }
 
@@ -124,7 +139,8 @@ public struct InvokeValueEnumeratorImmediate<TArg, TResult> : IValueEnumerator<F
     int index;
     
     public InvokeValueEnumeratorImmediate(IFuncPublisher<TArg, TResult> publisher, TArg arg) {
-        var handlers = publisher.GetHandlers();
+        using var handlerSnapshot = publisher.SnapshotHandlers();
+        var handlers = handlerSnapshot.Span;
         
         if (handlers.Length == 0) {
             results = null;

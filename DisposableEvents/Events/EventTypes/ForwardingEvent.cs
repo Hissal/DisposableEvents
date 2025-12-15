@@ -138,9 +138,13 @@ public sealed class ForwardingEvent<TMessage> : AbstractSubscriber<TMessage>, IP
             core?.ClearHandlers();
         }
     }
-
-    public IEventHandler<TMessage>[] GetHandlers() => core?.GetHandlers() ?? Array.Empty<IEventHandler<TMessage>>();
     
+    public EventHandlerSnapshot<TMessage> SnapshotHandlers() {
+        return core != null 
+            ? core.SnapshotHandlers() 
+            : EventHandlerSnapshot<TMessage>.Empty;
+    }
+
     IPipelineEvent<TMessage>? IPipelineEvent<TMessage>.Next => core?.Next;
     void IPipelineEvent<TMessage>.SetNext(IPipelineEvent<TMessage> next) => core?.SetNext(next);
 }

@@ -2,11 +2,14 @@
 
 public static partial class FuncPublisherExtensions {
     public static FuncResult<TResult>[] InvokeToArray<TArg, TResult>(
-        this IFuncPublisher<TArg, TResult> publisher, TArg arg) {
-        var handlers = publisher.GetHandlers();
+        this IFuncPublisher<TArg, TResult> publisher, 
+        TArg arg) 
+    {
+        using var handlerSnapshot = publisher.SnapshotHandlers();
+        var handlers = handlerSnapshot.Span;
 
         if (handlers.Length == 0)
-            return Array.Empty<FuncResult<TResult>>();
+            return [];
 
         var results = new FuncResult<TResult>[handlers.Length];
 
@@ -17,9 +20,13 @@ public static partial class FuncPublisherExtensions {
         return results;
     }
 
-    public static int InvokeToArrayNonAlloc<TArg, TResult>(this IFuncPublisher<TArg, TResult> publisher,
-        TArg arg, FuncResult<TResult>[] results) {
-        var handlers = publisher.GetHandlers();
+    public static int InvokeToArrayNonAlloc<TArg, TResult>(
+        this IFuncPublisher<TArg, TResult> publisher,
+        TArg arg, 
+        FuncResult<TResult>[] results) 
+    {
+        using var handlerSnapshot = publisher.SnapshotHandlers();
+        var handlers = handlerSnapshot.Span;
 
         if (results.Length == 0)
             return 0;
@@ -32,9 +39,13 @@ public static partial class FuncPublisherExtensions {
         return count;
     }
 
-    public static int InvokeToArrayNonAlloc<TArg, TResult>(this IFuncPublisher<TArg, TResult> publisher,
-        TArg arg, TResult[] results) {
-        var handlers = publisher.GetHandlers();
+    public static int InvokeToArrayNonAlloc<TArg, TResult>(
+        this IFuncPublisher<TArg, TResult> publisher,
+        TArg arg, 
+        TResult[] results) 
+    {
+        using var handlerSnapshot = publisher.SnapshotHandlers();
+        var handlers = handlerSnapshot.Span;
 
         if (results.Length == 0)
             return 0;

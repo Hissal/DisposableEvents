@@ -5,7 +5,7 @@
 /// </summary>
 public interface IEventMarker : IDisposable;
 
-public interface IEventPublisher<in TMessage> : IDisposable {
+public interface IEventPublisher<TMessage> : IDisposable {
     public bool IsDisposed { get; }
     public int HandlerCount { get; }
     
@@ -15,8 +15,12 @@ public interface IEventPublisher<in TMessage> : IDisposable {
     /// <param name="message">The value to publish.</param>
     void Publish(TMessage message);
     
-    IEventHandler<TMessage>[] GetHandlers();
+    EventHandlerSnapshot<TMessage> SnapshotHandlers();
     void ClearHandlers();
+  
+    // Would require synchronization to implement properly
+    // Maybe in the future with a publicly available sync root
+    // ReadOnlySpan<IEventHandler<TMessage>> GetHandlersSpan();
 }
 
 public interface IEventSubscriber<TMessage> {

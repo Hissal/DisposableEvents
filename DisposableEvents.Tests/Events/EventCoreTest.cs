@@ -136,10 +136,11 @@ public class EventCoreTest {
         }
         
         // Act
-        var currentHandlers = sut.GetHandlers();
+        using var handlerSnapshot = sut.SnapshotHandlers();
+        var currentHandlers = handlerSnapshot.Span;
         
         // Assert
-        Assert.Equal(handlers, currentHandlers);
+        Assert.Equal(handlers, currentHandlers.ToArray());
     }
     
     [Fact]
@@ -150,10 +151,11 @@ public class EventCoreTest {
         sut.Dispose();
         
         // Act
-        var currentHandlers = sut.GetHandlers();
+        using var handlerSnapshot = sut.SnapshotHandlers();
+        var currentHandlers = handlerSnapshot.Span;
         
         // Assert
-        Assert.Empty(currentHandlers);
+        Assert.Empty(currentHandlers.ToArray());
     }
     
     [Fact]
@@ -164,14 +166,19 @@ public class EventCoreTest {
         sut.Subscribe(handler1);
         
         // Act
-        var firstCall = sut.GetHandlers();
-        var secondCall = sut.GetHandlers();
+        using var firstSnapshot = sut.SnapshotHandlers();
+        var firstCall = firstSnapshot.Span.ToArray();
+        
+        using var secondSnapshot = sut.SnapshotHandlers();
+        var secondCall = secondSnapshot.Span.ToArray();
+        
         sut.Subscribe(handler2);
-        var afterSecondSubscribe = sut.GetHandlers();
+        using var afterSecondSnapshot = sut.SnapshotHandlers();
+        var afterSecondSubscribe = afterSecondSnapshot.Span.ToArray();
         
         // Assert
-        firstCall.Should().BeSameAs(secondCall);
-        afterSecondSubscribe.Should().NotBeSameAs(secondCall);
+        firstCall.Should().BeEquivalentTo(secondCall);
+        afterSecondSubscribe.Should().NotBeEquivalentTo(secondCall);
         afterSecondSubscribe.Should().Contain([handler1, handler2]);
     }
 }

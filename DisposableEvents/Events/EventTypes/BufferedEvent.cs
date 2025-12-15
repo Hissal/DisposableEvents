@@ -22,15 +22,17 @@ public sealed class BufferedEvent<TMessage> : AbstractSubscriber<TMessage>, IPip
         core.Publish(message);
     }
 
+
     public override IDisposable Subscribe(IEventHandler<TMessage> handler) {
         if (!core.IsDisposed && previousMessage.TryGetValue(out var message))
             handler.Handle(message);
 
         return core.Subscribe(handler);
     }
-
-    public IEventHandler<TMessage>[] GetHandlers() => core.GetHandlers();
+    
+    public EventHandlerSnapshot<TMessage> SnapshotHandlers() => core.SnapshotHandlers();
     public void ClearHandlers() => core.ClearHandlers();
+
     public void ClearBufferedMessage() => previousMessage = Optional<TMessage>.Null();
     public void Dispose() => core.Dispose();
 

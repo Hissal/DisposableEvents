@@ -39,8 +39,9 @@ public sealed class FilteredEvent<TMessage> : IPipelineEvent<TMessage> {
     public IDisposable Subscribe(IEventHandler<TMessage> handler, IEventFilter<TMessage> handlerFilter) => core.Subscribe(handler, handlerFilter);
     public IDisposable Subscribe(IEventHandler<TMessage> handler, IEventFilter<TMessage>[] filters, FilterOrdering ordering) => core.Subscribe(handler, filters, ordering);
 
-    public IEventHandler<TMessage>[] GetHandlers() => core.GetHandlers();
+    public EventHandlerSnapshot<TMessage> SnapshotHandlers() => core.SnapshotHandlers();
     public void ClearHandlers() => core.ClearHandlers();
+
     public void Dispose() => core.Dispose();
 
     IPipelineEvent<TMessage>? IPipelineEvent<TMessage>.Next => core.Next;

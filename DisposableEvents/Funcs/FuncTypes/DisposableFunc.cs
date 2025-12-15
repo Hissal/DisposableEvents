@@ -14,11 +14,11 @@ public sealed class DisposableFunc<TArg, TResult> : AbstractFuncSubscriber<TArg,
     public FuncResult<TResult> Invoke(TArg arg) => core.Invoke(arg);
     public override IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler) => core.RegisterHandler(handler);
     
+    public FuncHandlerSnapshot<TArg, TResult> SnapshotHandlers() => core.SnapshotHandlers();
     public void ClearHandlers() => core.ClearHandlers();
     public void Dispose() => core.Dispose();
     
     FuncResult<TResult> IFuncPublisher<TArg, TResult>.InvokeHandler(IFuncHandler<TArg, TResult> handler, TArg arg) => core.InvokeHandler(handler, arg);
-    IFuncHandler<TArg, TResult>[] IFuncPublisher<TArg, TResult>.GetHandlers() => core.GetHandlers();
 }
 
 public sealed class DisposableFunc<TResult> : AbstractFuncSubscriber<Void, TResult>, IDisposableFunc<Void, TResult> {
@@ -35,9 +35,9 @@ public sealed class DisposableFunc<TResult> : AbstractFuncSubscriber<Void, TResu
     public FuncResult<TResult> Invoke(Void arg) => core.Invoke(arg);
     public override IDisposable RegisterHandler(IFuncHandler<Void, TResult> handler) => core.RegisterHandler(handler);
     
+    public FuncHandlerSnapshot<Void, TResult> SnapshotHandlers() => core.SnapshotHandlers();
     public void ClearHandlers() => core.ClearHandlers();
     public void Dispose() => core.Dispose();
 
     FuncResult<TResult> IFuncPublisher<Void, TResult>.InvokeHandler(IFuncHandler<Void, TResult> handler, Void arg) => core.InvokeHandler(handler, arg);
-    IFuncHandler<Void, TResult>[] IFuncPublisher<Void, TResult>.GetHandlers() => core.GetHandlers();
 }
