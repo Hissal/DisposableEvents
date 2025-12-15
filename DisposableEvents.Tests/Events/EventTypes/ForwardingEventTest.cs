@@ -1,4 +1,5 @@
 using DisposableEvents;
+using DisposableEvents.Disposables;
 
 namespace DisposableEvents.Tests.Events.EventTypes;
 
@@ -19,7 +20,7 @@ public class ForwardingEventTest {
         
         substitute.Subscribe(Arg.Any<IEventHandler<T>>()).Returns(callInfo => {
             var handler = callInfo.Arg<IEventHandler<T>>();
-            return global::DisposableEvents.Disposables.Disposable.Action(() => handlers.Remove(handler));
+            return Disposable.Action(() => handlers.Remove(handler));
         });
         
         substitute.When(x => x.Publish(Arg.Any<T>()))
