@@ -21,7 +21,6 @@ public interface IEventPublisher<TMessage> : IDisposable {
     // Would require synchronization to implement properly
     // Maybe in the future with a publicly available sync root
     // ReadOnlySpan<IEventHandler<TMessage>> GetHandlersSpan();
-    // IEventHandler<TMessage>[] GetHandlers();
 }
 
 public interface IEventSubscriber<TMessage> {

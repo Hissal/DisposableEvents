@@ -21,7 +21,6 @@ public interface IFuncPublisher<TArg, TResult> : IDisposable {
     // Would require synchronization to implement properly
     // Maybe in the future with a publicly available sync root
     // ReadOnlySpan<IFuncHandler<TArg, TResult>> GetHandlersSpan();
-    // IFuncHandler<TArg, TResult>[] GetHandlers();
 }
 
 public interface IFuncSubscriber<TArg, TResult> {
