@@ -2,6 +2,10 @@
 
 namespace DisposableEvents.Disposables;
 
+/// <summary>
+/// A ref struct builder for efficiently constructing a composite disposable from multiple disposables.
+/// Uses stack allocation for small numbers of disposables and array pooling for larger collections.
+/// </summary>
 public ref struct DisposableBuilder
 #if NET9_0_OR_GREATER
     : IDisposable
@@ -20,6 +24,10 @@ public ref struct DisposableBuilder
     int count;
     bool IsDisposed => count == -1;
     
+    /// <summary>
+    /// Adds a disposable to the builder. If already disposed, the disposable is disposed immediately.
+    /// </summary>
+    /// <param name="disposable">The disposable to add.</param>
     public void Add(IDisposable disposable) {
         if (IsDisposed) {
             disposable.Dispose();
@@ -71,11 +79,10 @@ public ref struct DisposableBuilder
 
     /// <summary>
     /// Builds the disposable collection and returns a single <see cref="IDisposable"/> that will dispose all added disposables.
-    /// </summary>
-    /// <exception cref="ObjectDisposedException">Thrown if the builder has already been disposed.</exception>
-    /// <remarks>
     /// After calling this method, the builder is disposed and cannot be used again.
-    /// </remarks>
+    /// </summary>
+    /// <returns>A composite disposable that disposes all added disposables when disposed.</returns>
+    /// <exception cref="ObjectDisposedException">Thrown if the builder has already been disposed.</exception>
     public IDisposable Build() {
         var result = count switch {
             -1 => Disposable.Empty,
@@ -95,6 +102,10 @@ public ref struct DisposableBuilder
         return result;
     }
 
+    /// <summary>
+    /// Disposes the builder and releases any pooled arrays.
+    /// After disposal, the builder cannot be used again.
+    /// </summary>
     public void Dispose() {
         if (IsDisposed)
             return;
