@@ -1,3 +1,5 @@
+using System;
+using DisposableEvents;
 using DisposableEvents.Disposables;
 
 namespace DisposableEvents.Tests.Extensions;
