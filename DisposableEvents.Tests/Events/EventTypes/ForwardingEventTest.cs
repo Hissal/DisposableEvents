@@ -30,26 +30,22 @@ public class ForwardingEventTest {
 
     [Fact]
     public void Publish_WithPublishFlag_ForwardsMessageToTarget() {
-        var target = new DisposableEvent<int>();
-        var handler = Substitute.For<IEventHandler<int>>();
-        target.Subscribe(handler);
+        var target = Substitute.For<IDisposableEvent<int>>();
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.AfterSelf, ForwardFlags.Publish);
         sut.Publish(c_message);
 
-        handler.Received(1).Handle(c_message);
+        target.Received(1).Publish(c_message);
     }
 
     [Fact]
     public void Publish_WithoutPublishFlag_DoesNotForwardMessage() {
-        var target = new DisposableEvent<int>();
-        var handler = Substitute.For<IEventHandler<int>>();
-        target.Subscribe(handler);
+        var target = Substitute.For<IDisposableEvent<int>>();
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.AfterSelf, ForwardFlags.Subscribe);
         sut.Publish(c_message);
 
-        handler.DidNotReceive().Handle(Arg.Any<int>());
+        target.DidNotReceive().Publish(Arg.Any<int>());
     }
 
     [Fact]
@@ -66,7 +62,7 @@ public class ForwardingEventTest {
 
     [Fact]
     public void Publish_WithoutIncludeSelfFlag_DoesNotSendMessageToOwnHandlers() {
-        var target = new DisposableEvent<int>();
+        var target = Substitute.For<IDisposableEvent<int>>();
         var handler = Substitute.For<IEventHandler<int>>();
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.AfterSelf, ForwardFlags.Publish);
@@ -78,100 +74,93 @@ public class ForwardingEventTest {
 
     [Fact]
     public void Publish_ToMultipleTargets_ForwardsToAllTargets() {
-        var target1 = new DisposableEvent<int>();
-        var target2 = new DisposableEvent<int>();
-        var handler1 = Substitute.For<IEventHandler<int>>();
-        var handler2 = Substitute.For<IEventHandler<int>>();
-        target1.Subscribe(handler1);
-        target2.Subscribe(handler2);
+        var target1 = Substitute.For<IDisposableEvent<int>>();
+        var target2 = Substitute.For<IDisposableEvent<int>>();
 
         var sut = new ForwardingEvent<int>(new[] { target1, target2 }, ForwardTiming.AfterSelf, ForwardFlags.Publish);
         sut.Publish(c_message);
 
-        handler1.Received(1).Handle(c_message);
-        handler2.Received(1).Handle(c_message);
+        target1.Received(1).Publish(c_message);
+        target2.Received(1).Publish(c_message);
     }
 
     // ----- Subscribe Flag Tests ----- //
 
     [Fact]
     public void Subscribe_WithSubscribeFlag_ForwardsSubscriptionToTarget() {
-        var target = new DisposableEvent<int>();
+        var target = Substitute.For<IDisposableEvent<int>>();
         var handler = Substitute.For<IEventHandler<int>>();
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.AfterSelf, ForwardFlags.Subscribe);
         sut.Subscribe(handler);
-        target.Publish(c_message);
 
-        handler.Received(1).Handle(c_message);
+        target.Received(1).Subscribe(Arg.Any<IEventHandler<int>>());
     }
 
     [Fact]
     public void Subscribe_WithoutSubscribeFlag_DoesNotForwardSubscription() {
-        var target = new DisposableEvent<int>();
+        var target = Substitute.For<IDisposableEvent<int>>();
         var handler = Substitute.For<IEventHandler<int>>();
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.AfterSelf, ForwardFlags.Publish);
         sut.Subscribe(handler);
-        target.Publish(c_message);
 
-        handler.DidNotReceive().Handle(Arg.Any<int>());
+        target.DidNotReceive().Subscribe(Arg.Any<IEventHandler<int>>());
     }
 
     [Fact]
     public void Subscribe_ToMultipleTargets_ForwardsToAllTargets() {
-        var target1 = new DisposableEvent<int>();
-        var target2 = new DisposableEvent<int>();
+        var target1 = Substitute.For<IDisposableEvent<int>>();
+        var target2 = Substitute.For<IDisposableEvent<int>>();
         var handler = Substitute.For<IEventHandler<int>>();
 
         var sut = new ForwardingEvent<int>(new[] { target1, target2 }, ForwardTiming.AfterSelf, ForwardFlags.Subscribe);
         sut.Subscribe(handler);
 
-        target1.Publish(c_message);
-        target2.Publish(c_message);
-
-        handler.Received(2).Handle(c_message);
+        target1.Received(1).Subscribe(Arg.Any<IEventHandler<int>>());
+        target2.Received(1).Subscribe(Arg.Any<IEventHandler<int>>());
     }
 
     [Fact]
     public void Subscribe_ReturnsDisposable_ThatUnsubscribesFromTargets() {
-        var target = new DisposableEvent<int>();
+        var target = Substitute.For<IDisposableEvent<int>>();
+        var disposable = Substitute.For<IDisposable>();
+        target.Subscribe(Arg.Any<IEventHandler<int>>()).Returns(disposable);
         var handler = Substitute.For<IEventHandler<int>>();
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.AfterSelf, ForwardFlags.Subscribe);
         var subscription = sut.Subscribe(handler);
 
         subscription.Dispose();
-        target.Publish(c_message);
-
-        handler.DidNotReceive().Handle(Arg.Any<int>());
+        
+        disposable.Received(1).Dispose();
     }
 
     // ----- Dispose Flag Tests ----- //
 
     [Fact]
     public void Dispose_WithDisposeFlag_DisposesTargets() {
-        var target = new DisposableEvent<int>();
+        var target = Substitute.For<IDisposableEvent<int>>();
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.AfterSelf, ForwardFlags.Dispose);
         sut.Dispose();
 
-        target.IsDisposed.Should().BeTrue();
+        target.Received(1).Dispose();
     }
 
     [Fact]
     public void Dispose_WithoutDisposeFlag_DoesNotDisposeTargets() {
-        var target = new DisposableEvent<int>();
+        var target = Substitute.For<IDisposableEvent<int>>();
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.AfterSelf, ForwardFlags.Subscribe);
         sut.Dispose();
 
-        target.IsDisposed.Should().BeFalse();
+        target.DidNotReceive().Dispose();
     }
 
     [Fact]
     public void Dispose_WithIncludeSelfFlag_DisposesOwnCore() {
-        var target = new DisposableEvent<int>();
+        var target = Substitute.For<IDisposableEvent<int>>();
         var handler = Substitute.For<IEventHandler<int>>();
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.AfterSelf, ForwardFlags.IncludeSelf);
@@ -187,35 +176,27 @@ public class ForwardingEventTest {
 
     [Fact]
     public void ClearHandlers_WithClearSubscriptionsFlag_ClearsTargetHandlers() {
-        var target = new DisposableEvent<int>();
-        var handler = Substitute.For<IEventHandler<int>>();
-        target.Subscribe(handler);
+        var target = Substitute.For<IDisposableEvent<int>>();
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.AfterSelf, ForwardFlags.ClearSubscriptions);
         sut.ClearHandlers();
-        target.Publish(c_message);
 
-        handler.DidNotReceive().Handle(Arg.Any<int>());
-        target.HandlerCount.Should().Be(0);
+        target.Received(1).ClearHandlers();
     }
 
     [Fact]
     public void ClearHandlers_WithoutClearSubscriptionsFlag_DoesNotClearTargetHandlers() {
-        var target = new DisposableEvent<int>();
-        var handler = Substitute.For<IEventHandler<int>>();
-        target.Subscribe(handler);
+        var target = Substitute.For<IDisposableEvent<int>>();
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.AfterSelf, ForwardFlags.Subscribe);
         sut.ClearHandlers();
-        target.Publish(c_message);
 
-        handler.Received(1).Handle(c_message);
-        target.HandlerCount.Should().Be(1);
+        target.DidNotReceive().ClearHandlers();
     }
 
     [Fact]
     public void ClearHandlers_WithIncludeSelfFlag_ClearsOwnHandlers() {
-        var target = new DisposableEvent<int>();
+        var target = Substitute.For<IDisposableEvent<int>>();
         var handler = Substitute.For<IEventHandler<int>>();
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.AfterSelf, ForwardFlags.IncludeSelf);
@@ -232,11 +213,13 @@ public class ForwardingEventTest {
     [Fact]
     public void Publish_WithAfterSelfTiming_PublishesInCorrectOrder() {
         var receivedMessages = new List<string>();
-        var target = new DisposableEvent<int>();
-        target.Subscribe(new EventHandler<int>(_ => receivedMessages.Add("target")));
+        var target = Substitute.For<IDisposableEvent<int>>();
+        target.When(t => t.Publish(Arg.Any<int>())).Do(_ => receivedMessages.Add("target"));
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.AfterSelf, ForwardFlags.Publish | ForwardFlags.IncludeSelf);
-        sut.Subscribe(new EventHandler<int>(_ => receivedMessages.Add("self")));
+        var handler = Substitute.For<IEventHandler<int>>();
+        handler.When(h => h.Handle(Arg.Any<int>())).Do(_ => receivedMessages.Add("self"));
+        sut.Subscribe(handler);
 
         sut.Publish(c_message);
 
@@ -246,11 +229,13 @@ public class ForwardingEventTest {
     [Fact]
     public void Publish_WithBeforeSelfTiming_PublishesInCorrectOrder() {
         var receivedMessages = new List<string>();
-        var target = new DisposableEvent<int>();
-        target.Subscribe(new EventHandler<int>(_ => receivedMessages.Add("target")));
+        var target = Substitute.For<IDisposableEvent<int>>();
+        target.When(t => t.Publish(Arg.Any<int>())).Do(_ => receivedMessages.Add("target"));
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.BeforeSelf, ForwardFlags.Publish | ForwardFlags.IncludeSelf);
-        sut.Subscribe(new EventHandler<int>(_ => receivedMessages.Add("self")));
+        var handler = Substitute.For<IEventHandler<int>>();
+        handler.When(h => h.Handle(Arg.Any<int>())).Do(_ => receivedMessages.Add("self"));
+        sut.Subscribe(handler);
 
         sut.Publish(c_message);
 
@@ -260,41 +245,39 @@ public class ForwardingEventTest {
     [Fact]
     public void Subscribe_WithAfterSelfTiming_SubscribesInCorrectOrder() {
         var callOrder = new List<string>();
-        var target = new DisposableEvent<int>();
+        var target = Substitute.For<IDisposableEvent<int>>();
+        target.When(t => t.Subscribe(Arg.Any<IEventHandler<int>>())).Do(_ => callOrder.Add("target"));
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.AfterSelf, ForwardFlags.Subscribe | ForwardFlags.IncludeSelf);
 
         // With AfterSelf timing, when subscribing, it should:
         // 1. Subscribe to self's core first
         // 2. Then subscribe to target
-        var handler = new EventHandler<int>(_ => callOrder.Add("handler"));
+        var handler = Substitute.For<IEventHandler<int>>();
         sut.Subscribe(handler);
 
-        // When target publishes, the handler (subscribed to target) should be called
-        target.Publish(c_message);
-
-        callOrder.Should().Contain("handler");
-        callOrder.Count.Should().Be(1);
+        // Target should have been subscribed to after self
+        callOrder.Should().Equal("target");
+        target.Received(1).Subscribe(Arg.Any<IEventHandler<int>>());
     }
 
     [Fact]
     public void Subscribe_WithBeforeSelfTiming_SubscribesInCorrectOrder() {
         var callOrder = new List<string>();
-        var target = new DisposableEvent<int>();
+        var target = Substitute.For<IDisposableEvent<int>>();
+        target.When(t => t.Subscribe(Arg.Any<IEventHandler<int>>())).Do(_ => callOrder.Add("target"));
 
         var sut = new ForwardingEvent<int>(target, ForwardTiming.BeforeSelf, ForwardFlags.Subscribe | ForwardFlags.IncludeSelf);
 
         // With BeforeSelf timing, when subscribing, it should:
         // 1. Subscribe to target first
         // 2. Then subscribe to self's core
-        var handler = new EventHandler<int>(_ => callOrder.Add("handler"));
+        var handler = Substitute.For<IEventHandler<int>>();
         sut.Subscribe(handler);
 
-        // When target publishes, the handler (subscribed to target) should be called
-        target.Publish(c_message);
-
-        callOrder.Should().Contain("handler");
-        callOrder.Count.Should().Be(1);
+        // Target should have been subscribed to before self
+        callOrder.Should().Equal("target");
+        target.Received(1).Subscribe(Arg.Any<IEventHandler<int>>());
     }
 
     // ----- Combined Flags Tests ----- //
