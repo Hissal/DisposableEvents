@@ -17,6 +17,6 @@ internal class NullEvent<TMessage> :
     
     public override IDisposable Subscribe(IEventHandler<TMessage> handler) => Disposable.Empty;
     
-    public void ClearSubscriptions() { }
+    public void ClearHandlers() { }
     public void Dispose() { }
 }

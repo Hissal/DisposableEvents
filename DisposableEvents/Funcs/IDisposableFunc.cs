@@ -15,6 +15,8 @@ public interface IFuncPublisher<TArg, TResult> : IDisposable {
 
     FuncResult<TResult> InvokeHandler(IFuncHandler<TArg, TResult> handler, TArg arg);
     IFuncHandler<TArg, TResult>[] GetHandlers();
+    
+    void ClearHandlers();
 }
 
 public interface IFuncSubscriber<TArg, TResult> {
@@ -41,6 +43,4 @@ public interface IFuncSubscriber<TArg, TResult> {
 #endif
 }
 
-public interface IDisposableFunc<TArg, TResult> : IFuncPublisher<TArg, TResult>, IFuncSubscriber<TArg, TResult>, IFuncMarker {
-    void ClearHandlers();
-}
+public interface IDisposableFunc<TArg, TResult> : IFuncPublisher<TArg, TResult>, IFuncSubscriber<TArg, TResult>, IFuncMarker;
