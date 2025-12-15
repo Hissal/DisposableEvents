@@ -80,6 +80,8 @@ public class VoidEventExtensionsTest {
                 var filter = ci.Arg<IEventFilter<Void>>();
                 var msg = Void.Value;
                 _ = filter.Filter(ref msg);
+                var h = ci.Arg<IEventHandler<Void>>();
+                h.Handle(Void.Value);
                 return disp;
             });
 
@@ -89,21 +91,11 @@ public class VoidEventExtensionsTest {
         // Assert
         result.Should().Be(disp);
         predCalled.Should().BeTrue();
+        observed.Should().Be(1);
         subscriber.Received(1)
             .Subscribe(
                 Arg.Is<IEventHandler<Void>>(h => h is VoidEventHandler),
                 Arg.Is<IEventFilter<Void>>(f => f is VoidPredicateEventFilter));
-
-        // also ensure handler wiring works by invoking via callback above
-        observed = 0;
-        subscriber.ClearReceivedCalls();
-        subscriber
-            .Subscribe(
-                Arg.Do<IEventHandler<Void>>(h => h.Handle(Void.Value)),
-                Arg.Any<IEventFilter<Void>>())
-            .Returns(disp);
-        _ = VoidEventExtensions.Subscribe(subscriber, () => observed++, Predicate);
-        observed.Should().Be(1);
     }
 
     [Fact]
