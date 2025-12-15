@@ -96,7 +96,7 @@ public class VoidDisposableEventTest {
     }
     
     [Fact]
-    public void IsDisposed_ReturnsReflectsDisposedState() {
+    public void IsDisposed_ReflectsDisposedState() {
         sut.IsDisposed.Should().BeFalse();
         sut.Dispose();
         sut.IsDisposed.Should().BeTrue();
