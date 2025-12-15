@@ -58,7 +58,7 @@ public class FilterAttachingEventTest {
             sut.Subscribe(handler);
         }
 
-        sut.ClearSubscriptions();
+        sut.ClearHandlers();
         sut.Publish(c_message);
 
         Assert.All(handlers, h => h.DidNotReceive().Handle(Arg.Any<int>()));
@@ -102,7 +102,7 @@ public class FilterAttachingEventTest {
             sut.Subscribe(handler);
         }
 
-        sut.ClearSubscriptions();
+        sut.ClearHandlers();
 
         sut.HandlerCount.Should().Be(0);
     }

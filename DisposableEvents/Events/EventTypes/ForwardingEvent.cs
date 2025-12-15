@@ -124,18 +124,18 @@ public sealed class ForwardingEvent<TMessage> : AbstractSubscriber<TMessage>, IP
         }
     }
 
-    public void ClearSubscriptions() {
+    public void ClearHandlers() {
         if (IsDisposed)
             return;
         
         if (forwardFlags.HasFlag(ForwardFlags.ClearSubscriptions)) {
             foreach (var target in forwardTargets) {
-                target.ClearSubscriptions();
+                target.ClearHandlers();
             }
         }
         
         if (forwardFlags.HasFlag(ForwardFlags.IncludeSelf)) {
-            core?.ClearSubscriptions();
+            core?.ClearHandlers();
         }
     }
     

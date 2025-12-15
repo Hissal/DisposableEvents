@@ -87,12 +87,12 @@ internal class LazyInnerEvent<TMessage> : IDisposableEvent<TMessage>, IPipelineE
             : Core.Subscribe(handler, filters, ordering);
     }
 
-    public void ClearSubscriptions() {
+    public void ClearHandlers() {
         if (IsDisposed)
             return;
 
         var existing = Volatile.Read(ref coreLazy);
-        existing?.ClearSubscriptions();
+        existing?.ClearHandlers();
     }
 
     public void Dispose() {

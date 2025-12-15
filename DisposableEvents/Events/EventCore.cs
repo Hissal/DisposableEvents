@@ -89,7 +89,7 @@ public sealed class EventCore<TMessage> : AbstractSubscriber<TMessage>, IDisposa
         }
     }
 
-    public void ClearSubscriptions() {
+    public void ClearHandlers() {
         lock (gate) {
             if (disposed)
                 return;

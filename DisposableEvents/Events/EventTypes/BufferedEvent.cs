@@ -31,7 +31,8 @@ public sealed class BufferedEvent<TMessage> : AbstractSubscriber<TMessage>, IPip
     }
     
     public EventHandlerSnapshot<TMessage> SnapshotHandlers() => core.SnapshotHandlers();
-    public void ClearSubscriptions() => core.ClearSubscriptions();
+    public void ClearHandlers() => core.ClearHandlers();
+
     public void ClearBufferedMessage() => previousMessage = Optional<TMessage>.Null();
     public void Dispose() => core.Dispose();
 

@@ -16,9 +16,10 @@ public sealed class DisposableEvent<TMessage> : AbstractSubscriber<TMessage>, ID
     
     public override IDisposable Subscribe(IEventHandler<TMessage> handler) => core.Subscribe(handler);
     public void Publish(TMessage message) => core.Publish(message);
-    
+
     public EventHandlerSnapshot<TMessage> SnapshotHandlers() => core.SnapshotHandlers();
-    public void ClearSubscriptions() => core.ClearSubscriptions();
+    public void ClearHandlers() => core.ClearHandlers();
+
     public void Dispose() => core.Dispose();
 }
 
@@ -37,8 +38,9 @@ public sealed class DisposableEvent : AbstractSubscriber<Void>, IDisposableEvent
     
     public override IDisposable Subscribe(IEventHandler<Void> handler) => core.Subscribe(handler);
     public void Publish(Void message) => core.Publish(message);
-    
+  
     public EventHandlerSnapshot<Void> SnapshotHandlers() => core.SnapshotHandlers();
-    public void ClearSubscriptions() => core.ClearSubscriptions();
+    public void ClearHandlers() => core.ClearHandlers();
+  
     public void Dispose() => core.Dispose();
 }
