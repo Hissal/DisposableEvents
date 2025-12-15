@@ -7,19 +7,19 @@ namespace DisposableEvents.Tests.Events.EventTypes;
 public class ForwardingEventTest {
     const int c_message = 42;
 
-    // Helper method to create a functional substitute that behaves like a real event
+    /// <summary>
+    /// Creates a functional substitute that behaves like a real IDisposableEvent.
+    /// The substitute maintains a list of handlers and properly implements Subscribe/Publish/ClearHandlers.
+    /// Use this when tests need actual event behavior (e.g., testing integration of multiple flags).
+    /// For simple forwarding tests, use Substitute.For directly with When/Do for specific method calls.
+    /// </summary>
     static IDisposableEvent<T> CreateFunctionalSubstitute<T>() {
         var substitute = Substitute.For<IDisposableEvent<T>>();
         var handlers = new List<IEventHandler<T>>();
         
-        substitute.When(x => x.Subscribe(Arg.Any<IEventHandler<T>>()))
-            .Do(callInfo => {
-                var handler = callInfo.Arg<IEventHandler<T>>();
-                handlers.Add(handler);
-            });
-        
         substitute.Subscribe(Arg.Any<IEventHandler<T>>()).Returns(callInfo => {
             var handler = callInfo.Arg<IEventHandler<T>>();
+            handlers.Add(handler);
             return Disposable.Action(() => handlers.Remove(handler));
         });
         
