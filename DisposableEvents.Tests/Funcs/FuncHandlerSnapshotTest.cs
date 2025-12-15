@@ -1,4 +1,4 @@
-namespace DisposableEvents.Tests.Events;
+namespace DisposableEvents.Tests.Funcs;
 
 [TestSubject(typeof(FuncHandlerSnapshot<,>))]
 public class FuncHandlerSnapshotTest {
