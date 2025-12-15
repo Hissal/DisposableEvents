@@ -27,7 +27,7 @@ internal struct PooledArray<T>(T[] array, int length) : IDisposable {
     /// array which may be larger due to pooling behavior. All operations (indexing, enumeration, etc.)
     /// respect this logical length.
     /// </remarks>
-    public int Length { get; } = length;
+    public int Length { get; private set; } = length;
 
     /// <summary>
     /// Indicates whether the object has been disposed.
@@ -192,6 +192,7 @@ internal struct PooledArray<T>(T[] array, int length) : IDisposable {
         
         ArrayPool<T>.Shared.Return(_array, clearArray);
         _array = null!;
+        Length = 0;
     }
     
     /// <summary>

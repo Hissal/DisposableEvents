@@ -126,7 +126,7 @@ public struct InvokeValueEnumeratorDeferred<TArg, TResult>(IFuncPublisher<TArg, 
     public void Dispose() {
         if (handlers == null)
             return;
-                
+        
         ArrayPool<IFuncHandler<TArg, TResult>>.Shared.Return(handlers);
         handlers = null;
     }
