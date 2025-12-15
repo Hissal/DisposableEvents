@@ -132,7 +132,7 @@ public class ForwardingEventTest {
         var subscription = sut.Subscribe(handler);
 
         subscription.Dispose();
-        
+
         disposable.Received(1).Dispose();
     }
 
