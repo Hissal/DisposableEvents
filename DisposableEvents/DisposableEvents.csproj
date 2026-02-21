@@ -66,4 +66,10 @@
         </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="HCommons.Disposables" Version="1.0.0" />
+        <PackageReference Include="HCommons.Void" Version="1.0.0" />
+        <PackageReference Include="HCommons.Buffers" Version="1.0.0" />
+    </ItemGroup>
+
 </Project>
