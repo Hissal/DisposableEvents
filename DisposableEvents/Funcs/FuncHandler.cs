@@ -1,4 +1,6 @@
-﻿namespace DisposableEvents;
+﻿using Void = HCommons.Void.Void;
+
+namespace DisposableEvents;
 
 public interface IFuncHandler<in TArg, TResult> {
     FuncResult<TResult> Handle(TArg value);

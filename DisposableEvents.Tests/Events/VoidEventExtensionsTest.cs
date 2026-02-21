@@ -1,4 +1,4 @@
-using DisposableEvents;
+using Void = HCommons.Void.Void;
 
 namespace DisposableEvents.Tests.Events;
 

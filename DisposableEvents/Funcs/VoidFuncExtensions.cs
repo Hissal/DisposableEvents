@@ -1,4 +1,6 @@
-﻿namespace DisposableEvents;
+﻿using Void = HCommons.Void.Void;
+
+namespace DisposableEvents;
 
 public static class VoidFuncExtensions {
     public static FuncResult<TResult> Invoke<TResult>(this IFuncPublisher<Void, TResult> publisher) => publisher.Invoke(Void.Value);

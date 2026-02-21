@@ -1,4 +1,5 @@
-﻿
+﻿using Void = HCommons.Void.Void;
+
 namespace DisposableEvents;
 
 public sealed class DisposableEvent<TMessage> : AbstractSubscriber<TMessage>, IDisposableEvent<TMessage> {

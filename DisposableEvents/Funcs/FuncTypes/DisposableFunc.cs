@@ -1,4 +1,6 @@
-﻿namespace DisposableEvents;
+﻿using Void = HCommons.Void.Void;
+
+namespace DisposableEvents;
 
 public sealed class DisposableFunc<TArg, TResult> : AbstractFuncSubscriber<TArg, TResult>, IDisposableFunc<TArg, TResult> {
     readonly FuncCore<TArg, TResult> core;

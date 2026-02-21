@@ -1,4 +1,6 @@
-﻿namespace DisposableEvents;
+﻿using Void = HCommons.Void.Void;
+
+namespace DisposableEvents;
 
 /// <summary>
 /// Defines a filter that uses a predicate to determine whether an event should be passed to handlers.
