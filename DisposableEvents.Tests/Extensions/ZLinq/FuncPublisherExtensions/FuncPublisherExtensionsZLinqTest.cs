@@ -17,7 +17,7 @@ public class FuncPublisherExtensionsZLinqTest {
             var result = FuncResult<int>.From(i);
             handlers[i].Handle(Arg.Any<int>()).Returns(result);
             expectedResults[i] = result;
-            func.RegisterHandler(handlers[i]);
+            func.AddHandler(handlers[i]);
         }
     }
     

@@ -26,7 +26,7 @@ public sealed class FirstFunc<TArg, TResult> : AbstractFuncSubscriber<TArg, TRes
         return result;
     }
     
-    public override IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler) => core.RegisterHandler(handler);
+    public override IDisposable AddHandler(IFuncHandler<TArg, TResult> handler) => core.AddHandler(handler);
     
     public FuncHandlerSnapshot<TArg, TResult> SnapshotHandlers() => core.SnapshotHandlers();
     public void ClearHandlers() => core.ClearHandlers();
