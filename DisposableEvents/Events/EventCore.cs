@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using DisposableEvents.Internal;
+using HCommons.Buffers;
 using HCommons.Disposables;
 
 namespace DisposableEvents;

@@ -1,4 +1,4 @@
-﻿using DisposableEvents.Internal;
+﻿using HCommons.Buffers;
 
 namespace DisposableEvents;
 
