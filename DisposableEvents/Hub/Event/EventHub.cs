@@ -2,17 +2,20 @@
 
 namespace DisposableEvents;
 
-public interface IEventHub : IDisposable {
+public interface IEventHub {
     IEventPublisher<TMessage> GetPublisher<TMessage>();
     IEventSubscriber<TMessage> GetSubscriber<TMessage>();
 }
 
-public interface IEventHub<in TMessageRestriction> : IDisposable {
+public interface IEventHub<in TMessageRestriction> {
     IEventPublisher<TMessage> GetPublisher<TMessage>() where TMessage : TMessageRestriction;
     IEventSubscriber<TMessage> GetSubscriber<TMessage>() where TMessage : TMessageRestriction;
 }
 
-public sealed class EventHub : IEventHub {
+public interface IDisposableEventHub : IEventHub, IDisposable;
+public interface IDisposableEventHub<in TMessageRestriction> : IEventHub<TMessageRestriction>, IDisposable;
+
+public sealed class EventHub : IDisposableEventHub {
     readonly EventRegistry registry = new();
     readonly IEventFactory factory;
     
@@ -47,7 +50,7 @@ public sealed class EventHub : IEventHub {
     }
 }
 
-public sealed class EventHub<TMessageRestriction> : IEventHub<TMessageRestriction> {
+public sealed class EventHub<TMessageRestriction> : IDisposableEventHub<TMessageRestriction> {
     readonly EventRegistry registry = new();
     readonly IEventFactory factory;
     
