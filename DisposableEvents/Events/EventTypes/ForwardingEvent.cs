@@ -1,5 +1,5 @@
-﻿using DisposableEvents.Disposables;
-using DisposableEvents.Internal;
+﻿using DisposableEvents.Internal;
+using HCommons.Disposables;
 
 namespace DisposableEvents;
 
