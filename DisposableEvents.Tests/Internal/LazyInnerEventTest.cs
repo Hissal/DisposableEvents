@@ -1,4 +1,4 @@
-using Disposable = DisposableEvents.Disposables.Disposable;
+using Disposable = HCommons.Disposables.Disposable;
 
 namespace DisposableEvents.Tests.Internal;
 

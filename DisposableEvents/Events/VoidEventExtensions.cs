@@ -1,4 +1,6 @@
-﻿namespace DisposableEvents;
+﻿using Void = HCommons.Void.Void;
+
+namespace DisposableEvents;
 
 public static class VoidEventExtensions {
     public static void Publish(this IEventPublisher<Void> publisher) => publisher.Publish(Void.Value);

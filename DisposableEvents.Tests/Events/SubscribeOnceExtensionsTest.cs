@@ -1,4 +1,6 @@
-﻿namespace DisposableEvents.Tests.Events;
+﻿using Void = HCommons.Void.Void;
+
+namespace DisposableEvents.Tests.Events;
 
 [TestSubject(typeof(EventSubscribeOnceExtensions))]
 public class EventSubscribeOnceExtensionsTest {

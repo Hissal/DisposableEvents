@@ -78,5 +78,9 @@
         <Using Include="NSubstitute"/>
         <Using Include="JetBrains.Annotations"/>
     </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="HCommons.Disposables" Version="1.0.0" />
+    </ItemGroup>
     
 </Project>

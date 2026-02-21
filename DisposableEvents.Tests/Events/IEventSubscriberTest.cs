@@ -1,4 +1,4 @@
-﻿using DisposableEvents.Disposables;
+﻿using HCommons.Disposables;
 
 namespace DisposableEvents.Tests.Events;
 

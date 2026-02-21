@@ -1,4 +1,6 @@
-﻿namespace DisposableEvents;
+﻿using Void = HCommons.Void.Void;
+
+namespace DisposableEvents;
 
 /// <summary>
 /// An event handler that invokes the inner handler at most once, then disposes its subscription.

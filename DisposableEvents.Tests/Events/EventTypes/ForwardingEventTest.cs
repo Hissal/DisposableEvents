@@ -1,5 +1,5 @@
 using DisposableEvents;
-using DisposableEvents.Disposables;
+using HCommons.Disposables;
 
 namespace DisposableEvents.Tests.Events.EventTypes;
 

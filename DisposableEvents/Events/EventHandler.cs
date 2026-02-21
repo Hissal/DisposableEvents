@@ -1,4 +1,6 @@
-﻿namespace DisposableEvents;
+﻿using Void = HCommons.Void.Void;
+
+namespace DisposableEvents;
 
 public interface IEventHandler<in TMessage> {
     void Handle(TMessage message);
