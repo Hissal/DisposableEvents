@@ -82,7 +82,7 @@ public sealed class FuncCore<TArg, TResult> : AbstractFuncSubscriber<TArg, TResu
         return result;
     }
     
-    public override IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler) {
+    public override IDisposable AddHandler(IFuncHandler<TArg, TResult> handler) {
         lock (gate) {
             if (disposed)
                 return Disposable.Empty;

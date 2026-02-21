@@ -121,7 +121,7 @@ public class FuncBenchMarks {
         funcPubOnly = new DisposableFunc<int, int>(c_pubOnlySubCount);
         dePubOnly = new DisposableEvent<int>(c_pubOnlySubCount);
         for (int i = 0; i < c_pubOnlySubCount; i++) {
-            funcPubOnly.RegisterHandler(x => x * 2);
+            funcPubOnly.AddHandler(x => x * 2);
             dePubOnly.Subscribe(this, (bench, x) => {
                 bench.pubOnlyEventResult = x * 2;
             });

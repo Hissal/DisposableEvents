@@ -14,7 +14,7 @@ public sealed class DisposableFunc<TArg, TResult> : AbstractFuncSubscriber<TArg,
     public int HandlerCount => core.HandlerCount;
 
     public FuncResult<TResult> Invoke(TArg arg) => core.Invoke(arg);
-    public override IDisposable RegisterHandler(IFuncHandler<TArg, TResult> handler) => core.RegisterHandler(handler);
+    public override IDisposable AddHandler(IFuncHandler<TArg, TResult> handler) => core.AddHandler(handler);
     
     public FuncHandlerSnapshot<TArg, TResult> SnapshotHandlers() => core.SnapshotHandlers();
     public void ClearHandlers() => core.ClearHandlers();
@@ -35,7 +35,7 @@ public sealed class DisposableFunc<TResult> : AbstractFuncSubscriber<Void, TResu
     public int HandlerCount => core.HandlerCount;
 
     public FuncResult<TResult> Invoke(Void arg) => core.Invoke(arg);
-    public override IDisposable RegisterHandler(IFuncHandler<Void, TResult> handler) => core.RegisterHandler(handler);
+    public override IDisposable AddHandler(IFuncHandler<Void, TResult> handler) => core.AddHandler(handler);
     
     public FuncHandlerSnapshot<Void, TResult> SnapshotHandlers() => core.SnapshotHandlers();
     public void ClearHandlers() => core.ClearHandlers();
