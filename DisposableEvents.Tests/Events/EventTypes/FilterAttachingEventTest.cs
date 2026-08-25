@@ -16,7 +16,7 @@ public class FilterAttachingEventTest {
     // ----- Filtering Tests ----- //
 
     [Fact]
-    public void AttachesFilterToHandler() {
+    public void Subscribe_WithDefaultFilter_WrapsHandlerInFilteredEventHandler() {
         var filter = Substitute.For<IEventFilter<int>>();
         var sutWithFilter = new FilterAttachingEvent<int>(filter);
         var handler = Substitute.For<IEventHandler<int>>();
@@ -97,7 +97,7 @@ public class FilterAttachingEventTest {
     }
 
     [Fact]
-    public void HandlerCount_ShouldBeZero_AfterClearSubscriptions() {
+    public void HandlerCount_AfterClearHandlers_IsZero() {
         foreach (var handler in handlers) {
             sut.Subscribe(handler);
         }

@@ -75,7 +75,7 @@ public class DisposableEventTest {
     }
     
     [Fact]
-    public void HandlerCount_ShouldBeZero_AfterClearSubscriptions() {
+    public void HandlerCount_AfterClearHandlers_IsZero() {
         foreach (var handler in handlers) {
             sut.Subscribe(handler);
         }
