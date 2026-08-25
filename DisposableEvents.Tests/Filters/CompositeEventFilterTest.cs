@@ -10,7 +10,7 @@ public class CompositeEventFilterTest {
     int message = 69;
     
     [Fact]
-    public void Should_ReturnFilterResultPassed_WhenAllFiltersPass() {
+    public void Filter_WhenAllFiltersPass_ReturnsPassed() {
         foreach (var filter in filters) {
             filter.Filter(ref Arg.Any<int>()).Returns(FilterResult.Pass);
         }
@@ -20,7 +20,7 @@ public class CompositeEventFilterTest {
     }
     
     [Fact]
-    public void Should_ReturnFilterResultBlocked_WhenOneOrMoreBlock() {
+    public void Filter_WhenAnyFilterBlocks_ReturnsBlocked() {
         foreach (var filter in filters) {
             filter.Filter(ref Arg.Any<int>()).Returns(FilterResult.Pass);
         }
@@ -31,7 +31,7 @@ public class CompositeEventFilterTest {
     }
     
     [Fact]
-    public void FilterOrder_ShouldBeSetCorrectly() {
+    public void FilterOrder_ReturnsConstructorValue() {
         var sut = CompositeEventFilter<int>.Create([], filterOrder: 3);
         sut.FilterOrder.Should().Be(3);
     }
@@ -43,7 +43,7 @@ public class CompositeEventFilterTest {
     }
     
     [Fact]
-    public void Filters_ShouldReceiveMessage() {
+    public void Filter_PassesMessageToEveryFilter() {
         foreach (var filter in filters) {
             filter.Filter(ref Arg.Any<int>()).Returns(FilterResult.Pass);
         }
@@ -56,7 +56,7 @@ public class CompositeEventFilterTest {
     // ----- Filter Ordering ----- //
     
     [Fact]
-    public void FiltersArray_StableSort_ShouldCallFiltersInCorrectOrder() {
+    public void Filter_ArrayWithStableSort_CallsFiltersInStableFilterOrder() {
         // Arrange
         const int c_generationCount = 3;
         var filterArray = Enumerable.Range(0, 1000).Select(_ => Substitute.For<IEventFilter<int>>()).ToArray();
@@ -76,7 +76,7 @@ public class CompositeEventFilterTest {
     
     
     [Fact]
-    public void FiltersArray_UnstableSort_ShouldCallFiltersInGenerationalOrder() {
+    public void Filter_ArrayWithUnstableSort_CallsFilterOrderGroupsInOrder() {
         // Arrange
         const int c_generationCount = 20;
         var filterArray = Enumerable.Range(0, 1000).Select(_ => Substitute.For<IEventFilter<int>>()).ToArray();
@@ -107,7 +107,7 @@ public class CompositeEventFilterTest {
     }
     
     [Fact]
-    public void FiltersArray_KeepOriginal_ShouldCallFiltersInOriginalOrder() {
+    public void Filter_ArrayWithKeepOriginal_CallsFiltersInInsertionOrder() {
         // Arrange
         var filterArray = Enumerable.Range(0, 100).Select(_ => Substitute.For<IEventFilter<int>>()).ToArray();
         var sut = CompositeEventFilter<int>.Create(filterArray.ToArray(), FilterOrdering.KeepOriginal);
@@ -130,7 +130,7 @@ public class CompositeEventFilterTest {
     // ----- Enumerable versions ----- //
     
     [Fact]
-    public void FiltersEnumerable_StableSort_ShouldCallFiltersInCorrectOrder() {
+    public void Filter_EnumerableWithStableSort_CallsFiltersInStableFilterOrder() {
         // Arrange
         const int c_generationCount = 3;
         var filterArray = Enumerable.Range(0, 1000).Select(_ => Substitute.For<IEventFilter<int>>()).ToArray();
@@ -149,7 +149,7 @@ public class CompositeEventFilterTest {
     }
     
     [Fact]
-    public void FiltersEnumerable_UnstableSort_ShouldCallFiltersInGenerationalOrder() {
+    public void Filter_EnumerableWithUnstableSort_CallsFilterOrderGroupsInOrder() {
         // Arrange
         const int c_generationCount = 20;
         var filterArray = Enumerable.Range(0, 1000).Select(_ => Substitute.For<IEventFilter<int>>()).ToArray();
@@ -180,7 +180,7 @@ public class CompositeEventFilterTest {
     }
     
     [Fact]
-    public void FiltersEnumerable_KeepOriginal_ShouldCallFiltersInOriginalOrder() {
+    public void Filter_EnumerableWithKeepOriginal_CallsFiltersInInsertionOrder() {
         // Arrange
         var filterArray = Enumerable.Range(0, 100).Select(_ => Substitute.For<IEventFilter<int>>()).ToArray();
         var sut = CompositeEventFilter<int>.Create(filterArray.ToArray().AsEnumerable(), FilterOrdering.KeepOriginal);

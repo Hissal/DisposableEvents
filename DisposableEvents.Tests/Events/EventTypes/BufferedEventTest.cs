@@ -9,7 +9,7 @@ public class BufferedEventTest {
     // ----- Buffering Tests ----- //
     
     [Fact]
-    public void Should_BufferMessages() {
+    public void Subscribe_AfterPublish_ReplaysBufferedMessage() {
         sut.Publish(c_message);
         var handler = Substitute.For<IEventHandler<int>>();
         sut.Subscribe(handler);
@@ -85,7 +85,7 @@ public class BufferedEventTest {
     }
 
     [Fact]
-    public void HandlerCount_ShouldBeZero_AfterClearSubscriptions() {
+    public void HandlerCount_AfterClearHandlers_IsZero() {
         foreach (var handler in handlers) {
             sut.Subscribe(handler);
         }
