@@ -1,4 +1,4 @@
-using Void = HCommons.Void.Void;
+﻿using Void = HCommons.Void.Void;
 
 namespace DisposableEvents.Tests.Events.EventTypes;
 
@@ -153,5 +153,31 @@ public class VoidDisposableEventTest {
 
         sub3.Dispose();
         sut.HandlerCount.Should().Be(0);
+    }
+    
+    [Fact]
+    public void SubscriptionDispose_AfterClearHandlers_DoesNotThrow() {
+        var handler = Substitute.For<IEventHandler<Void>>();
+        var subscription = sut.Subscribe(handler);
+        sut.ClearHandlers();
+        
+        var act = () => subscription.Dispose();
+        
+        act.Should().NotThrow("a subscription invalidated by ClearHandlers should dispose as a no-op");
+    }
+    
+    [Fact]
+    public void SubscriptionDispose_AfterClearHandlers_DoesNotRemoveHandlerReusingTheKey() {
+        var staleSubscription = sut.Subscribe(Substitute.For<IEventHandler<Void>>());
+        
+        sut.ClearHandlers();
+        
+        var newHandler = Substitute.For<IEventHandler<Void>>();
+        sut.Subscribe(newHandler); // Reuses the key freed by ClearHandlers.
+        
+        staleSubscription.Dispose();
+        sut.Publish();
+        
+        newHandler.Received(1).Handle(Void.Value);
     }
 }

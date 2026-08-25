@@ -118,9 +118,9 @@ public sealed class FuncCore<TArg, TResult> : AbstractFuncSubscriber<TArg, TResu
     sealed class Subscription : IDisposable {
         bool isDisposed;
         readonly FuncCore<TArg, TResult> core;
-        readonly int subscriptionKey;
+        readonly FreeListKey subscriptionKey;
 
-        public Subscription(FuncCore<TArg, TResult> core, int subscriptionKey) {
+        public Subscription(FuncCore<TArg, TResult> core, FreeListKey subscriptionKey) {
             this.core = core;
             this.subscriptionKey = subscriptionKey;
         }
@@ -134,8 +134,9 @@ public sealed class FuncCore<TArg, TResult> : AbstractFuncSubscriber<TArg, TResu
                 if (core.disposed)
                     return;
 
-                core.DisposePooledHandlers();
-                core.Handlers.Remove(subscriptionKey, true);
+                // A key invalidated by ClearHandlers is stale, removing it must be a no-op.
+                if (core.Handlers.Remove(subscriptionKey, true))
+                    core.DisposePooledHandlers();
             }
         }
     }
