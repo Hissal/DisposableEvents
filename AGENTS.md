@@ -84,10 +84,11 @@ section of the architecture doc — so prefer an extension method in the relevan
 `Funcs/`. Change one and check the other.
 
 **Tests.** Conventions live in [docs/TESTING.md](docs/TESTING.md) — read it, do not restate it.
-Two practical notes it does not cover: the test tree mirrors the source tree
-directory for directory, and while the guidelines suggest `Should_X_When_Y` naming, most existing
-tests use `Member_ExpectedBehaviour` (`Publish_SendsMessageToHandlers`). Match the file you are
-working in rather than reformatting its neighbours.
+Names follow `Unit_Scenario_ExpectedBehaviour` (`Publish_AfterDispose_DoesNotSendMessageToHandlers`),
+dropping the scenario when there is only one path. One thing the guidelines do not cover: the test
+tree mirrors the source tree directory for directory, so a test for
+`DisposableEvents/Events/EventTypes/BufferedEvent.cs` belongs in
+`Events/EventTypes/BufferedEventTest.cs`.
 
 ## Deliberate choices — do not "fix" these without asking
 
