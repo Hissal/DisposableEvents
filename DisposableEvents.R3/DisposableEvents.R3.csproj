@@ -71,4 +71,10 @@
         <Folder Include="InternalInclude\" />
     </ItemGroup>
     
+    <Target Name="SetPackageReleaseNotes" BeforeTargets="GenerateNuspec">
+        <PropertyGroup>
+            <PackageReleaseNotes>Release notes: $(RepositoryUrl)/releases/tag/v$(PackageVersion)</PackageReleaseNotes>
+        </PropertyGroup>
+    </Target>
+
 </Project>

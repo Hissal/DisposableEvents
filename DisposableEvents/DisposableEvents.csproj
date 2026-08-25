@@ -72,4 +72,10 @@
         <PackageReference Include="HCommons.Buffers" Version="1.0.0" />
     </ItemGroup>
 
+    <Target Name="SetPackageReleaseNotes" BeforeTargets="GenerateNuspec">
+        <PropertyGroup>
+            <PackageReleaseNotes>Release notes: $(RepositoryUrl)/releases/tag/v$(PackageVersion)</PackageReleaseNotes>
+        </PropertyGroup>
+    </Target>
+
 </Project>

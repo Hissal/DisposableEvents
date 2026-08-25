@@ -52,7 +52,7 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: nuget
-          path: ./artifacts/*.nupkg
+          path: ./artifacts/*
 
   publish:
     needs: build-and-pack
@@ -81,9 +81,8 @@ jobs:
         with:
           tag_name: v${{ inputs.version }}
           name: v${{ inputs.version }}
-          body: |
-            DisposableEvents v${{ inputs.version }}
-
-            - TODO: fill in notable changes
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+          prerelease: ${{ contains(inputs.version, '-') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
