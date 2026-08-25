@@ -181,4 +181,51 @@ public class EventCoreTest {
         afterSecondSubscribe.Should().NotBeEquivalentTo(secondCall);
         afterSecondSubscribe.Should().Contain([handler1, handler2]);
     }
+    
+    [Fact]
+    public void SubscriptionDispose_AfterClearHandlers_DoesNotThrow() {
+        // Arrange
+        var handler = Substitute.For<IEventHandler<int>>();
+        var subscription = sut.Subscribe(handler);
+        sut.ClearHandlers();
+        
+        // Act
+        var act = () => subscription.Dispose();
+        
+        // Assert
+        act.Should().NotThrow("a subscription invalidated by ClearHandlers should dispose as a no-op");
+    }
+    
+    [Fact]
+    public void SubscriptionDispose_AfterClearHandlers_DoesNotRemoveHandlerReusingTheKey() {
+        // Arrange
+        var staleHandler = Substitute.For<IEventHandler<int>>();
+        var staleSubscription = sut.Subscribe(staleHandler);
+        
+        sut.ClearHandlers();
+        
+        var newHandler = Substitute.For<IEventHandler<int>>();
+        sut.Subscribe(newHandler); // Reuses the key freed by ClearHandlers.
+        
+        // Act
+        staleSubscription.Dispose();
+        sut.Publish(42);
+        
+        // Assert
+        newHandler.Received(1).Handle(42);
+    }
+    
+    [Fact]
+    public void SubscriptionDispose_AfterClearHandlers_LeavesHandlerCountUnchanged() {
+        // Arrange
+        var staleSubscription = sut.Subscribe(Substitute.For<IEventHandler<int>>());
+        sut.ClearHandlers();
+        sut.Subscribe(Substitute.For<IEventHandler<int>>());
+        
+        // Act
+        staleSubscription.Dispose();
+        
+        // Assert
+        sut.HandlerCount.Should().Be(1);
+    }
 }

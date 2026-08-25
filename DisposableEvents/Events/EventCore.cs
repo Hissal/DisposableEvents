@@ -114,9 +114,9 @@ public sealed class EventCore<TMessage> : AbstractSubscriber<TMessage>, IDisposa
     sealed class Subscription : IDisposable {
         bool isDisposed;
         readonly EventCore<TMessage> core;
-        readonly int subscriptionKey;
+        readonly FreeListKey subscriptionKey;
 
-        public Subscription(EventCore<TMessage> core, int subscriptionKey) {
+        public Subscription(EventCore<TMessage> core, FreeListKey subscriptionKey) {
             this.core = core;
             this.subscriptionKey = subscriptionKey;
         }
@@ -130,8 +130,9 @@ public sealed class EventCore<TMessage> : AbstractSubscriber<TMessage>, IDisposa
                 if (core.disposed)
                     return;
 
-                core.DisposePooledHandlers();
-                core.Handlers.Remove(subscriptionKey, true);
+                // A key invalidated by ClearHandlers is stale, removing it must be a no-op.
+                if (core.Handlers.Remove(subscriptionKey, true))
+                    core.DisposePooledHandlers();
             }
         }
     }
