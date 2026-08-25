@@ -5,22 +5,20 @@ changelog:
     authors:
       - dependabot
   categories:
+    # One label per category, each of which exists in the repo.
+    # Contributor-facing table: CONTRIBUTING.md
     - title: Breaking Changes
       labels:
         - breaking-change
-        - breaking
     - title: Features
       labels:
         - enhancement
-        - feature
     - title: Bug Fixes
       labels:
         - bug
-        - bugfix
     - title: Documentation
       labels:
         - documentation
-        - docs
     - title: Dependencies
       labels:
         - dependencies
