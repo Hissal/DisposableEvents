@@ -17,7 +17,7 @@
 - [ ] `dotnet build DisposableEvents.sln -c Release` passes
 - [ ] `dotnet test DisposableEvents.sln -c Release --no-build` passes
 - [ ] Tests added or updated for behaviour changes (see
-      [TestGuidelines.md](../DisposableEvents.Tests/TestGuidelines.md))
+      [docs/TESTING.md](../docs/TESTING.md))
 - [ ] Public API changes carry XML doc comments, and the `Events` / `Funcs` mirror was checked
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for the full rules.

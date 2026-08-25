@@ -83,9 +83,8 @@ section of the architecture doc — so prefer an extension method in the relevan
 **Events and funcs are mirrored.** Nearly every file under `Events/` has a counterpart under
 `Funcs/`. Change one and check the other.
 
-**Tests.** Conventions live in
-[DisposableEvents.Tests/TestGuidelines.md](DisposableEvents.Tests/TestGuidelines.md) — read it, do
-not restate it. Two practical notes it does not cover: the test tree mirrors the source tree
+**Tests.** Conventions live in [docs/TESTING.md](docs/TESTING.md) — read it, do not restate it.
+Two practical notes it does not cover: the test tree mirrors the source tree
 directory for directory, and while the guidelines suggest `Should_X_When_Y` naming, most existing
 tests use `Member_ExpectedBehaviour` (`Publish_SendsMessageToHandlers`). Match the file you are
 working in rather than reformatting its neighbours.

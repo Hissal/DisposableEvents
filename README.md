@@ -101,6 +101,7 @@ Links are absolute so they also work from the rendered README on nuget.org.
 
 - [Architecture](https://github.com/Hissal/DisposableEvents/blob/main/docs/ARCHITECTURE.md) — how the codebase fits together
 - [Contributing](https://github.com/Hissal/DisposableEvents/blob/main/CONTRIBUTING.md) — PRs, labels, building, releases
+- [Testing](https://github.com/Hissal/DisposableEvents/blob/main/docs/TESTING.md) — test conventions
 - [AGENTS.md](https://github.com/Hissal/DisposableEvents/blob/main/AGENTS.md) — guidance for AI coding agents
 - [Releases](https://github.com/Hissal/DisposableEvents/releases) — changelog per version
 

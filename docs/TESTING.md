@@ -1,4 +1,4 @@
-﻿# TestGuidelines for DisposableEvents Library
+﻿# Testing Guidelines
 
 ## Overview
 This document outlines the guidelines and best practices for writing tests for the DisposableEvents library. The goal is to ensure that all tests are consistent, maintainable, and effectively validate the functionality of the library.

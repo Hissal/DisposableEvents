@@ -173,7 +173,7 @@ Other target-specific pieces: PolySharp on both netstandard targets, `System.Buf
 
 `DisposableEvents.Tests/` mirrors the source tree directory for directory. xunit.v3 on
 Microsoft.Testing.Platform, targeting `net6.0;net8.0;net9.0` plus `net48` on Windows. Conventions
-live in [TestGuidelines.md](../DisposableEvents.Tests/TestGuidelines.md).
+live in [TESTING.md](TESTING.md).
 
 The `sandbox` solution folder is not packable and not part of the public contract: `Benchmarks`
 (BenchmarkDotNet, compared against MessagePipe and R3), plus `InternalsInvisible` and

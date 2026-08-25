@@ -4,7 +4,7 @@ Thanks for helping out. This page covers how to get a change merged: branches, P
 and what to run locally.
 
 New to the codebase? [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) is the fastest way in.
-Writing tests? [DisposableEvents.Tests/TestGuidelines.md](DisposableEvents.Tests/TestGuidelines.md).
+Writing tests? [docs/TESTING.md](docs/TESTING.md).
 Working through an AI agent? [AGENTS.md](AGENTS.md).
 
 ## Always go through a pull request

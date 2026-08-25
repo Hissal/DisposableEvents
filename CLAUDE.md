@@ -6,4 +6,4 @@ conventions, and which parts of the repo are deliberate choices rather than mist
 
 Related: [CONTRIBUTING.md](CONTRIBUTING.md) for PR titles and labels,
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the codebase map, and
-[DisposableEvents.Tests/TestGuidelines.md](DisposableEvents.Tests/TestGuidelines.md) for tests.
+[docs/TESTING.md](docs/TESTING.md) for tests.
